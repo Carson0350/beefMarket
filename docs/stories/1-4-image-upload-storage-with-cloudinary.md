@@ -2,7 +2,7 @@
 
 **Epic:** 1 - Foundation & Infrastructure  
 **Story ID:** 1-4-image-upload-storage-with-cloudinary  
-**Status:** review  
+**Status:** done  
 **Created:** 2025-11-07  
 **Developer:** 
 
