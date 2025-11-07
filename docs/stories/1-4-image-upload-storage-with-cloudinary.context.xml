@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.4</storyId>
+    <title>Image Upload &amp; Storage with Cloudinary</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-07</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-4-image-upload-storage-with-cloudinary.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>image upload functionality with cloud storage</iWant>
+    <soThat>users can upload bull photos with automatic optimization</soThat>
+    <tasks>
+      - Task 1: Install Cloudinary SDK
+      - Task 2: Configure Cloudinary (credentials in .env, lib/cloudinary.ts)
+      - Task 3: Create upload API route (/api/upload)
+      - Task 4: Create reusable upload utility (lib/uploadImage.ts)
+      - Task 5: Create ImageUpload component (UI)
+      - Task 6: Test image upload
+    </tasks>
+  </story>
+  <acceptanceCriteria>
+    - Cloudinary SDK is configured and integrated.
+    - Upload API route exists at /api/upload.
+    - Images are uploaded to Cloudinary with automatic WebP conversion, multiple size transformations, and secure signed uploads.
+    - Upload component handles file validation, progress indication, and error handling.
+    - Uploaded image URLs are returned and can be stored in the database.
+  </acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-4: Image Storage - Cloudinary</section>
+        <snippet>Use Cloudinary for image storage and optimization. Rationale includes automatic image optimization (WebP, responsive sizes), CDN delivery for fast global access, transformation API for on-the-fly resizing, and generous free tier. Upload strategy uses signed uploads for security.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.4: Image Upload &amp; Storage with Cloudinary</section>
+        <snippet>Technical notes include using Cloudinary Node.js SDK, configuring upload presets for automatic optimization, implementing signed uploads for security, storing Cloudinary credentials in environment variables, and creating a reusable upload utility function.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>app/api/auth/[...nextauth]/route.ts</path>
+        <description>NextAuth.js API route from Story 1.3. Can be used to protect the /api/upload route with authentication.</description>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="cloudinary">Cloudinary SDK for Node.js</package>
+      </node>
+    </dependencies>
+  </artifacts>
+  <constraints>
+    - Must use Cloudinary for image storage.
+    - Images must be automatically converted to WebP format.
+    - Multiple size transformations must be created (thumbnail: 200x200, medium: 800x600, large: 1600x1200).
+    - Uploads must be signed for security.
+    - File validation must reject files larger than 10MB or not JPG/PNG.
+    - The /api/upload route must be protected with authentication.
+    - Cloudinary credentials must be stored in environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).
+  </constraints>
+  <interfaces>
+    <api>
+      <route method="POST" path="/api/upload">
+        <description>Uploads an image to Cloudinary and returns the secure URLs for the uploaded image.</description>
+        <request>FormData with 'file' field (image file)</request>
+        <response>{ success: boolean, urls: { thumbnail: string, medium: string, large: string, original: string } }</response>
+      </route>
+    </api>
+  </interfaces>
+  <tests>
+    <standards>Manual verification for this story. Automated tests can be added in a future story.</standards>
+    <locations>No automated test files will be created in this story. A test page at /app/test-upload/page.tsx will be used for manual testing.</locations>
+    <ideas>
+      - AC-1: Verify a user can select an image file and upload it successfully.
+      - AC-2: Verify the upload progress indicator works correctly.
+      - AC-3: Verify file validation rejects files that are too large or of the wrong type.
+      - AC-4: Verify the uploaded image appears in the Cloudinary dashboard.
+      - AC-5: Verify the returned URLs display the image in the browser (thumbnail, medium, large).
+      - AC-6: Verify images are automatically converted to WebP format.
+    </ideas>
+  </tests>
+</story-context>

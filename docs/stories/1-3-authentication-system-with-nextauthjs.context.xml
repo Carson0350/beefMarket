@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.3</storyId>
+    <title>Authentication System with NextAuth.js</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-07</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-3-authentication-system-with-nextauthjs.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a secure authentication system with session management</iWant>
+    <soThat>users can register, log in, and access protected routes</soThat>
+    <tasks>
+      - Task 1: Install NextAuth.js, Prisma Adapter, and bcrypt
+      - Task 2: Update Prisma schema with NextAuth.js models (Account, Session, VerificationToken) and User role field
+      - Task 3: Configure NextAuth.js (auth.config.ts, auth.ts) with Credentials provider
+      - Task 4: Create authentication API routes (signup, [...nextauth])
+      - Task 5: Implement middleware for protected routes
+      - Task 6: Create login and signup UI pages
+    </tasks>
+  </story>
+  <acceptanceCriteria>
+    - NextAuth.js v5 (Auth.js) is configured with a Credentials provider for email/password.
+    - Session strategy uses database persistence via the Prisma adapter.
+    - Passwords are securely hashed using bcrypt.
+    - API routes exist for /api/auth/signin, /api/auth/signup, and /api/auth/signout.
+    - Middleware is implemented to protect specific routes (e.g., /dashboard).
+    - Session data (user ID, role) is accessible in server components and API routes.
+    - Basic, functional login and signup pages are created.
+    - An email verification flow is implemented (users must verify email to log in).
+  </acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-3: Authentication - NextAuth.js</section>
+        <snippet>Use NextAuth.js v5 (Auth.js) for authentication. Supports email/password (Credentials provider), database session strategy with Prisma adapter, bcrypt password hashing (cost factor 12), JWT for session tokens, and email verification. Rate limiting: 5 login attempts per 15 minutes per IP.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>Data Architecture - Database Schema (Prisma)</section>
+        <snippet>User model includes fields for email, password, role (RANCH_OWNER, BREEDER, ADMIN), emailVerified, and timestamps. NextAuth.js models include Account, Session, and VerificationToken for session management.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.3: Authentication System with NextAuth.js</section>
+        <snippet>Technical notes include using NextAuth.js v5, storing sessions in the database with Prisma adapter, implementing rate limiting on auth endpoints, hashing passwords with bcrypt (cost factor 12), and setting up NEXTAUTH_SECRET environment variable.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>lib/db.ts</path>
+        <description>Singleton Prisma client instance created in Story 1.2. Will be used to interact with the database for user authentication.</description>
+      </file>
+      <file>
+        <path>prisma/schema.prisma</path>
+        <description>Database schema created in Story 1.2. Will be extended with NextAuth.js models (Account, Session, VerificationToken) and a role field on the User model.</description>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next-auth">Authentication library for Next.js</package>
+        <package name="@auth/prisma-adapter">Prisma adapter for NextAuth.js</package>
+        <package name="bcrypt">Password hashing library</package>
+        <package name="@types/bcrypt" devDependency="true">TypeScript types for bcrypt</package>
+      </node>
+    </dependencies>
+  </artifacts>
+  <constraints>
+    - Must use NextAuth.js v5 (Auth.js).
+    - Must use the Prisma adapter for database session storage.
+    - Passwords must be hashed using bcrypt with a salt round of 12.
+    - Environment variables must include NEXTAUTH_SECRET and NEXTAUTH_URL.
+    - The User model must include a role field (enum: RANCH_OWNER, BREEDER, ADMIN).
+    - Middleware must protect routes matching /dashboard/:path*.
+  </constraints>
+  <interfaces>
+    <api>
+      <route method="POST" path="/api/auth/signup">
+        <description>Registers a new user with email and password. Hashes the password and stores the user in the database.</description>
+        <request>{ email: string, password: string }</request>
+        <response>{ success: boolean, message: string }</response>
+      </route>
+      <route method="POST" path="/api/auth/signin">
+        <description>Authenticates a user with email and password. Managed by NextAuth.js.</description>
+      </route>
+      <route method="POST" path="/api/auth/signout">
+        <description>Signs out the current user. Managed by NextAuth.js.</description>
+      </route>
+    </api>
+  </interfaces>
+  <tests>
+    <standards>Manual verification for this story. Automated tests can be added in a future story.</standards>
+    <locations>No automated test files will be created in this story.</locations>
+    <ideas>
+      - AC-1: Verify a new user can sign up successfully via the /signup page.
+      - AC-2: Verify a registered user can log in successfully via the /login page.
+      - AC-3: Verify an unauthenticated user attempting to access /dashboard is redirected to /login.
+      - AC-4: Verify an authenticated user can access /dashboard.
+      - AC-5: Verify session data (user role) is correctly attached to the session object.
+      - AC-6: Verify passwords stored in the database are properly hashed (not plain text).
+    </ideas>
+  </tests>
+</story-context>

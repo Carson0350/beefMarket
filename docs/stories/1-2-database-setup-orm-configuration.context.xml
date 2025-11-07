@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.2</storyId>
+    <title>Database Setup &amp; ORM Configuration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-07</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-2-database-setup-orm-configuration.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a PostgreSQL database with Prisma ORM configured</iWant>
+    <soThat>I can store and query data efficiently with type safety</soThat>
+    <tasks>
+      - Task 1: Install Prisma CLI
+      - Task 2: Initialize Prisma (creates prisma/schema.prisma)
+      - Task 3: Define initial schema (User, Ranch, Bull models)
+      - Task 4: Set up DATABASE_URL in .env file
+      - Task 5: Run initial migration (prisma migrate dev)
+      - Task 6: Generate Prisma Client (prisma generate)
+      - Task 7: Create a singleton Prisma client utility in lib/db.ts
+      - Task 8: Test database connection
+    </tasks>
+  </story>
+  <acceptanceCriteria>
+    - PostgreSQL database is provisioned (local + Vercel Postgres).
+    - Prisma is installed and configured.
+    - Initial schema includes User, Ranch, and Bull models.
+    - Prisma migrations run successfully.
+    - Prisma Client is generated and importable.
+    - Database connection works in the development environment.
+  </acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-2: Database - PostgreSQL with Prisma ORM</section>
+        <snippet>Use PostgreSQL as the primary database with Prisma as the ORM. Rationale includes relational data structure, ACID compliance, and excellent Vercel Postgres integration. Prisma provides type-safety, migrations, and a great developer experience.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>Data Architecture - Database Schema (Prisma)</section>
+        <snippet>The schema includes models for User, Ranch, Bull, Inquiry, Favorite, and NextAuth.js support models. Key fields and relations are defined, such as the one-to-one User-Ranch link and one-to-many Ranch-Bull link.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.2: Database Setup &amp; ORM Configuration</section>
+        <snippet>Technical notes for this story include using Vercel Postgres for production, local PostgreSQL for development, defining the schema in `prisma/schema.prisma`, and setting up the DATABASE_URL environment variable.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing database code. This story will create it. -->
+    </code>
+    <dependencies>
+      <node>
+        <package name="prisma" devDependency="true">ORM for database access and migrations</package>
+        <package name="@prisma/client">Generated, type-safe database client</package>
+      </node>
+    </dependencies>
+  </artifacts>
+  <constraints>
+    - Must use PostgreSQL as the database.
+    - Must use Prisma as the ORM.
+    - The schema must be defined in `prisma/schema.prisma`.
+    - Environment variables must be used for the database connection string (`DATABASE_URL`).
+    - Migrations must be managed using `prisma migrate`.
+  </constraints>
+  <interfaces>
+    <!-- No external interfaces. This story sets up the internal database interface. -->
+  </interfaces>
+  <tests>
+    <standards>Verification for this story is manual. The primary goal is to confirm that the database is set up correctly and that the application can connect to it.</standards>
+    <locations>No automated test files will be created in this story. A temporary test script or API route can be used for verification.</locations>
+    <ideas>
+      - AC-1: Verify `prisma/schema.prisma` exists and contains the correct models.
+      - AC-2: Verify the `.env` file contains the `DATABASE_URL`.
+      - AC-3: Run `npx prisma migrate dev` and ensure it completes without errors.
+      - AC-4: Check the local database to confirm the `User`, `Ranch`, and `Bull` tables were created.
+      - AC-5: Write a temporary script to import `lib/db.ts` and perform a simple query (e.g., `prisma.user.count()`).
+    </ideas>
+  </tests>
+</story-context>

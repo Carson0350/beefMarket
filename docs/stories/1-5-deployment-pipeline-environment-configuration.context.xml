@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.5</storyId>
+    <title>Deployment Pipeline &amp; Environment Configuration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-07</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-5-deployment-pipeline-environment-configuration.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>automated deployment to Vercel with proper environment configuration</iWant>
+    <soThat>code changes are automatically deployed to staging and production</soThat>
+    <tasks>
+      - Task 1: Connect GitHub repository to Vercel
+      - Task 2: Set up Vercel Postgres database
+      - Task 3: Configure environment variables in Vercel
+      - Task 4: Add postbuild script for Prisma migrations
+      - Task 5: Test production deployment
+      - Task 6: Configure custom domain (optional)
+    </tasks>
+  </story>
+  <acceptanceCriteria>
+    - Git repository is connected to Vercel.
+    - Vercel automatically deploys main branch to production and other branches to preview environments.
+    - Environment variables are configured in Vercel (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, Cloudinary credentials).
+    - Build succeeds without errors.
+    - Database migrations run automatically on deployment.
+    - HTTPS is enforced on all deployments.
+    - Custom domain is configured (optional).
+  </acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-7: Deployment - Vercel</section>
+        <snippet>Deploy to Vercel for seamless Next.js integration, automatic HTTPS, preview deployments, and edge network CDN. Use Vercel Postgres for production database. Deployment strategy: main branch to production, feature branches to preview environments.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.5: Deployment Pipeline &amp; Environment Configuration</section>
+        <snippet>Technical notes include connecting Git repository to Vercel, configuring build command (npm run build), setting up Vercel Postgres integration, configuring environment variables in Vercel dashboard, testing deployment, and setting up preview deployments.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>package.json</path>
+        <description>Project manifest with build scripts. Will be updated to include a postbuild script for running Prisma migrations on deployment.</description>
+      </file>
+      <file>
+        <path>prisma/schema.prisma</path>
+        <description>Database schema from Story 1.2. Migrations will run automatically on deployment.</description>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="prisma">Must be in dependencies (not just devDependencies) to run migrations in production</package>
+      </node>
+    </dependencies>
+  </artifacts>
+  <constraints>
+    - Must use Vercel as the deployment platform.
+    - Must use Vercel Postgres for the production database.
+    - Environment variables must be configured for Production, Preview, and Development environments.
+    - Prisma migrations must run automatically on deployment via a postbuild script.
+    - HTTPS must be enforced on all deployments.
+    - Main branch deploys to production; other branches deploy to preview environments.
+  </constraints>
+  <interfaces>
+    <!-- No API interfaces. This story focuses on infrastructure and deployment. -->
+  </interfaces>
+  <tests>
+    <standards>Manual verification for this story. Deployment is tested by pushing code and verifying the live site.</standards>
+    <locations>No automated test files will be created in this story.</locations>
+    <ideas>
+      - AC-1: Verify a commit to main triggers a production deployment.
+      - AC-2: Verify a commit to a feature branch triggers a preview deployment.
+      - AC-3: Verify the production URL loads the application without errors.
+      - AC-4: Verify database migrations run successfully on deployment (check Vercel logs).
+      - AC-5: Verify environment variables are correctly applied (test by logging in or uploading an image).
+      - AC-6: Verify HTTPS is enforced on all deployments.
+    </ideas>
+  </tests>
+</story-context>
