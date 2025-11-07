@@ -2,7 +2,7 @@
 
 **Epic:** 1 - Foundation & Infrastructure  
 **Story ID:** 1-1-project-initialization-core-setup  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-07  
 **Developer:** Carson
 
@@ -396,7 +396,7 @@ node_modules
 
 ---
 
-**Story Status:** ready-for-dev  
+**Story Status:** review  
 **Ready for Development:** Yes  
 **Estimated Effort:** 30 minutes - 1 hour
 
