@@ -2,7 +2,7 @@
 
 **Epic:** 1 - Foundation & Infrastructure  
 **Story ID:** 1-4-image-upload-storage-with-cloudinary  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-07  
 **Developer:** 
 
@@ -113,6 +113,50 @@ High-quality images are critical for showcasing bulls effectively. This story en
 ### Context Reference
 
 - `docs/stories/1-4-image-upload-storage-with-cloudinary.context.xml`
+
+### Completion Notes
+
+- [x] Cloudinary SDK installed and configured
+- [x] Cloudinary credentials added to .env (cloud name, API key, API secret)
+- [x] Configuration utility created at `lib/cloudinary.ts`
+- [x] Upload API route created at `/api/upload` with authentication protection
+- [x] File validation implemented (JPG/PNG only, max 10MB)
+- [x] Automatic WebP conversion configured
+- [x] Multiple size transformations generated (thumbnail: 200x200, medium: 800x600, large: 1600x1200)
+- [x] Reusable upload utility created at `lib/uploadImage.ts`
+- [x] ImageUpload component created with preview, progress, and error handling
+- [x] Test page created at `/app/test-upload`
+- [x] Image upload tested successfully
+
+### Files Created
+
+- `lib/cloudinary.ts` - Cloudinary SDK configuration
+- `lib/uploadImage.ts` - Reusable upload utility with deleteImage function
+- `app/api/upload/route.ts` - Protected upload API endpoint
+- `components/ImageUpload.tsx` - Client-side upload component with UI
+- `app/test-upload/page.tsx` - Test page for upload functionality
+
+### Debug Log
+
+**Implementation Details:**
+- Upload folder: `wagnerbeef` (all images stored in this Cloudinary folder)
+- Transformations: `quality: auto, fetch_format: auto` for automatic WebP conversion
+- URL generation: Dynamic URLs with size transformations using Cloudinary's URL API
+- Authentication: Route protected with NextAuth session check
+- File size limit: 10MB (configurable constant)
+- Allowed types: image/jpeg, image/png, image/jpg
+
+**Image Sizes Generated:**
+- Thumbnail: 200x200 (cropped to fill)
+- Medium: 800x600 (limited, maintains aspect ratio)
+- Large: 1600x1200 (limited, maintains aspect ratio)
+- Original: Full resolution
+
+**Testing:**
+- Test upload successful via `/test-upload` page
+- Image uploaded to Cloudinary account: dcxo4lnl8
+- All size variants generated correctly
+- WebP conversion working
 
 ---
 

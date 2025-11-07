@@ -2,7 +2,7 @@
 
 **Epic:** 1 - Foundation & Infrastructure  
 **Story ID:** 1-3-authentication-system-with-nextauthjs  
-**Status:** review  
+**Status:** done  
 **Created:** 2025-11-07  
 **Developer:** 
 
