@@ -1,0 +1,129 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project Initialization & Core Setup</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-07</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-1-project-initialization-core-setup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a properly structured Next.js project with core dependencies configured</iWant>
+    <soThat>I have a solid foundation to build features efficiently</soThat>
+    <tasks>
+      - Initialize Next.js Project (npx create-next-app with TypeScript, Tailwind, App Router, ESLint)
+      - Verify Project Structure (check directories: app/, public/, node_modules/, config files)
+      - Create Additional Folder Structure (mkdir components/, lib/, types/)
+      - Configure Absolute Imports (verify tsconfig.json paths with @/* alias)
+      - Initialize Git Repository (git init, verify .gitignore)
+      - Test Local Development Server (npm run dev, verify localhost:3000)
+      - Set Up Vercel Project (npx vercel link - optional but recommended)
+      - Configure Prettier (install prettier, create .prettierrc and .prettierignore - optional but recommended)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    - Next.js 14+ with App Router initialized
+    - TypeScript configuration present and working
+    - Tailwind CSS setup and functional
+    - ESLint and Prettier configured
+    - Git repository with proper .gitignore
+    - Project runs locally with `npm run dev`
+    - Basic folder structure exists: /app, /components, /lib, /types
+    - Absolute imports configured with @/* alias
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-1: Framework Selection</section>
+        <snippet>Use Next.js 14+ with App Router as the primary framework. Full-stack framework with built-in API routes, excellent Vercel integration, image optimization, server/client components. Initialize with: npx create-next-app@latest wagnerbeef --typescript --tailwind --app --eslint</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-8: Styling Strategy</section>
+        <snippet>Use Tailwind CSS for styling with shadcn/ui for components. Tailwind provides utility-first rapid development with small bundle size. shadcn/ui components are copy-paste (not a dependency), accessible by default (WCAG 2.1 AA), and customizable with Tailwind.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>Component Architecture</section>
+        <snippet>App Router structure: /app with (auth), (public), (dashboard) route groups. Shared components in /components with ui/ subdirectory for shadcn/ui components. Layout components include header, footer, and dashboard-nav.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 1: Foundation & Infrastructure</section>
+        <snippet>Story 1.1 establishes the technical foundation for wagnerBeef. Use create-next-app with TypeScript and Tailwind, configure absolute imports with @/ alias, set up Vercel project for deployment, initialize Git repository.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing code - greenfield project -->
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="^14.0.0">Full-stack React framework with App Router</package>
+        <package name="react" version="^18.2.0">UI library</package>
+        <package name="react-dom" version="^18.2.0">React DOM renderer</package>
+        <package name="typescript" version="^5.3.0">Type safety</package>
+        <package name="tailwindcss" version="^3.3.0">Utility-first CSS framework</package>
+        <package name="eslint" version="^8.54.0">Code linting</package>
+        <package name="@types/node">TypeScript types for Node.js</package>
+        <package name="@types/react">TypeScript types for React</package>
+        <package name="@types/react-dom">TypeScript types for React DOM</package>
+        <package name="prettier" version="latest" devDependency="true">Code formatting (optional)</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must use Next.js 14+ with App Router (not Pages Router)
+    - Must use TypeScript for all code (no JavaScript files)
+    - Must use Tailwind CSS for styling (no CSS modules or styled-components)
+    - Must configure absolute imports with @/* alias
+    - Project must run successfully with npm run dev
+    - All configuration files must be properly initialized
+    - Git repository must be initialized with proper .gitignore
+    - Follow Next.js best practices and conventions
+    - Ensure development server starts without errors
+  </constraints>
+
+  <interfaces>
+    <!-- No interfaces yet - this is the initialization story -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      This is a project initialization story. Testing focuses on verification rather than automated tests:
+      - Verify all required directories exist
+      - Verify all configuration files are present and valid
+      - Verify development server starts successfully
+      - Verify TypeScript compilation works
+      - Verify ESLint runs without errors
+      - Verify Tailwind CSS is functional
+      - Verify hot reload works
+    </standards>
+    <locations>
+      No test files for this story. Future stories will add tests in:
+      - __tests__/ directory for unit tests
+      - e2e/ directory for end-to-end tests (if needed)
+    </locations>
+    <ideas>
+      Manual verification checklist (from story Definition of Done):
+      - AC-1: Run `npm run dev` and verify server starts without errors
+      - AC-2: Open browser to http://localhost:3000 and verify Next.js welcome page displays
+      - AC-3: Run `npm run lint` and verify ESLint passes
+      - AC-4: Edit app/page.tsx with TypeScript error and verify compilation catches it
+      - AC-5: Add Tailwind classes to app/page.tsx and verify styles apply
+      - AC-6: Edit app/page.tsx and verify hot reload updates browser
+      - AC-7: Verify all directories exist: app/, components/, lib/, types/, public/
+      - AC-8: Verify tsconfig.json contains paths configuration with @/* alias
+    </ideas>
+  </tests>
+</story-context>

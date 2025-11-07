@@ -1,0 +1,92 @@
+# generated: 2025-11-07
+# project: wagnerBeef
+# project_key: wagnerBeef
+# tracking_system: file-system
+# story_location: {project-root}/docs/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-11-07
+project: wagnerBeef
+project_key: wagnerBeef
+tracking_system: file-system
+story_location: "{project-root}/docs/stories"
+
+development_status:
+  # Epic 1: Foundation & Infrastructure
+  epic-1: backlog
+  1-1-project-initialization-core-setup: in-progress
+  1-2-database-setup-orm-configuration: backlog
+  1-3-authentication-system-with-nextauthjs: backlog
+  1-4-image-upload-storage-with-cloudinary: backlog
+  1-5-deployment-pipeline-environment-configuration: backlog
+  epic-1-retrospective: optional
+  
+  # Epic 2: Ranch Owner Onboarding
+  epic-2: backlog
+  2-1-ranch-owner-registration-role-assignment: backlog
+  2-2-ranch-profile-creation-branding: backlog
+  2-3-bull-profile-creation-form-basic-info-photos: backlog
+  2-4-bull-profile-creation-form-genetic-data-pedigree: backlog
+  2-5-bull-profile-creation-form-performance-inventory: backlog
+  2-6-ranch-dashboard-bull-management: backlog
+  epic-2-retrospective: optional
+  
+  # Epic 3: Bull Discovery & Browsing
+  epic-3: backlog
+  3-1-public-bull-browse-page-with-card-grid: backlog
+  3-2-advanced-filtering-system: backlog
+  3-3-text-search-functionality: backlog
+  3-4-detailed-bull-profile-page: backlog
+  3-5-ranch-public-profile-page: backlog
+  3-6-shareable-bull-links-copy-functionality: backlog
+  3-7-guest-browsing-no-account-required: backlog
+  epic-3-retrospective: optional
+  
+  # Epic 4: Bull Comparison & Favorites
+  epic-4: backlog
+  4-1-bull-comparison-selection: backlog
+  4-2-side-by-side-comparison-view: backlog
+  4-3-breeder-account-creation-favorites: backlog
+  4-4-favorites-notifications: backlog
+  epic-4-retrospective: optional
+  
+  # Epic 5: Inquiry & Communication
+  epic-5: backlog
+  5-1-inquiry-contact-form: backlog
+  5-2-inquiry-email-notifications-to-ranch-owners: backlog
+  5-3-inquiry-dashboard-for-ranch-owners: backlog
+  5-4-inquiry-response-tracking: backlog
+  5-5-inquiry-analytics-for-ranch-owners: backlog
+  epic-5-retrospective: optional
+  
+  # Epic 6: Polish & Production Readiness
+  epic-6: backlog
+  6-1-responsive-design-refinement: backlog
+  6-2-performance-optimization: backlog
+  6-3-accessibility-compliance-wcag-21-aa: backlog
+  6-4-production-deployment-monitoring: backlog
+  epic-6-retrospective: optional
