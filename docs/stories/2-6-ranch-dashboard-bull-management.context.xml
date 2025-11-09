@@ -1,0 +1,139 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.6</storyId>
+    <title>Ranch Dashboard & Bull Management</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-6-ranch-dashboard-bull-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>a dashboard showing all my bulls with edit and archive capabilities</iWant>
+    <soThat>I can manage my inventory and keep information current</soThat>
+    <tasks>
+      <task id="T1" ac="AC1,AC2" status="pending">Create Dashboard Page Layout</task>
+      <task id="T2" ac="AC1" status="pending">Implement Bull Cards</task>
+      <task id="T3" ac="AC2" status="pending">Create Ranch Statistics Component</task>
+      <task id="T4" ac="AC3,AC5" status="pending">Implement Bull Management Actions</task>
+      <task id="T5" ac="AC4" status="pending">Create Edit Bull Flow</task>
+      <task id="T6" ac="ALL" status="pending">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="Dashboard Overview">
+      - Dashboard displays all bulls (published, draft, archived) in grid/list view
+      - Each bull card shows: hero photo, name, breed, status badge, semen count
+      - Filter tabs: All, Published, Draft, Archived
+      - Search box to filter bulls by name or breed
+      - Add New Bull button prominently displayed
+    </criterion>
+    
+    <criterion id="AC2" title="Ranch Information Display">
+      - Dashboard header shows ranch name and public URL
+      - Copy Link button copies ranch URL to clipboard
+      - Ranch statistics displayed: total bulls, active listings, draft count
+      - Link to edit ranch profile
+    </criterion>
+    
+    <criterion id="AC3" title="Bull Management Actions">
+      - Edit button on each bull opens edit form
+      - Archive button changes bull status to ARCHIVED
+      - Unarchive button restores archived bulls to PUBLISHED
+      - Delete button permanently removes bull (with confirmation)
+      - Actions available via dropdown menu or buttons
+    </criterion>
+    
+    <criterion id="AC4" title="Edit Bull Flow">
+      - Edit form reuses creation form components
+      - Form pre-populated with existing bull data
+      - All three steps accessible
+      - Changes saved to existing bull record
+      - Success message after update
+    </criterion>
+    
+    <criterion id="AC5" title="Archive Functionality">
+      - Archived bulls hidden from public ranch page
+      - Archived bulls visible in dashboard with badge
+      - Archived bulls can be unarchived
+      - Archive action requires confirmation
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.6: Ranch Dashboard</section>
+        <snippet>Dashboard for ranch owners to manage bulls. Grid view with filters, search, edit/archive/delete actions. Statistics display. Archive hides from public but keeps in dashboard.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull.status, Bull.archived</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model has status enum (DRAFT/PUBLISHED) and archived boolean. Archived bulls should be hidden from public pages but visible in dashboard.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/bulls/[slug]/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>PUT, DELETE</symbol>
+        <lines>1-200</lines>
+        <reason>Bull update and delete API already exists. Can be used for archive/unarchive and delete operations.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="react" version="^18.3.0">UI library</package>
+        <package name="next" version="^14.2.0">Framework</package>
+        <package name="next/image" version="^14.2.0">Image optimization</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Only authenticated ranch owners can access dashboard
+    - Dashboard shows only bulls belonging to user's ranch
+    - Archived bulls hidden from public ranch page
+    - Delete action requires confirmation dialog
+    - Archive action requires confirmation dialog
+    - Search filters by name and breed (case-insensitive)
+    - Status badges color-coded (green=published, yellow=draft, gray=archived)
+    - Copy to clipboard requires browser clipboard API
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>GET /api/ranch/bulls</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: none
+Response: { success: boolean, bulls: Bull[], stats: { total, published, draft, archived } }</signature>
+      <path>app/api/ranch/bulls/route.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>Manual testing for dashboard UI. Integration tests for bull management actions. E2E tests for complete workflow.</standards>
+    
+    <locations>Manual testing for UI, integration tests for API</locations>
+    
+    <ideas>
+      <test ac="AC1" id="T1">Component test: Filter tabs show correct bulls</test>
+      <test ac="AC1" id="T2">Component test: Search filters by name and breed</test>
+      <test ac="AC2" id="T3">Manual test: Copy ranch URL to clipboard</test>
+      <test ac="AC3" id="T4">Integration test: Archive changes status and hides from public</test>
+      <test ac="AC3" id="T5">Integration test: Delete removes bull permanently</test>
+      <test ac="AC4" id="T6">E2E test: Edit bull and verify changes saved</test>
+      <test ac="AC5" id="T7">Integration test: Unarchive restores bull to published</test>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,154 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.4</storyId>
+    <title>Bull Profile Creation Form - Genetic Data & Pedigree</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-4-bull-profile-creation-form-genetic-data-pedigree.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to add genetic data and pedigree information for my bull</iWant>
+    <soThat>breeders can evaluate the genetics and bloodlines</soThat>
+    <tasks>
+      <task id="T1" ac="AC1,AC2" status="pending">Create Genetic Data Form Component</task>
+      <task id="T2" ac="AC3" status="pending">Create Pedigree Form Component</task>
+      <task id="T3" ac="AC4" status="pending">Integrate with Multi-Step Form</task>
+      <task id="T4" ac="AC1,AC2,AC3" status="pending">Update Bull Model for Genetic Data</task>
+      <task id="T5" ac="AC4" status="pending">Create/Update Bull API Routes</task>
+      <task id="T6" ac="ALL" status="pending">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="EPD Values Input">
+      - Form includes EPD fields: birth weight, weaning weight, yearling weight, milk, marbling, ribeye area
+      - All EPD fields are optional (numeric input)
+      - Inline help text/tooltips explain each EPD metric
+      - Validation ensures numeric values only
+      - Clear labels with units
+    </criterion>
+    
+    <criterion id="AC2" title="Genetic Markers & DNA Test Results">
+      - Text fields for genetic markers (optional)
+      - Text area for DNA test results (optional)
+      - Character limits displayed
+      - No validation required (flexible data entry)
+    </criterion>
+    
+    <criterion id="AC3" title="Pedigree Information">
+      - Input fields for sire name and dam name (optional)
+      - Repeatable field group for notable ancestors (up to 6)
+      - Add/remove ancestor entries dynamically
+      - Each ancestor has name and relationship fields
+    </criterion>
+    
+    <criterion id="AC4" title="Form Navigation & Saving">
+      - "Back to Photos" button returns to previous step with data preserved
+      - "Save as Draft" button saves bull with current data
+      - "Continue to Performance" button proceeds to Story 2.5 form
+      - Form state persisted across navigation
+      - All fields optional
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.4: Genetic Data & Pedigree</section>
+        <snippet>Multi-step form Part 2: EPD values (birth weight, weaning weight, yearling weight, milk, marbling, ribeye), genetic markers, DNA results, pedigree (sire, dam, ancestors). All fields optional for flexibility.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Data Architecture - Bull Model</title>
+        <section>Genetic Data Storage</section>
+        <snippet>EPD data stored as JSON for flexibility across breeds. Allows different breeds to have different EPD fields. Type-safe access via Zod schemas in application layer.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/stories/2-3-bull-profile-creation-form-basic-info-photos.md</path>
+        <title>Story 2.3: Basic Info & Photos</title>
+        <section>Multi-Step Form Foundation</section>
+        <snippet>Bull creation form started in Story 2.3. Basic info and photos completed. Continue button navigates to genetic data step. Form state management needed.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull.epdData, Bull.geneticMarkers, Bull.dnaTestResults, Bull.sireName, Bull.damName, Bull.notableAncestors</symbol>
+        <lines>80-98</lines>
+        <reason>Bull model has fields for genetic data: epdData (JSON), geneticMarkers (String), dnaTestResults (String), sireName, damName, notableAncestors (String array).</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/bulls/create/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>CreateBullPage</symbol>
+        <lines>1-400</lines>
+        <reason>Existing bull creation form from Story 2.3. Shows pattern for form state management, validation, and navigation. Need to extend for multi-step.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/bulls/create/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>POST</symbol>
+        <lines>1-100</lines>
+        <reason>Existing bull creation API. Need to extend to accept genetic data fields and update bull records.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="react" version="^18.3.0">UI library</package>
+        <package name="next" version="^14.2.0">Framework</package>
+        <package name="@prisma/client" version="^6.19.0">Database ORM</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - All genetic data fields are optional (flexibility for incomplete data)
+    - EPD values must be numeric if provided
+    - EPD data stored as JSON in Bull.epdData field
+    - Notable ancestors limited to 6 entries
+    - Notable ancestors stored as string array
+    - Form must preserve state when navigating between steps
+    - Multi-step form needs shared state management
+    - Back button must preserve all previous step data
+    - Draft saving must include all completed steps
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>PUT /api/bulls/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { epdData?, geneticMarkers?, dnaTestResults?, sireName?, damName?, notableAncestors? }
+Response: { success: boolean, bull: { ... } }</signature>
+      <path>app/api/bulls/[id]/route.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>Manual testing for form interactions. Integration tests for API endpoints. Validation tests for numeric EPD values.</standards>
+    
+    <locations>__tests__/api/ for API routes, manual testing for multi-step navigation</locations>
+    
+    <ideas>
+      <test ac="AC1" id="T1">Component test: EPD fields accept numeric values only</test>
+      <test ac="AC1" id="T2">Component test: EPD help text displays correctly</test>
+      <test ac="AC3" id="T3">Component test: Add/remove ancestor fields (max 6)</test>
+      <test ac="AC4" id="T4">Integration test: Form state persists across navigation</test>
+      <test ac="AC4" id="T5">Integration test: Back button preserves previous step data</test>
+      <test ac="AC4" id="T6">Integration test: Draft saving includes genetic data</test>
+      <test ac="ALL" id="T7">E2E test: Complete multi-step bull creation flow</test>
+    </ideas>
+  </tests>
+</story-context>

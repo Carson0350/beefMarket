@@ -1,0 +1,137 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.5</storyId>
+    <title>Bull Profile Creation Form - Performance & Inventory</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-5-bull-profile-creation-form-performance-inventory.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to add performance data and semen inventory count</iWant>
+    <soThat>breeders know the bull's track record and availability</soThat>
+    <tasks>
+      <task id="T1" ac="AC1,AC2" status="pending">Create Performance & Inventory Form</task>
+      <task id="T2" ac="AC3" status="pending">Create Bull Profile Preview Modal</task>
+      <task id="T3" ac="AC4" status="pending">Implement Publish Functionality</task>
+      <task id="T4" ac="AC4" status="pending">Update Bull Status API</task>
+      <task id="T5" ac="ALL" status="pending">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="Performance Data Input">
+      - Weight data fields: birth weight, weaning weight, yearling weight (optional)
+      - Progeny performance notes text area (1000 char max)
+      - Numeric validation for weight fields
+      - Character counter for notes
+      - Clear labels with units
+    </criterion>
+    
+    <criterion id="AC2" title="Inventory & Pricing">
+      - Available semen straw count (required, numeric, min 0)
+      - Price per straw (optional, currency format)
+      - Validation prevents negative numbers
+      - Currency formatting for price display
+    </criterion>
+    
+    <criterion id="AC3" title="Bull Profile Preview">
+      - Preview button shows modal with complete profile
+      - Displays all entered data formatted for breeders
+      - Includes hero photo and all photos
+      - Shows all sections: basic, photos, genetic, performance
+      - Close preview returns to form
+    </criterion>
+    
+    <criterion id="AC4" title="Publish or Save as Draft">
+      - Save as Draft button (DRAFT status)
+      - Publish Bull button (PUBLISHED status)
+      - Published bulls visible on ranch public page
+      - Success message with shareable URL
+      - Redirect to ranch dashboard
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.5: Performance & Inventory</section>
+        <snippet>Final step of bull creation. Performance data (weights, progeny notes), semen inventory count, pricing. Preview modal before publishing. Publish changes status to PUBLISHED, making bull visible publicly.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/stories/2-4-bull-profile-creation-form-genetic-data-pedigree.md</path>
+        <title>Story 2.4: Genetic Data</title>
+        <section>Multi-Step Form Continuation</section>
+        <snippet>Story 2.4 implemented genetic data step. Continue button navigates to performance step. Form state needs to be preserved across all three steps.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull.currentWeight, Bull.frameScore, Bull.scrotalCircumference, Bull.price, Bull.availabilityStatus, Bull.semenAvailable, Bull.status</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model has performance fields: currentWeight, frameScore, scrotalCircumference, price, availabilityStatus, semenAvailable. Status enum (DRAFT/PUBLISHED) controls visibility.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/bulls/[slug]/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>PUT</symbol>
+        <lines>1-200</lines>
+        <reason>Bull update API already exists from Story 2.4. Can accept performance data fields. Need to handle status change to PUBLISHED.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="react" version="^18.3.0">UI library</package>
+        <package name="next" version="^14.2.0">Framework</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Semen straw count is required (minimum 0)
+    - Weight fields are optional
+    - Price must be non-negative if provided
+    - Progeny notes limited to 1000 characters
+    - Status change from DRAFT to PUBLISHED is permanent (no unpublish in this story)
+    - Published bulls immediately visible on ranch public page
+    - Preview modal must show all data from all three form steps
+    - Currency formatting for price display
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>PUT /api/bulls/[slug]</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { currentWeight?, frameScore?, scrotalCircumference?, price?, availabilityStatus?, semenAvailable, status? }
+Response: { success: boolean, bull: { ... } }</signature>
+      <path>app/api/bulls/[slug]/route.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>Manual testing for form interactions and preview modal. Integration tests for publish flow. Validation tests for numeric fields.</standards>
+    
+    <locations>Manual testing for UI, integration tests for API</locations>
+    
+    <ideas>
+      <test ac="AC1" id="T1">Component test: Weight fields accept numeric values only</test>
+      <test ac="AC2" id="T2">Component test: Semen count required and non-negative</test>
+      <test ac="AC2" id="T3">Component test: Price formatting displays correctly</test>
+      <test ac="AC3" id="T4">Manual test: Preview modal shows all bull data</test>
+      <test ac="AC4" id="T5">Integration test: Publish changes status to PUBLISHED</test>
+      <test ac="AC4" id="T6">Integration test: Published bull visible on ranch page</test>
+      <test ac="ALL" id="T7">E2E test: Complete 3-step bull creation and publish</test>
+    </ideas>
+  </tests>
+</story-context>

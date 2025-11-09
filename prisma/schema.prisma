@@ -88,14 +88,18 @@ model Bull {
   notableAncestors  String[]
   
   // Performance
-  birthWeight       Float?
-  weaningWeight     Float?
-  yearlingWeight    Float?
-  progenyNotes      String?   @db.Text
+  birthWeight            Float?
+  weaningWeight          Float?
+  yearlingWeight         Float?
+  currentWeight          Float?
+  frameScore             Int?
+  scrotalCircumference   Float?
+  progenyNotes           String?   @db.Text
   
   // Inventory
-  availableStraws   Int       @default(0)
-  pricePerStraw     Float?
+  semenAvailable    Int       @default(0)
+  price             Float?
+  availabilityStatus String   @default("AVAILABLE")
   
   // Metadata
   archived          Boolean   @default(false)

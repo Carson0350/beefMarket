@@ -50,9 +50,9 @@ development_status:
   2-1-ranch-owner-registration-role-assignment: review
   2-2-ranch-profile-creation-branding: review
   2-3-bull-profile-creation-form-basic-info-photos: review
-  2-4-bull-profile-creation-form-genetic-data-pedigree: ready-for-dev
-  2-5-bull-profile-creation-form-performance-inventory: ready-for-dev
-  2-6-ranch-dashboard-bull-management: ready-for-dev
+  2-4-bull-profile-creation-form-genetic-data-pedigree: review
+  2-5-bull-profile-creation-form-performance-inventory: review
+  2-6-ranch-dashboard-bull-management: review
   epic-2-retrospective: optional
   
   # Epic 3: Bull Discovery & Browsing
