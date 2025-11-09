@@ -47,12 +47,12 @@ development_status:
   
   # Epic 2: Ranch Owner Onboarding
   epic-2: backlog
-  2-1-ranch-owner-registration-role-assignment: backlog
-  2-2-ranch-profile-creation-branding: backlog
-  2-3-bull-profile-creation-form-basic-info-photos: backlog
-  2-4-bull-profile-creation-form-genetic-data-pedigree: backlog
-  2-5-bull-profile-creation-form-performance-inventory: backlog
-  2-6-ranch-dashboard-bull-management: backlog
+  2-1-ranch-owner-registration-role-assignment: review
+  2-2-ranch-profile-creation-branding: review
+  2-3-bull-profile-creation-form-basic-info-photos: review
+  2-4-bull-profile-creation-form-genetic-data-pedigree: ready-for-dev
+  2-5-bull-profile-creation-form-performance-inventory: ready-for-dev
+  2-6-ranch-dashboard-bull-management: ready-for-dev
   epic-2-retrospective: optional
   
   # Epic 3: Bull Discovery & Browsing

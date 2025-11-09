@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { createVerificationToken } from '@/lib/tokens';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -10,6 +12,15 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate role if provided
+    const validRoles = ['RANCH_OWNER', 'BREEDER', 'ADMIN'];
+    if (role && !validRoles.includes(role)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid role specified' },
         { status: 400 }
       );
     }
@@ -34,13 +45,22 @@ export async function POST(request: Request) {
       data: {
         email,
         password: hashedPassword,
-        role: role || 'BREEDER', // Default to BREEDER if not specified
+        role: role || 'RANCH_OWNER', // Default to RANCH_OWNER if not specified
       },
     });
 
+    // Generate and send verification email
+    const token = await createVerificationToken(email);
+    const emailResult = await sendVerificationEmail(email, token);
+
+    if (!emailResult.success) {
+      console.error('Failed to send verification email:', emailResult.error);
+      // Don't fail signup if email fails, just log it
+    }
+
     return NextResponse.json({
       success: true,
-      message: 'User created successfully',
+      message: 'User created successfully. Please check your email to verify your account.',
       user: {
         id: user.id,
         email: user.email,

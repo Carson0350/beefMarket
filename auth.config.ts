@@ -7,11 +7,28 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      const isEmailVerified = !!auth?.user?.emailVerified;
       
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+      // Protected routes that require authentication
+      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      const isOnRanchManagement = nextUrl.pathname.startsWith('/ranch/create') || 
+                                   nextUrl.pathname.startsWith('/ranch/edit');
+      const isOnBullCreation = nextUrl.pathname.startsWith('/bulls/create');
+      
+      // Routes that require email verification
+      const requiresVerification = isOnDashboard || isOnRanchManagement || isOnBullCreation;
+      
+      // Allow access to verification and check-email pages
+      const isOnVerificationPage = nextUrl.pathname.startsWith('/verify-email') || 
+                                     nextUrl.pathname.startsWith('/check-email');
+      
+      if (requiresVerification) {
+        if (!isLoggedIn) return false; // Redirect to login
+        if (!isEmailVerified && !isOnVerificationPage) {
+          // Redirect unverified users to check-email page
+          return Response.redirect(new URL('/check-email', nextUrl));
+        }
+        return true;
       }
       
       return true;

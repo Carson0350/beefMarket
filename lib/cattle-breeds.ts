@@ -1,0 +1,25 @@
+export const CATTLE_BREEDS = [
+  'Angus',
+  'Hereford',
+  'Simmental',
+  'Charolais',
+  'Limousin',
+  'Gelbvieh',
+  'Red Angus',
+  'Brahman',
+  'Brangus',
+  'Beefmaster',
+  'Santa Gertrudis',
+  'Shorthorn',
+  'Texas Longhorn',
+  'Highland',
+  'Wagyu',
+  'Piedmontese',
+  'Chianina',
+  'Maine-Anjou',
+  'Salers',
+  'Tarentaise',
+  'Other',
+] as const;
+
+export type CattleBreed = typeof CATTLE_BREEDS[number];

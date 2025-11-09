@@ -1,0 +1,202 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>Ranch Profile Creation & Branding</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-2-ranch-profile-creation-branding.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to create my ranch profile with name, location, and contact information</iWant>
+    <soThat>breeders can learn about my operation and contact me</soThat>
+    <tasks>
+      <task id="T1" ac="AC1,AC4" status="pending">Create Ranch Profile Page & Form</task>
+      <task id="T2" ac="AC2" status="pending">Implement Slug Generation Utility</task>
+      <task id="T3" ac="AC3" status="pending">Create Ranch Profile API Route</task>
+      <task id="T4" ac="AC2" status="pending">Display Slug Preview in Form</task>
+      <task id="T5" ac="AC4" status="pending">Implement Post-Creation Redirect</task>
+      <task id="T6" ac="AC4" status="pending">Create Public Ranch Profile Page</task>
+      <task id="T7" ac="AC4" status="pending">Add Ranch Profile Edit Capability</task>
+      <task id="T8" ac="ALL" status="pending">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="Ranch Profile Form">
+      - Form includes required fields: ranch name, state/location, contact email, phone number
+      - Form includes optional fields: about section (500 char max), website URL
+      - All fields have appropriate validation (email format, phone format, URL format)
+      - Character counter displayed for about section
+      - Clear error messages for validation failures
+    </criterion>
+    
+    <criterion id="AC2" title="Unique Ranch Slug Generation">
+      - Slug is automatically generated from ranch name
+      - Slug format: lowercase, hyphens replace spaces, alphanumeric only
+      - System checks for slug uniqueness and appends number if duplicate
+      - Slug is displayed to user during form completion
+      - Ranch URL preview shown: wagnerbeef.com/[ranch-slug]
+    </criterion>
+    
+    <criterion id="AC3" title="Ranch Profile Creation">
+      - Only verified ranch owners can access profile creation page
+      - Form submission creates Ranch record in database
+      - Ranch is linked to current user (one-to-one relationship)
+      - User can only create one ranch profile
+      - Success message displayed after creation
+    </criterion>
+    
+    <criterion id="AC4" title="Post-Creation Flow">
+      - After successful creation, user is redirected to "Add Your First Bull" page
+      - Ranch profile is accessible at /ranch/[slug] (public view)
+      - Ranch owner can edit profile from dashboard
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.2: Ranch Profile Creation & Branding</section>
+        <snippet>Create Ranch model with one-to-one User relationship. Generate unique slug from ranch name (lowercase, hyphens). Validate phone format. Redirect to "Add Your First Bull" page.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Data Architecture - Ranch Model</title>
+        <section>Database Schema</section>
+        <snippet>Ranch model with fields: id, userId (unique), name, slug (unique), state, contactEmail, contactPhone, about, websiteUrl. One-to-one with User, one-to-many with Bull.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>AD-9: Form Handling</title>
+        <section>React Hook Form + Zod</section>
+        <snippet>Use React Hook Form for performant forms with Zod for type-safe validation. Client-side and server-side validation. Helpful error messages for low digital literacy users.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/stories/2-1-ranch-owner-registration-role-assignment.context.xml</path>
+        <title>Story 2.1 Context</title>
+        <section>Previous Story Implementation</section>
+        <snippet>Email verification system implemented. Access control middleware checks emailVerified status. Only verified RANCH_OWNER users can access ranch features.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Ranch</symbol>
+        <lines>41-61</lines>
+        <reason>Ranch model already defined with all required fields: id, userId (unique), name, slug (unique), state, contactEmail, contactPhone, about, websiteUrl, timestamps. Relationships to User and Bull.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>auth.config.ts</path>
+        <kind>middleware</kind>
+        <symbol>authConfig.authorized</symbol>
+        <lines>1-39</lines>
+        <reason>Middleware for route protection. Checks authentication and emailVerified status. Can be extended to protect /ranch/create route.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>NextAuth configuration</symbol>
+        <lines>1-67</lines>
+        <reason>NextAuth setup with session management. User role and emailVerified available in session for access control.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/signup/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>SignupPage</symbol>
+        <lines>1-146</lines>
+        <reason>Example form implementation using React state and validation. Pattern to follow for ranch profile form.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0">Full-stack React framework with App Router</package>
+        <package name="react" version="^18.3.0">UI library</package>
+        <package name="@prisma/client" version="^6.19.0">Prisma ORM client</package>
+        <package name="next-auth" version="^5.0.0-beta.30">Authentication library</package>
+        <package name="typescript" version="^5">TypeScript language</package>
+        <package name="tailwindcss" version="^3.4.0">Utility-first CSS framework</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Only verified ranch owners (emailVerified = true, role = RANCH_OWNER) can create ranch profiles
+    - One ranch per user (enforce via userId unique constraint)
+    - Ranch slug must be unique across all ranches
+    - Slug format: lowercase, hyphens for spaces, alphanumeric only
+    - Phone number must be validated (US or international format)
+    - Email must be valid format
+    - Website URL must be valid HTTP/HTTPS format
+    - About section limited to 500 characters
+    - Required fields: name, state, contactEmail, contactPhone
+    - Optional fields: about, websiteUrl
+    - Slug generation must handle duplicates by appending numbers
+    - Public ranch profile accessible at /ranch/[slug]
+    - Form validation required both client-side and server-side
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>POST /api/ranch/create</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { name, state, contactEmail, contactPhone, about?, websiteUrl? }
+Response: { success: boolean, ranch: { id, slug, ... } }</signature>
+      <path>app/api/ranch/create/route.ts</path>
+    </interface>
+    
+    <interface>
+      <name>PUT /api/ranch/update</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { name, state, contactEmail, contactPhone, about?, websiteUrl? }
+Response: { success: boolean, ranch: { ... } }</signature>
+      <path>app/api/ranch/update/route.ts</path>
+    </interface>
+    
+    <interface>
+      <name>generateSlug</name>
+      <kind>function</kind>
+      <signature>async (name: string) => Promise&lt;string&gt;</signature>
+      <path>lib/slugify.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>No testing framework currently configured. Recommended: Jest for unit/integration tests, React Testing Library for component tests. Focus on slug generation uniqueness, form validation, access control, and end-to-end ranch creation flow.</standards>
+    
+    <locations>Recommended: __tests__/lib/ for slug utilities, __tests__/api/ for API routes, __tests__/e2e/ for user flows</locations>
+    
+    <ideas>
+      <test ac="AC2" id="T1">Unit test: generateSlug converts "Wagner Ranch" to "wagner-ranch"</test>
+      <test ac="AC2" id="T2">Unit test: generateSlug handles special characters and spaces</test>
+      <test ac="AC2" id="T3">Unit test: generateSlug appends number for duplicates</test>
+      <test ac="AC1" id="T4">Component test: Form validates required fields</test>
+      <test ac="AC1" id="T5">Component test: Form validates email format</test>
+      <test ac="AC1" id="T6">Component test: Form validates phone format</test>
+      <test ac="AC1" id="T7">Component test: Form validates URL format</test>
+      <test ac="AC1" id="T8">Component test: Character counter for about section</test>
+      <test ac="AC3" id="T9">Integration test: POST /api/ranch/create requires authentication</test>
+      <test ac="AC3" id="T10">Integration test: POST /api/ranch/create requires email verification</test>
+      <test ac="AC3" id="T11">Integration test: User cannot create duplicate ranch</test>
+      <test ac="AC3" id="T12">Integration test: Ranch creation links to current user</test>
+      <test ac="AC4" id="T13">Integration test: Public ranch profile renders at /ranch/[slug]</test>
+      <test ac="AC4" id="T14">Integration test: 404 for non-existent ranch slug</test>
+      <test ac="ALL" id="T15">E2E test: Complete ranch creation flow with redirect</test>
+      <test ac="AC4" id="T16">E2E test: Ranch owner can edit profile</test>
+    </ideas>
+  </tests>
+</story-context>

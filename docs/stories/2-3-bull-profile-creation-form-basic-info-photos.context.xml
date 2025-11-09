@@ -1,0 +1,175 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>Bull Profile Creation Form - Basic Info & Photos</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-3-bull-profile-creation-form-basic-info-photos.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to add a bull with basic information and photos</iWant>
+    <soThat>I can start showcasing my genetics to breeders</soThat>
+    <tasks>
+      <task id="T1" ac="AC1" status="pending">Create Bull Creation Page & Basic Form</task>
+      <task id="T2" ac="AC2" status="pending">Integrate Cloudinary Image Upload</task>
+      <task id="T3" ac="AC3" status="pending">Implement Photo Reordering</task>
+      <task id="T4" ac="AC4" status="pending">Create Bull API Route</task>
+      <task id="T5" ac="AC4" status="pending">Implement Draft Saving</task>
+      <task id="T6" ac="AC4" status="pending">Implement Continue to Next Step</task>
+      <task id="T7" ac="ALL" status="pending">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="Basic Information Form">
+      - Form includes required fields: bull name, breed (dropdown)
+      - Form includes optional fields: registration number, birth date
+      - Breed dropdown populated with common cattle breeds
+      - Date picker for birth date
+      - Form validation prevents submission without required fields
+      - Clear error messages for validation failures
+    </criterion>
+    
+    <criterion id="AC2" title="Photo Upload with Cloudinary">
+      - Hero photo upload (required) - single image
+      - Additional photos upload (optional) - up to 6 images
+      - Photos uploaded to Cloudinary with progress indication
+      - Image preview displayed after upload
+      - File validation: JPG/PNG only, max 10MB per image
+      - Upload errors displayed with clear messages
+    </criterion>
+    
+    <criterion id="AC3" title="Photo Management">
+      - Drag-and-drop to reorder photos
+      - First photo is always the hero photo
+      - Delete button for each photo
+      - Visual indication of hero photo
+      - Photo order persisted in database
+    </criterion>
+    
+    <criterion id="AC4" title="Draft and Continue Options">
+      - "Save as Draft" button saves bull with status: DRAFT
+      - "Continue to Genetic Data" button saves and proceeds to Story 2.4 form
+      - Draft bulls not visible publicly
+      - Ranch owner can return to edit drafts from dashboard
+      - Form state preserved when navigating between steps
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.3: Bull Profile Creation Form</section>
+        <snippet>Multi-step bull creation form. Part 1: Basic info (name, breed, registration, birth date) and photos (hero + up to 6 additional). Cloudinary integration for image upload. Draft saving capability.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>AD-4: Image Storage - Cloudinary</title>
+        <section>Image Strategy</section>
+        <snippet>Signed uploads from client to Cloudinary. Store URLs in database. Automatic WebP conversion, multiple size transformations, lazy loading. Free tier: 25GB storage, 25GB bandwidth.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/stories/1-4-image-upload-storage-with-cloudinary.md</path>
+        <title>Story 1.4: Image Upload Implementation</title>
+        <section>Cloudinary Integration</section>
+        <snippet>Cloudinary SDK configured. Upload API route exists. Signed uploads implemented. Image validation and optimization working.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model with all required fields: name, breed, registrationNumber, birthDate, heroImage, additionalImages array, status enum (DRAFT/PUBLISHED), ranchId relationship.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/upload/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>POST</symbol>
+        <lines>1-50</lines>
+        <reason>Existing Cloudinary upload endpoint from Story 1.4. Handles signed uploads, image validation, returns Cloudinary URLs.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/ranch/create/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>CreateRanchPage</symbol>
+        <lines>1-200</lines>
+        <reason>Example form implementation pattern with validation, state management, error handling. Reference for bull creation form.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="cloudinary" version="^2.8.0">Image upload and optimization service</package>
+        <package name="@dnd-kit/core" version="latest">Modern drag-and-drop library (recommended)</package>
+        <package name="@dnd-kit/sortable" version="latest">Sortable utilities for dnd-kit</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Only ranch owners with verified email and ranch profile can create bulls
+    - Bull must be linked to user's ranch (ranchId foreign key)
+    - Hero photo is required before saving
+    - Maximum 7 total photos (1 hero + 6 additional)
+    - Image validation: JPG/PNG only, max 10MB per file
+    - Breed dropdown must include common cattle breeds (Angus, Hereford, etc.)
+    - Draft bulls have status: DRAFT, not visible publicly
+    - Published bulls have status: PUBLISHED, visible on ranch profile
+    - Photo URLs stored as array in Bull.additionalImages field
+    - Hero photo stored in Bull.heroImage field
+    - Form must handle multi-step navigation (Story 2.3 → 2.4 → 2.5)
+    - Cloudinary upload must use signed uploads for security
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>POST /api/bulls/create</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { name, breed, registrationNumber?, birthDate?, heroImage, additionalImages[], status }
+Response: { success: boolean, bull: { id, slug, ... } }</signature>
+      <path>app/api/bulls/create/route.ts</path>
+    </interface>
+    
+    <interface>
+      <name>POST /api/upload</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: FormData with image file
+Response: { success: boolean, url: string }</signature>
+      <path>app/api/upload/route.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>No testing framework configured. Recommended: Manual testing for image upload, drag-and-drop functionality. Integration tests for API endpoints. E2E tests for complete bull creation flow.</standards>
+    
+    <locations>Recommended: __tests__/api/ for API routes, manual testing for UI interactions</locations>
+    
+    <ideas>
+      <test ac="AC1" id="T1">Component test: Form validates required fields (name, breed, hero photo)</test>
+      <test ac="AC1" id="T2">Component test: Breed dropdown populated with cattle breeds</test>
+      <test ac="AC1" id="T3">Component test: Date picker for birth date works</test>
+      <test ac="AC2" id="T4">Integration test: Image upload to Cloudinary returns URL</test>
+      <test ac="AC2" id="T5">Integration test: File validation rejects non-JPG/PNG files</test>
+      <test ac="AC2" id="T6">Integration test: File validation rejects files over 10MB</test>
+      <test ac="AC3" id="T7">Manual test: Drag-and-drop reordering works</test>
+      <test ac="AC3" id="T8">Manual test: Delete photo removes from list</test>
+      <test ac="AC4" id="T9">Integration test: POST /api/bulls/create with DRAFT status</test>
+      <test ac="AC4" id="T10">Integration test: Bull linked to correct ranch</test>
+      <test ac="AC4" id="T11">E2E test: Complete bull creation flow with photos</test>
+      <test ac="AC4" id="T12">E2E test: Save as draft and return to edit</test>
+    </ideas>
+  </tests>
+</story-context>

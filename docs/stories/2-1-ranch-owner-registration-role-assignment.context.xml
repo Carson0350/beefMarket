@@ -1,0 +1,261 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.1</storyId>
+    <title>Ranch Owner Registration & Role Assignment</title>
+    <status>review</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-1-ranch-owner-registration-role-assignment.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to create an account with my email and password</iWant>
+    <soThat>I can access the platform to manage my ranch and bulls</soThat>
+    <tasks>
+      <task id="T1" ac="AC1" status="completed">Extend Signup API to Support Role Selection</task>
+      <task id="T2" ac="AC2" status="completed">Implement Email Verification Token System</task>
+      <task id="T3" ac="AC2" status="completed">Set Up Email Sending Service</task>
+      <task id="T4" ac="AC2,AC3" status="completed">Create Email Verification Pages</task>
+      <task id="T5" ac="AC1,AC4" status="completed">Update Signup Page with Role Selection</task>
+      <task id="T6" ac="AC3" status="completed">Implement Access Control for Unverified Users</task>
+      <task id="T7" ac="ALL" status="completed">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1" title="Ranch Owner Account Creation">
+      - User can sign up with email, password, and password confirmation
+      - Account is created with role set to "RANCH_OWNER"
+      - Password is hashed using bcryptjs (12 rounds)
+      - Duplicate email addresses are rejected with clear error message
+    </criterion>
+    
+    <criterion id="AC2" title="Email Verification Flow">
+      - Verification token is generated and stored in database
+      - Verification email is sent to user's email address
+      - Email contains clickable verification link
+      - Link redirects to verification page that validates token
+      - Upon successful verification, emailVerified field is set to current timestamp
+    </criterion>
+    
+    <criterion id="AC3" title="Post-Registration Flow">
+      - After signup, user is redirected to "Check Your Email" page
+      - After email verification, user is redirected to ranch profile creation page
+      - Unverified users cannot access ranch management features (dashboard, bull creation)
+    </criterion>
+    
+    <criterion id="AC4" title="Form Validation">
+      - Email format validation
+      - Password minimum 6 characters
+      - Password confirmation must match
+      - Clear, user-friendly error messages displayed inline
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Epic 2: Ranch Owner Onboarding</title>
+        <section>Story 2.1: Ranch Owner Registration & Role Assignment</section>
+        <snippet>Enable ranch owners to create accounts with email/password, assign RANCH_OWNER role, implement email verification flow, and protect ranch management features until verified.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>AD-3: Authentication - NextAuth.js v5</title>
+        <section>Authentication Strategy</section>
+        <snippet>Email/password with bcrypt hashing (cost factor 12), role-based access control (RANCH_OWNER, BREEDER, ADMIN), session timeout 30 days, rate limiting on auth endpoints.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>AD-6: Email Service - Resend</title>
+        <section>Email Types</section>
+        <snippet>Email verification (registration), inquiry notifications, favorites updates, password reset. Modern API with React Email templates, 3,000 emails/month free tier.</snippet>
+      </artifact>
+      
+      <artifact>
+        <path>docs/PRD.md</path>
+        <title>User Management & Authentication</title>
+        <section>FR-1: User Registration & Authentication</section>
+        <snippet>Support two user roles (Ranch Owner, Breeder) with email/password authentication, email verification, and role-based access control.</snippet>
+      </artifact>
+    </docs>
+    
+    <code>
+      <artifact>
+        <path>lib/tokens.ts</path>
+        <kind>utility</kind>
+        <symbol>generateVerificationToken, createVerificationToken, verifyEmailToken</symbol>
+        <lines>1-89</lines>
+        <reason>Core token generation and validation logic for email verification. Uses crypto.randomBytes for secure tokens, 24-hour expiry, handles token cleanup.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendVerificationEmail</symbol>
+        <lines>1-102</lines>
+        <reason>Email service integration with Resend. Sends verification emails with HTML and text templates, includes verification URL with token.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/auth/signup/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>POST</symbol>
+        <lines>1-78</lines>
+        <reason>Signup endpoint implementing AC1. Validates role (RANCH_OWNER, BREEDER, ADMIN), hashes password with bcrypt (12 rounds), creates user, generates verification token, sends email.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/api/auth/verify-email/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>POST</symbol>
+        <lines>1-37</lines>
+        <reason>Email verification endpoint implementing AC2. Validates token, updates emailVerified field, deletes used token.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/signup/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>SignupPage</symbol>
+        <lines>1-146</lines>
+        <reason>Signup form implementing AC1, AC4. Includes email, password, confirmPassword, role selection. Client-side validation, redirects to /check-email on success.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/verify-email/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>VerifyEmailPage</symbol>
+        <lines>1-131</lines>
+        <reason>Email verification page implementing AC2, AC3. Handles token from URL, calls verification API, shows loading/success/error states, redirects to /ranch/create on success.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>app/check-email/page.tsx</path>
+        <kind>page-component</kind>
+        <symbol>CheckEmailPage</symbol>
+        <lines>1-71</lines>
+        <reason>Post-signup instruction page implementing AC3. Informs users to check email, explains verification requirement.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>NextAuth configuration</symbol>
+        <lines>1-67</lines>
+        <reason>NextAuth.js setup with Credentials provider. JWT callbacks include emailVerified field in session for access control.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>auth.config.ts</path>
+        <kind>middleware</kind>
+        <symbol>authConfig.authorized</symbol>
+        <lines>1-39</lines>
+        <reason>Middleware implementing AC3 access control. Checks emailVerified status, protects dashboard/ranch/bull routes, redirects unverified users to /check-email.</reason>
+      </artifact>
+      
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User, Role, VerificationToken</symbol>
+        <lines>18-38, 202-208</lines>
+        <reason>Database schema with User.role enum (RANCH_OWNER, BREEDER, ADMIN), User.emailVerified DateTime field, VerificationToken model for email verification.</reason>
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0">Full-stack React framework with App Router</package>
+        <package name="react" version="^18.3.0">UI library</package>
+        <package name="react-dom" version="^18.3.0">React DOM renderer</package>
+        <package name="next-auth" version="^5.0.0-beta.30">Authentication library (NextAuth.js v5)</package>
+        <package name="@auth/prisma-adapter" version="^2.11.1">Prisma adapter for NextAuth</package>
+        <package name="@prisma/client" version="^6.19.0">Prisma ORM client</package>
+        <package name="prisma" version="^6.19.0">Prisma CLI and schema tools</package>
+        <package name="bcryptjs" version="^3.0.3">Password hashing library</package>
+        <package name="resend" version="^6.4.2">Email service SDK</package>
+        <package name="cloudinary" version="^2.8.0">Image upload and optimization service</package>
+        <package name="typescript" version="^5">TypeScript language</package>
+        <package name="tailwindcss" version="^3.4.0">Utility-first CSS framework</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Password must be minimum 6 characters (enforced client and server-side)
+    - Password hashing uses bcryptjs with 12 rounds (security requirement from architecture)
+    - Verification tokens expire after 24 hours
+    - Tokens generated using crypto.randomBytes(32) for security
+    - Role must be one of: RANCH_OWNER, BREEDER, ADMIN (validated in API)
+    - Default role is RANCH_OWNER if not specified
+    - Duplicate emails rejected with clear error message
+    - Unverified users cannot access: /dashboard, /ranch/*, /bulls/create
+    - Email verification required before ranch management access
+    - Resend API key required in environment variables (RESEND_API_KEY, FROM_EMAIL)
+    - NextAuth session includes emailVerified field for middleware checks
+    - Used tokens are deleted after successful verification
+    - Expired tokens are automatically cleaned up during validation
+  </constraints>
+  
+  <interfaces>
+    <interface>
+      <name>POST /api/auth/signup</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { email: string, password: string, role?: "RANCH_OWNER" | "BREEDER" | "ADMIN" }
+Response: { success: boolean, message: string, user?: { id, email, role } }</signature>
+      <path>app/api/auth/signup/route.ts</path>
+    </interface>
+    
+    <interface>
+      <name>POST /api/auth/verify-email</name>
+      <kind>REST endpoint</kind>
+      <signature>Request: { token: string }
+Response: { success: boolean, message: string, email?: string }</signature>
+      <path>app/api/auth/verify-email/route.ts</path>
+    </interface>
+    
+    <interface>
+      <name>createVerificationToken</name>
+      <kind>function</kind>
+      <signature>async (email: string) => Promise&lt;string&gt;</signature>
+      <path>lib/tokens.ts</path>
+    </interface>
+    
+    <interface>
+      <name>sendVerificationEmail</name>
+      <kind>function</kind>
+      <signature>async (email: string, token: string) => Promise&lt;{ success: boolean, error?: string }&gt;</signature>
+      <path>lib/email.ts</path>
+    </interface>
+  </interfaces>
+  
+  <tests>
+    <standards>No testing framework currently configured in the project. Based on the story's Task 7 requirements and Next.js best practices, testing should include: Unit tests for utility functions (token generation, email sending), Integration tests for API routes (signup, email verification), End-to-end tests for complete user flows, Manual testing for email delivery. Recommended frameworks: Jest for unit/integration tests, React Testing Library for component tests, Playwright or Cypress for E2E tests.</standards>
+    
+    <locations>Tests not yet implemented. Recommended structure: __tests__/lib/ for unit tests, __tests__/api/ for integration tests, __tests__/e2e/ for end-to-end tests</locations>
+    
+    <ideas>
+      <test ac="AC1" id="T1">Unit test: Token generation produces unique 64-character hex strings</test>
+      <test ac="AC1" id="T2">Unit test: createVerificationToken stores token with 24-hour expiry</test>
+      <test ac="AC1" id="T3">Unit test: verifyEmailToken validates and updates emailVerified field</test>
+      <test ac="AC1" id="T4">Unit test: verifyEmailToken rejects expired tokens</test>
+      <test ac="AC2" id="T5">Unit test: sendVerificationEmail constructs correct verification URL</test>
+      <test ac="AC1" id="T6">Integration test: POST /api/auth/signup creates user with RANCH_OWNER role</test>
+      <test ac="AC1" id="T7">Integration test: POST /api/auth/signup rejects duplicate emails</test>
+      <test ac="AC1" id="T8">Integration test: POST /api/auth/signup validates role enum</test>
+      <test ac="AC1" id="T9">Integration test: POST /api/auth/signup hashes password with bcrypt</test>
+      <test ac="AC2" id="T10">Integration test: POST /api/auth/verify-email validates token and updates user</test>
+      <test ac="AC3" id="T11">Integration test: Middleware redirects unverified users from /dashboard</test>
+      <test ac="AC3" id="T12">Integration test: Middleware allows verified users to access /dashboard</test>
+      <test ac="AC4" id="T13">Component test: Signup form validates password confirmation match</test>
+      <test ac="AC4" id="T14">Component test: Signup form validates email format</test>
+      <test ac="ALL" id="T15">E2E test: Complete signup flow - register, receive email, verify, redirect</test>
+      <test ac="AC3" id="T16">E2E test: Unverified user cannot access ranch management features</test>
+      <test ac="AC2" id="T17">Manual test: Verify email delivery with valid RESEND_API_KEY</test>
+    </ideas>
+  </tests>
+</story-context>
