@@ -99,3 +99,217 @@ This link will expire in 24 hours.
 If you didn't create an account, you can safely ignore this email.
   `;
 }
+
+/**
+ * Send inventory change notification email
+ * @param params - Email parameters including bull data and inventory changes
+ */
+export async function sendInventoryChangeEmail({
+  userEmail,
+  bull,
+  oldInventory,
+  newInventory,
+  changeType,
+}: {
+  userEmail: string;
+  bull: {
+    id: string;
+    name: string;
+    slug: string;
+    heroImage: string;
+    ranch: {
+      name: string;
+      contactEmail: string;
+      contactPhone: string;
+    };
+  };
+  oldInventory: number;
+  newInventory: number;
+  changeType: 'became_available' | 'running_low' | 'sold_out' | 'restocked' | 'inventory_updated';
+}): Promise<{ success: boolean; error?: string }> {
+  const subject = getSubjectForChangeType(changeType, bull.name);
+  const bullUrl = `${APP_URL}/bulls/${bull.slug}`;
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject,
+      html: getInventoryChangeEmailHTML({
+        bull,
+        bullUrl,
+        oldInventory,
+        newInventory,
+        changeType,
+      }),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending inventory change email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get email subject line based on change type
+ */
+function getSubjectForChangeType(
+  changeType: string,
+  bullName: string
+): string {
+  switch (changeType) {
+    case 'became_available':
+      return `🎉 ${bullName} is now available!`;
+    case 'sold_out':
+      return `⚠️ ${bullName} is sold out`;
+    case 'running_low':
+      return `⏰ Limited availability: ${bullName}`;
+    case 'restocked':
+      return `📦 ${bullName} restocked`;
+    default:
+      return `Inventory update: ${bullName}`;
+  }
+}
+
+/**
+ * HTML template for inventory change email
+ */
+function getInventoryChangeEmailHTML({
+  bull,
+  bullUrl,
+  oldInventory,
+  newInventory,
+  changeType,
+}: {
+  bull: {
+    name: string;
+    heroImage: string;
+    ranch: {
+      name: string;
+      contactEmail: string;
+      contactPhone: string;
+    };
+  };
+  bullUrl: string;
+  oldInventory: number;
+  newInventory: number;
+  changeType: string;
+}): string {
+  const changeMessage = getChangeMessage(changeType, oldInventory, newInventory);
+  const changeColor = getChangeColor(changeType);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Update - ${bull.name}</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+    <h1 style="color: #2c3e50; margin-bottom: 20px;">Inventory Update</h1>
+    
+    <div style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+      <img src="${bull.heroImage}" alt="${bull.name}" style="width: 100%; height: 250px; object-fit: cover;">
+      <div style="padding: 20px;">
+        <h2 style="margin: 0 0 10px 0; color: #2c3e50;">${bull.name}</h2>
+        <p style="margin: 0; color: #666; font-size: 14px;">${bull.ranch.name}</p>
+      </div>
+    </div>
+    
+    <div style="background-color: ${changeColor}15; padding: 20px; border-radius: 8px; border-left: 4px solid ${changeColor}; margin-bottom: 20px;">
+      <p style="margin: 0 0 10px 0; font-weight: bold; color: ${changeColor}; font-size: 18px;">
+        ${changeMessage}
+      </p>
+      <div style="display: flex; align-items: center; gap: 20px; margin-top: 15px;">
+        <div>
+          <p style="margin: 0; color: #666; font-size: 14px;">Previous</p>
+          <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #999; text-decoration: line-through;">
+            ${oldInventory} ${oldInventory === 1 ? 'straw' : 'straws'}
+          </p>
+        </div>
+        <div style="font-size: 24px; color: #999;">→</div>
+        <div>
+          <p style="margin: 0; color: #666; font-size: 14px;">Current</p>
+          <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: ${changeColor};">
+            ${newInventory} ${newInventory === 1 ? 'straw' : 'straws'}
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${bullUrl}" 
+         style="background-color: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+        View Bull Details
+      </a>
+    </div>
+    
+    <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px;">
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+        <strong>Ranch Contact:</strong>
+      </p>
+      <p style="margin: 0; font-size: 14px; color: #666;">
+        ${bull.ranch.name}<br>
+        Email: ${bull.ranch.contactEmail}<br>
+        Phone: ${bull.ranch.contactPhone}
+      </p>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">
+      You're receiving this because you favorited ${bull.name}.<br>
+      To stop receiving notifications for this bull, visit your favorites page.
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Get change message based on change type
+ */
+function getChangeMessage(
+  changeType: string,
+  oldInventory: number,
+  newInventory: number
+): string {
+  const diff = Math.abs(newInventory - oldInventory);
+  
+  switch (changeType) {
+    case 'became_available':
+      return '🎉 Now Available!';
+    case 'sold_out':
+      return '⚠️ Sold Out';
+    case 'running_low':
+      return '⏰ Running Low';
+    case 'restocked':
+      return `📦 Restocked (+${diff} straws)`;
+    default:
+      return newInventory > oldInventory 
+        ? `Inventory Increased (+${diff})` 
+        : `Inventory Decreased (-${diff})`;
+  }
+}
+
+/**
+ * Get color for change type
+ */
+function getChangeColor(changeType: string): string {
+  switch (changeType) {
+    case 'became_available':
+    case 'restocked':
+      return '#10b981'; // Green
+    case 'sold_out':
+      return '#ef4444'; // Red
+    case 'running_low':
+      return '#f59e0b'; // Orange
+    default:
+      return '#6b7280'; // Gray
+  }
+}

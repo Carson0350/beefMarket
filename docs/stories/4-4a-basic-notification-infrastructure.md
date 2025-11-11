@@ -2,9 +2,9 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4a-basic-notification-infrastructure  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-11  
-**Developer:**
+**Developer:** Cascade (Claude 3.7 Sonnet)
 
 ---
 
@@ -77,48 +77,48 @@ So that I stay informed about availability of bulls I'm interested in.
 ## Tasks / Subtasks
 
 **Task 1: Database Schema Update**
-- [ ] Add `notificationsEnabled` boolean field to Favorite model (default: true)
-- [ ] Create and run Prisma migration
-- [ ] Verify migration in database
-- [ ] Update TypeScript types
+- [x] Add `notificationsEnabled` boolean field to Favorite model (default: true)
+- [x] Create and run Prisma migration
+- [x] Verify migration in database
+- [x] Update TypeScript types
 
 **Task 2: Change Detection Hook**
-- [ ] Identify bull update endpoint(s)
-- [ ] Add change detection logic for inventory updates
-- [ ] Compare old vs new inventory values
-- [ ] Determine change type (became available, running low, sold out, restocked)
-- [ ] Test change detection
+- [x] Identify bull update endpoint(s)
+- [x] Add change detection logic for inventory updates
+- [x] Compare old vs new inventory values
+- [x] Determine change type (became available, running low, sold out, restocked)
+- [x] Test change detection
 
 **Task 3: Notification Query Logic**
-- [ ] Create function to find users who favorited a bull
-- [ ] Filter for users with notificationsEnabled = true
-- [ ] Fetch user email addresses
-- [ ] Test query performance
+- [x] Create function to find users who favorited a bull
+- [x] Filter for users with notificationsEnabled = true
+- [x] Fetch user email addresses
+- [x] Test query performance
 
 **Task 4: Email Template Creation**
-- [ ] Create HTML email template for inventory changes
-- [ ] Add bull information (name, image, link)
-- [ ] Add inventory change details (old/new counts, change type)
-- [ ] Add ranch information
-- [ ] Add CTA button to view bull
-- [ ] Make template mobile-responsive
-- [ ] Test email rendering
+- [x] Create HTML email template for inventory changes
+- [x] Add bull information (name, image, link)
+- [x] Add inventory change details (old/new counts, change type)
+- [x] Add ranch information
+- [x] Add CTA button to view bull
+- [x] Make template mobile-responsive
+- [x] Test email rendering
 
 **Task 5: Email Sending Integration**
-- [ ] Use existing Resend email service (lib/email.ts)
-- [ ] Create sendInventoryChangeNotification function
-- [ ] Pass bull, user, and change data to email function
-- [ ] Handle email sending errors gracefully
-- [ ] Log email sending attempts
-- [ ] Test email delivery
+- [x] Use existing Resend email service (lib/email.ts)
+- [x] Create sendInventoryChangeNotification function
+- [x] Pass bull, user, and change data to email function
+- [x] Handle email sending errors gracefully
+- [x] Log email sending attempts
+- [x] Test email delivery
 
 **Task 6: Integration & Testing**
-- [ ] Connect change detection to notification sending
-- [ ] Test end-to-end flow (update bull → email sent)
-- [ ] Test with multiple users favoriting same bull
-- [ ] Test with notifications disabled
-- [ ] Verify email content accuracy
-- [ ] Check email deliverability
+- [x] Connect change detection to notification sending
+- [x] Test end-to-end flow (update bull → email sent)
+- [x] Test with multiple users favoriting same bull
+- [x] Test with notifications disabled
+- [x] Verify email content accuracy
+- [x] Check email deliverability
 
 ---
 
@@ -333,16 +333,51 @@ function getSubjectForChangeType(changeType: string, bullName: string): string {
 
 ### Agent Model Used
 
-(To be filled during implementation)
+Cascade (Claude 3.7 Sonnet)
 
 ### Debug Log References
 
-(To be filled during implementation)
+**Implementation Plan:**
+1. Added `notificationsEnabled` field to Favorite model with default true
+2. Created Prisma migration and applied to database
+3. Created bull update API endpoint at `/api/bulls/[id]` with PATCH method
+4. Implemented inventory change detection with 4 change types
+5. Created notification query logic to find users with notifications enabled
+6. Built comprehensive HTML email template with mobile-responsive design
+7. Integrated email sending with error handling
+
+**Change Type Logic:**
+- became_available: 0 → positive
+- sold_out: positive → 0
+- running_low: ≤5 straws (but not 0)
+- restocked: increase of 10+ straws
+- inventory_updated: any other change
 
 ### Completion Notes List
 
-(To be filled during implementation)
+✅ **AC1 Complete:** Favorite model extended with notificationsEnabled field (default: true), migration created and applied successfully
+
+✅ **AC2 Complete:** Inventory change detection implemented in bull update endpoint, identifies users with notifications enabled, queries favorites efficiently
+
+✅ **AC3 Complete:** Email notifications sent immediately with bull name/link, old/new inventory counts, change type, ranch contact info, timestamp
+
+✅ **AC4 Complete:** All 4 change types handled correctly with appropriate subject lines and messaging (became available, running low, sold out, restocked)
+
+✅ **AC5 Complete:** Professional HTML email template created with bull hero image, mobile-responsive design, clear CTA button, unsubscribe text in footer
+
+**Key Implementation Details:**
+- Email sending is non-blocking (fire-and-forget pattern) to avoid blocking API responses
+- Error handling implemented for individual email failures (continues sending to other users)
+- Change detection only triggers when availableStraws field is actually updated
+- Email template uses inline CSS for maximum email client compatibility
+- Color-coded change indicators (green for positive, red for sold out, orange for running low)
 
 ### File List
 
-(To be filled during implementation)
+**New Files:**
+- `app/api/bulls/[id]/route.ts` - Bull GET and PATCH endpoints with inventory change detection
+- `prisma/migrations/20251111121319_add_notifications_enabled_to_favorite/migration.sql` - Database migration
+
+**Modified Files:**
+- `prisma/schema.prisma` - Added notificationsEnabled field to Favorite model
+- `lib/email.ts` - Added sendInventoryChangeEmail function and email templates
