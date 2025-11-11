@@ -281,6 +281,10 @@ Consider implementing Stories 4.4a-4.4d first, gather user feedback, then decide
 
 ## Dev Agent Record
 
+### Context Reference
+
+- Story Context: `docs/stories/4-4e-notification-batching-queue.context.xml`
+
 ### File List
 
 (To be filled during implementation)

@@ -1,0 +1,181 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4b</storyId>
+    <title>Notification Preferences UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4b-notification-preferences-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to control notification settings for each favorited bull</iWant>
+    <soThat>I only receive notifications for bulls I'm actively tracking</soThat>
+    <tasks>
+      - Create reusable NotificationToggle component with bell icon
+      - Add NotificationToggle to each bull card on favorites page
+      - Create PATCH /api/favorites/[bullId]/notifications endpoint
+      - Implement bulk enable/disable all notifications
+      - Add confirmation dialog for bulk actions
+      - Test toggle functionality and database persistence
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Notification toggle switch visible on each favorited bull card, shows current on/off status with visual indicator
+    AC2: Clicking toggle updates notificationsEnabled field immediately, shows loading state, persists to database
+    AC3: Clear visual indicators: bell icon filled (ON) or bell with slash (OFF), tooltip explains status
+    AC4: Bulk actions available: "Enable all" and "Disable all" buttons with confirmation dialog, updates all favorites at once
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/4-4a-basic-notification-infrastructure.md</path>
+        <title>Story 4.4a: Basic Notification Infrastructure (Prerequisite)</title>
+        <section>Database Migration</section>
+        <snippet>Favorite model extended with notificationsEnabled field (default: true). This field is what the UI will toggle. Migration must be complete before this story.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-3b-bull-favorites-system.md</path>
+        <title>Story 4.3b: Bull Favorites System</title>
+        <section>Favorites Page</section>
+        <snippet>Favorites page exists at /favorites with card grid display. This is where notification toggles will be added to each bull card.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>components/FavoriteButton.tsx</path>
+        <kind>component</kind>
+        <symbol>FavoriteButton</symbol>
+        <lines>all</lines>
+        <reason>Reference for optimistic UI updates, error handling with state reversion, and icon toggle patterns. NotificationToggle will follow similar pattern.</reason>
+      </artifact>
+      <artifact>
+        <path>app/favorites/page.tsx</path>
+        <kind>page</kind>
+        <symbol>FavoritesPage</symbol>
+        <lines>all</lines>
+        <reason>Existing favorites page where NotificationToggle components will be added. Shows how favorites are fetched and displayed in card grid.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/favorites/[bullId]/route.ts</path>
+        <kind>api</kind>
+        <symbol>POST, DELETE</symbol>
+        <lines>all</lines>
+        <reason>Existing favorites API pattern for per-bull operations. NotificationToggle API will follow same structure with PATCH method.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Favorite</symbol>
+        <lines>158-172</lines>
+        <reason>Favorite model with notificationsEnabled field (added in Story 4.4a). This is the field the toggle will update.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>@heroicons/react</package>
+        <version>^2.2.0</version>
+        <usage>BellIcon (outline and solid) and BellSlashIcon for notification toggle UI</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for updating notificationsEnabled field</usage>
+      </node>
+      <node>
+        <package>react</package>
+        <version>^18.3.0</version>
+        <usage>useState for component state management</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Requires Story 4.4a complete (notificationsEnabled field must exist)
+    - Use optimistic UI updates for instant feedback
+    - Revert state on error (follow FavoriteButton pattern)
+    - Must validate user owns the favorite before updating
+    - Toggle must not trigger navigation when clicked on card
+    - Use existing Heroicons for bell icons (already installed)
+    - Follow existing API pattern from favorites endpoints
+    - Bulk actions need confirmation to prevent accidental changes
+    - Component must be reusable (used on each bull card)
+    - Loading state prevents rapid clicking
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NotificationToggle Component</name>
+      <kind>React Component</kind>
+      <signature>
+interface NotificationToggleProps {
+  bullId: string;
+  bullName: string;
+  initialEnabled: boolean;
+}
+export default function NotificationToggle(props: NotificationToggleProps): JSX.Element
+// Client component with optimistic updates, error handling, loading state
+      </signature>
+      <path>components/NotificationToggle.tsx</path>
+    </interface>
+    <interface>
+      <name>Toggle Notification API</name>
+      <kind>API Route</kind>
+      <signature>
+PATCH /api/favorites/[bullId]/notifications
+Body: { enabled: boolean }
+Response: { success: boolean, enabled: boolean }
+Auth: Required (session)
+Status: 200 (success) | 401 (unauthorized) | 404 (favorite not found)
+      </signature>
+      <path>app/api/favorites/[bullId]/notifications/route.ts</path>
+    </interface>
+    <interface>
+      <name>Bulk Toggle API</name>
+      <kind>API Route</kind>
+      <signature>
+PATCH /api/favorites/notifications/bulk
+Body: { enabled: boolean }
+Response: { success: boolean, count: number }
+Auth: Required (session)
+Updates all user's favorites at once
+      </signature>
+      <path>app/api/favorites/notifications/bulk/route.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test toggle functionality, optimistic updates, and database persistence.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/components/NotificationToggle.test.tsx
+      - __tests__/api/favorites/notifications/
+      - Manual testing via favorites page
+    </locations>
+    <ideas>
+      - AC1: Test toggle visible on each bull card
+      - AC1: Test toggle shows correct initial state (on/off)
+      - AC2: Test clicking toggle updates UI immediately (optimistic)
+      - AC2: Test loading state prevents rapid clicking
+      - AC2: Test database update persists after toggle
+      - AC3: Test bell icon filled when notifications ON
+      - AC3: Test bell slash icon when notifications OFF
+      - AC3: Test tooltip shows correct message
+      - AC4: Test "Enable all" button enables all favorites
+      - AC4: Test "Disable all" button disables all favorites
+      - AC4: Test confirmation dialog appears before bulk action
+      - Edge case: Test toggle with network error (reverts state)
+      - Edge case: Test toggle on deleted favorite (404 error)
+      - Edge case: Test toggle without authentication (401 error)
+      - Edge case: Test rapid clicking (disabled during loading)
+      - Edge case: Test with 0 favorites (no toggles shown)
+      - Edge case: Test with many favorites (all toggles work)
+    </ideas>
+  </tests>
+</story-context>

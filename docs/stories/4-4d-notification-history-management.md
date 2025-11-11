@@ -2,7 +2,7 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4d-notification-history-management  
-**Status:** drafted  
+**Status:** ready-for-dev  
 **Created:** 2025-11-11  
 **Developer:**
 
@@ -277,6 +277,10 @@ function verifyUnsubscribeToken(token: string, userId: string, bullId: string): 
 ---
 
 ## Dev Agent Record
+
+### Context Reference
+
+- Story Context: `docs/stories/4-4d-notification-history-management.context.xml`
 
 ### File List
 

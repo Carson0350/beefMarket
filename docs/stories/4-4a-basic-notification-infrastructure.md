@@ -2,7 +2,7 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4a-basic-notification-infrastructure  
-**Status:** drafted  
+**Status:** ready-for-dev  
 **Created:** 2025-11-11  
 **Developer:**
 
@@ -329,7 +329,7 @@ function getSubjectForChangeType(changeType: string, bullName: string): string {
 
 ### Context Reference
 
-(To be created during implementation)
+- Story Context: `docs/stories/4-4a-basic-notification-infrastructure.context.xml`
 
 ### Agent Model Used
 

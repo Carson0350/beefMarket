@@ -2,7 +2,7 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4c-price-change-notifications  
-**Status:** drafted  
+**Status:** ready-for-dev  
 **Created:** 2025-11-11  
 **Developer:**
 
@@ -258,6 +258,10 @@ function getPriceChangeEmailHTML({
 ---
 
 ## Dev Agent Record
+
+### Context Reference
+
+- Story Context: `docs/stories/4-4c-price-change-notifications.context.xml`
 
 ### File List
 

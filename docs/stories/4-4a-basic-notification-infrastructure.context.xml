@@ -1,0 +1,186 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4a</storyId>
+    <title>Basic Notification Infrastructure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4a-basic-notification-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to receive email notifications when favorited bulls' inventory changes</iWant>
+    <soThat>I stay informed about availability of bulls I'm interested in</soThat>
+    <tasks>
+      - Add notificationsEnabled field to Favorite model (database migration)
+      - Identify bull update endpoint(s) and add change detection logic
+      - Create function to find users who favorited a bull with notifications enabled
+      - Create HTML email template for inventory changes
+      - Use existing Resend email service to send notifications
+      - Connect change detection to notification sending
+      - Test end-to-end flow with multiple scenarios
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Favorite model has notificationsEnabled field (default: true), added via database migration
+    AC2: System detects inventory changes on bull update, identifies users with notifications enabled
+    AC3: Email sent immediately with bull name/link, old/new inventory, change type, ranch info, timestamp
+    AC4: Notifications for 4 change types: became available (0→positive), running low (≤5), sold out (positive→0), restocked (+10 or more)
+    AC5: Professional HTML email template with subject line, bull image, CTA button, mobile-responsive, unsubscribe option
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-6: Email Service - Resend</section>
+        <snippet>Use Resend for transactional emails. Simple API, generous free tier (3k emails/month), excellent deliverability. Email types: inquiry notifications, favorites update notifications, password reset.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-3b-bull-favorites-system.md</path>
+        <title>Story 4.3b: Bull Favorites System (Prerequisite)</title>
+        <section>Technical Notes - Favorite Model</section>
+        <snippet>Favorite model exists with many-to-many relationship (User ↔ Bull). Unique constraint on userId + bullId. Cascade delete when user or bull deleted. This is the foundation for notification preferences.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Favorite</symbol>
+        <lines>158-172</lines>
+        <reason>Existing Favorite model needs notificationsEnabled field added. Currently has userId, bullId, createdAt with unique constraint and indexes. This is where the migration will add the new field.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendVerificationEmail, Resend</symbol>
+        <lines>1-102</lines>
+        <reason>Existing email utility using Resend. Reference for email sending patterns, HTML template structure, error handling, and configuration (FROM_EMAIL, APP_URL). Will add sendInventoryChangeEmail function following same pattern.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/favorites/route.ts</path>
+        <kind>api</kind>
+        <symbol>GET favorites</symbol>
+        <lines>all</lines>
+        <reason>Existing favorites API shows how to query favorites with user relationships. Pattern for finding users who favorited a specific bull.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>resend</package>
+        <version>^6.4.2</version>
+        <usage>Email service for sending notification emails (already installed)</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for Favorite model updates and queries</usage>
+      </node>
+      <node>
+        <package>next</package>
+        <version>^14.2.0</version>
+        <usage>Next.js framework for API routes</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Favorite model already exists - only add notificationsEnabled field
+    - Use existing Resend email service (lib/email.ts) - no new email provider
+    - Follow existing email template pattern (HTML + text versions)
+    - Bull update endpoint may not exist yet - need to create or identify where to hook change detection
+    - Email sending must be non-blocking (async, don't crash if email fails)
+    - Default notificationsEnabled to true for backward compatibility
+    - Migration must be backward compatible with existing favorites
+    - Handle edge cases: invalid emails, deleted bulls, unfavorited bulls
+    - No job queue yet (Story 4.4e) - send emails immediately
+    - Keep email template simple and mobile-responsive
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Favorite Model (Extended)</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model Favorite {
+  id                   String    @id @default(cuid())
+  userId               String
+  bullId               String
+  notificationsEnabled Boolean   @default(true)  // NEW FIELD
+  createdAt            DateTime  @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bull Bull @relation(fields: [bullId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, bullId])
+  @@index([userId])
+  @@index([bullId])
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>sendInventoryChangeEmail</name>
+      <kind>Function</kind>
+      <signature>
+export async function sendInventoryChangeEmail({
+  userEmail: string,
+  bull: Bull & { ranch: Ranch },
+  oldInventory: number,
+  newInventory: number,
+  changeType: 'became_available' | 'running_low' | 'sold_out' | 'restocked' | 'inventory_updated'
+}): Promise&lt;{ success: boolean; error?: string }&gt;
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+    <interface>
+      <name>notifyInventoryChange</name>
+      <kind>Function</kind>
+      <signature>
+async function notifyInventoryChange(
+  oldBull: Bull,
+  newBull: Bull & { ranch: Ranch }
+): Promise&lt;void&gt;
+// Finds users with notifications enabled and sends emails
+      </signature>
+      <path>app/api/bulls/[id]/route.ts (or similar)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test notification sending, change detection, and email delivery.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/lib/email.test.ts for email functions
+      - __tests__/api/notifications/ for notification logic
+      - Manual testing via bull updates in development
+    </locations>
+    <ideas>
+      - AC1: Test migration adds notificationsEnabled field with default true
+      - AC1: Test existing favorites get default value
+      - AC2: Test inventory change detection (0→10, 10→5, 5→0, 10→20)
+      - AC2: Test finding users with notifications enabled vs disabled
+      - AC3: Test email sent with correct content (bull name, inventory, link)
+      - AC3: Test email includes ranch information
+      - AC4: Test "became available" notification (0→positive)
+      - AC4: Test "running low" notification (decrease to ≤5)
+      - AC4: Test "sold out" notification (positive→0)
+      - AC4: Test "restocked" notification (+10 or more)
+      - AC5: Test email template renders correctly (HTML and text)
+      - AC5: Test subject line varies by change type
+      - AC5: Test mobile responsiveness of email
+      - Edge case: Test with 0 users favoriting bull (no emails sent)
+      - Edge case: Test with multiple users favoriting same bull (all get emails)
+      - Edge case: Test with notifications disabled (no email sent)
+      - Edge case: Test email service failure (log error, don't crash)
+      - Edge case: Test rapid inventory changes (multiple emails OK for now)
+    </ideas>
+  </tests>
+</story-context>

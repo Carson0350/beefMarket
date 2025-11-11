@@ -2,7 +2,7 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4b-notification-preferences-ui  
-**Status:** drafted  
+**Status:** ready-for-dev  
 **Created:** 2025-11-11  
 **Developer:**
 
@@ -309,7 +309,7 @@ import NotificationToggle from '@/components/NotificationToggle';
 
 ### Context Reference
 
-(To be created during implementation)
+- Story Context: `docs/stories/4-4b-notification-preferences-ui.context.xml`
 
 ### File List
 
