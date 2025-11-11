@@ -72,8 +72,8 @@ development_status:
   4-3a-breeder-account-creation: review
   4-3b-bull-favorites-system: review
   4-4a-basic-notification-infrastructure: done
-  4-4b-notification-preferences-ui: review
-  4-4c-price-change-notifications: review
+  4-4b-notification-preferences-ui: done
+  4-4c-price-change-notifications: done
   4-4d-notification-history-management: ready-for-dev
   4-4e-notification-batching-queue: backlog
   epic-4-retrospective: optional
