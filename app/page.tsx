@@ -6,7 +6,7 @@ export default function Home() {
     <div className="min-h-screen">
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">WagnerBeef</h1>
+          <h1 className="text-2xl font-bold text-gray-900">BeefStore</h1>
           <AuthButton />
         </div>
       </header>

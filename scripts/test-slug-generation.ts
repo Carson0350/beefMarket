@@ -6,7 +6,7 @@ async function testSlugGeneration() {
   // Test 1: Basic slug generation
   console.log('📝 Test 1: Basic slug generation');
   const tests = [
-    'Wagner Ranch',
+    'Demo Ranch',
     'Smith & Sons Ranch',
     'ABC-123 Ranch',
     'Ranch  With   Spaces',
@@ -20,9 +20,9 @@ async function testSlugGeneration() {
   });
 
   // Test 2: Unique slug generation
-  console.log('\n📝 Test 2: Unique slug generation (with existing "wagner-ranch")');
-  const uniqueSlug1 = await generateUniqueRanchSlug('Wagner Ranch');
-  console.log(`   "Wagner Ranch" → "${uniqueSlug1}" (should be wagner-ranch-2)`);
+  console.log('\n📝 Test 2: Unique slug generation (with existing "demo-ranch")');
+  const uniqueSlug1 = await generateUniqueRanchSlug('Demo Ranch');
+  console.log(`   "Demo Ranch" → "${uniqueSlug1}" (should be demo-ranch-2)`);
 
   const uniqueSlug2 = await generateUniqueRanchSlug('New Ranch Name');
   console.log(`   "New Ranch Name" → "${uniqueSlug2}" (should be new-ranch-name)`);

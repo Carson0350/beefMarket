@@ -87,7 +87,7 @@ function getVerificationEmailHTML(verificationUrl: string): string {
  */
 function getVerificationEmailText(verificationUrl: string): string {
   return `
-Welcome to WagnerBeef!
+Welcome to BeefStore!
 
 Thank you for creating an account. Please verify your email address to get started.
 

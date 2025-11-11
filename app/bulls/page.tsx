@@ -162,6 +162,6 @@ export default async function BullsPage({ searchParams }: PageProps) {
 }
 
 export const metadata = {
-  title: 'Browse Bulls - Wagner Beef',
+  title: 'Browse Bulls - BeefStore',
   description: 'Browse quality breeding bulls from ranches across the country',
 };

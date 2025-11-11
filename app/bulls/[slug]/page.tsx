@@ -351,7 +351,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${bull.name} - ${bull.breed} Bull | Wagner Beef`,
+    title: `${bull.name} - ${bull.breed} Bull | BeefStore`,
     description: `View detailed information about ${bull.name}, a ${bull.breed} bull from ${bull.ranch.name}. Registration: ${bull.registrationNumber || 'N/A'}`,
   };
 }

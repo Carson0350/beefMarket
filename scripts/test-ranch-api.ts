@@ -25,8 +25,8 @@ async function testRanchCreation() {
     const ranch = await prisma.ranch.create({
       data: {
         userId: user.id,
-        name: 'Wagner Ranch',
-        slug: 'wagner-ranch',
+        name: 'Demo Ranch',
+        slug: 'demo-ranch',
         state: 'Texas',
         contactEmail: 'contact@wagnerranch.com',
         contactPhone: '(555) 123-4567',
@@ -66,7 +66,7 @@ async function testRanchCreation() {
     const updated = await prisma.ranch.update({
       where: { id: ranch.id },
       data: {
-        name: 'Wagner Premium Ranch',
+        name: 'Demo Premium Ranch',
         about: 'Updated: Family-owned ranch with 50+ years of experience.',
       },
     });
