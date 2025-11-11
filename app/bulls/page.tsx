@@ -1,14 +1,24 @@
 import { Suspense } from 'react';
 import BullCard from '@/components/BullCard';
 import Pagination from '@/components/Pagination';
+import BullFilters from '@/components/BullFilters';
 
 interface PageProps {
-  searchParams: { page?: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-async function fetchBulls(page: number) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
-  const res = await fetch(`${baseUrl}/api/bulls/public?page=${page}`, {
+async function fetchBulls(searchParams: { [key: string]: string | string[] | undefined }) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
+  // Build query string from all search params
+  const params = new URLSearchParams();
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value) {
+      params.set(key, Array.isArray(value) ? value.join(',') : value);
+    }
+  });
+  
+  const res = await fetch(`${baseUrl}/api/bulls/public?${params.toString()}`, {
     cache: 'no-store',
   });
 
@@ -64,8 +74,8 @@ function EmptyState() {
   );
 }
 
-async function BullsGrid({ page }: { page: number }) {
-  const data = await fetchBulls(page);
+async function BullsGrid({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const data = await fetchBulls(searchParams);
 
   if (!data.bulls || data.bulls.length === 0) {
     return <EmptyState />;
@@ -90,8 +100,6 @@ async function BullsGrid({ page }: { page: number }) {
 }
 
 export default async function BullsPage({ searchParams }: PageProps) {
-  const page = parseInt(searchParams.page || '1');
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -106,9 +114,19 @@ export default async function BullsPage({ searchParams }: PageProps) {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Suspense fallback={<BullsGridSkeleton />}>
-          <BullsGrid page={page} />
-        </Suspense>
+        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:col-span-1">
+            <BullFilters />
+          </div>
+
+          {/* Bulls Grid */}
+          <div className="lg:col-span-3 mt-6 lg:mt-0">
+            <Suspense fallback={<BullsGridSkeleton />}>
+              <BullsGrid searchParams={searchParams} />
+            </Suspense>
+          </div>
+        </div>
       </div>
     </div>
   );
