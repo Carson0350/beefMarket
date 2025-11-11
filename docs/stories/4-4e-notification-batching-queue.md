@@ -2,9 +2,9 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4e-notification-batching-queue  
-**Status:** backlog  
+**Status:** in-progress  
 **Created:** 2025-11-11  
-**Developer:**
+**Developer:** Cascade (Claude 3.7 Sonnet)
 
 ---
 
@@ -126,6 +126,13 @@ So that I'm not overwhelmed by too many emails.
 - [ ] Test weekly digest
 - [ ] Test preference changes
 - [ ] Load test with many notifications
+
+**Task 8: Testing**
+- [ ] Test queue processing
+- [ ] Test batching
+- [ ] Test preferences
+- [ ] Test digests
+- [ ] Load testing
 
 ---
 

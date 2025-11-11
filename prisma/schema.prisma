@@ -25,11 +25,12 @@ model User {
   updatedAt         DateTime  @updatedAt
   
   // Relations
-  ranch             Ranch?
-  favorites         Favorite[]
-  notifications     Notification[]
-  sessions          Session[]
-  accounts          Account[]
+  ranch                    Ranch?
+  favorites                Favorite[]
+  notifications            Notification[]
+  notificationPreferences  NotificationPreferences?
+  sessions                 Session[]
+  accounts                 Account[]
 }
 
 enum Role {
@@ -199,6 +200,30 @@ model Notification {
 enum NotificationType {
   INVENTORY_CHANGE
   PRICE_CHANGE
+}
+
+// NotificationPreferences Model - User notification settings
+model NotificationPreferences {
+  id                    String          @id @default(cuid())
+  userId                String          @unique
+  emailFrequency        EmailFrequency  @default(IMMEDIATE)
+  inventoryEnabled      Boolean         @default(true)
+  priceEnabled          Boolean         @default(true)
+  globallyEnabled       Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+enum EmailFrequency {
+  IMMEDIATE
+  HOURLY
+  DAILY
+  WEEKLY
 }
 
 // NextAuth.js Models
