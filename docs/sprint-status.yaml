@@ -71,7 +71,11 @@ development_status:
   4-2-side-by-side-comparison-view: done
   4-3a-breeder-account-creation: review
   4-3b-bull-favorites-system: review
-  4-4-favorites-notifications: ready-for-dev
+  4-4a-basic-notification-infrastructure: drafted
+  4-4b-notification-preferences-ui: drafted
+  4-4c-price-change-notifications: drafted
+  4-4d-notification-history-management: drafted
+  4-4e-notification-batching-queue: backlog
   epic-4-retrospective: optional
   
   # Epic 5: Inquiry & Communication
