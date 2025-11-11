@@ -1,0 +1,255 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4</storyId>
+    <title>Favorites Notifications</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4-favorites-notifications.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to receive notifications when favorited bulls' details change</iWant>
+    <soThat>I stay informed about bulls I'm interested in</soThat>
+    <tasks>
+      - Extend Favorite model with notificationsEnabled field
+      - Create NotificationPreferences model (one-to-one with User)
+      - Create Notification model for history
+      - Implement change detection for bull updates (inventory, price, EPDs)
+      - Set up notification queue system (BullMQ with Redis)
+      - Build email templates for different change types
+      - Implement email sending with Resend
+      - Create notification preferences UI (per-bull and global)
+      - Create notification history page
+      - Implement unsubscribe flow with tokens
+      - Add notification batching to prevent spam
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Email notification sent within 5 minutes when bull details updated, includes bull name, what changed, link, timestamp
+    AC2: Inventory change notifications for: straws become available (0→positive), running low (≤5), sold out (positive→0)
+    AC3: Price change notifications with old/new price, percentage change, highlight if decreased
+    AC4: Per-bull notification toggle on favorites page, preferences saved immediately
+    AC5: Global notification settings in account: disable all, frequency (immediate/daily/weekly), change types (checkboxes)
+    AC6: Notification history shows recent notifications (30 days), what changed, link to bull, mark as read
+    AC7: Unsubscribe link in emails, confirmation page with options (specific bull or all), confirmation message
+    AC8: Notification batching - multiple changes batched into single email, max 1 email per hour
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Bull Comparison & Favorites</title>
+        <section>Story 4.4: Favorites Notifications</section>
+        <snippet>Breeders receive email notifications when favorited bulls' details change (inventory, price, EPDs). Notification preferences per bull and globally. Batching prevents spam. Unsubscribe functionality included.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision - Email Service</title>
+        <section>AD-6: Email Service - Resend</section>
+        <snippet>Use Resend for transactional emails. Simple API, generous free tier (3k emails/month), excellent deliverability. Email types: inquiry notifications, favorites update notifications, password reset.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-3-breeder-account-creation-favorites.md</path>
+        <title>Story 4.3: Breeder Account Creation & Favorites (Prerequisite)</title>
+        <section>Technical Notes - Favorite Model</section>
+        <snippet>Favorite model exists with many-to-many relationship (User ↔ Bull). Unique constraint on userId + bullId. Cascade delete when user or bull deleted.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Favorite, User, Bull</symbol>
+        <lines>18-38, 64-115, 158-172</lines>
+        <reason>Favorite model needs notificationsEnabled field added. User model needs NotificationPreferences relationship. Bull model needs Notification relationship. Foundation for notification system.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>email utilities</symbol>
+        <lines>all</lines>
+        <reason>Existing email utility using Resend. Reference for email sending patterns, configuration, and error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/bulls/[id]/route.ts</path>
+        <kind>api</kind>
+        <symbol>Bull update endpoint</symbol>
+        <lines>all</lines>
+        <reason>Bull update API endpoint where change detection hook needs to be added. Intercept updates to trigger notifications.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>resend</package>
+        <version>^6.4.2</version>
+        <usage>Email service for sending notification emails (already installed)</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for notification models and queries</usage>
+      </node>
+      <node>
+        <package>bullmq</package>
+        <version>^4.0.0</version>
+        <usage>Job queue for reliable notification processing and batching (NEW DEPENDENCY)</usage>
+      </node>
+      <node>
+        <package>ioredis</package>
+        <version>^5.3.0</version>
+        <usage>Redis client for BullMQ queue backend (NEW DEPENDENCY)</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must integrate with existing Favorite model from Story 4.3
+    - Resend email service already configured (use existing patterns)
+    - Requires Redis for BullMQ job queue (infrastructure dependency)
+    - Change detection must not impact bull update performance
+    - Notification batching required to prevent email spam (max 1/hour)
+    - Unsubscribe tokens must be secure and time-limited
+    - Email templates must be mobile-responsive
+    - Handle email service failures gracefully with retry logic
+    - Notification preferences default to enabled
+    - Must respect user's global notification settings
+    - Cascade delete notifications when user or bull deleted
+    - Consider rate limiting for notification queue
+    - Store notification history for 30 days minimum
+    - Email "from" address must match domain (notifications@wagnerbeef.com)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NotificationPreferences Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model NotificationPreferences {
+  id            String                 @id @default(cuid())
+  userId        String                 @unique
+  globalEnabled Boolean                @default(true)
+  frequency     NotificationFrequency  @default(IMMEDIATE)
+  changeTypes   ChangeType[]
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  user          User                   @relation(...)
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  DAILY_DIGEST
+  WEEKLY_DIGEST
+}
+
+enum ChangeType {
+  INVENTORY
+  PRICE
+  EPD
+  GENERAL
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Notification Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model Notification {
+  id         String     @id @default(cuid())
+  userId     String
+  bullId     String
+  changeType ChangeType
+  message    String
+  oldValue   String?
+  newValue   String?
+  read       Boolean    @default(false)
+  sentAt     DateTime   @default(now())
+  user       User       @relation(...)
+  bull       Bull       @relation(...)
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Change Detection</name>
+      <kind>Utility Function</kind>
+      <signature>
+interface BullChanges {
+  inventory?: { old: number; new: number };
+  price?: { old: number; new: number };
+  epds?: { field: string; old: number; new: number }[];
+}
+function detectBullChanges(oldBull: Bull, newBull: Bull): BullChanges | null
+// Returns null if no significant changes detected
+      </signature>
+      <path>lib/notifications/detectChanges.ts</path>
+    </interface>
+    <interface>
+      <name>Notification Queue</name>
+      <kind>BullMQ Queue</kind>
+      <signature>
+const notificationQueue = new Queue('notifications', { connection: Redis })
+// Job data: { userId, bullId, changes }
+// Worker processes jobs and sends emails
+      </signature>
+      <path>lib/notifications/queue.ts</path>
+    </interface>
+    <interface>
+      <name>Notification Preferences API</name>
+      <kind>API Routes</kind>
+      <signature>
+GET /api/notifications/preferences - Get user preferences
+PUT /api/notifications/preferences - Update user preferences
+GET /api/notifications/history - Get notification history
+PUT /api/favorites/[bullId]/notifications - Toggle per-bull notifications
+      </signature>
+      <path>app/api/notifications/</path>
+    </interface>
+    <interface>
+      <name>Email Sending</name>
+      <kind>Utility Function</kind>
+      <signature>
+async function sendNotificationEmail(
+  userId: string,
+  bullId: string,
+  changes: BullChanges
+): Promise&lt;void>
+// Sends email using Resend, includes unsubscribe link
+      </signature>
+      <path>lib/notifications/email.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. For this story, focus on manual testing with email service mock/sandbox. Test change detection logic thoroughly. Verify queue processing and batching.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/lib/notifications/ for change detection and queue tests
+      - __tests__/api/notifications/ for API endpoint tests
+      - Email templates can be tested with Resend sandbox
+    </locations>
+    <ideas>
+      - AC1: Test email sent within 5 minutes of bull update, verify content
+      - AC2: Test inventory notifications for all scenarios (0→positive, ≤5, positive→0)
+      - AC3: Test price change notification with percentage calculation
+      - AC4: Test per-bull notification toggle saves and loads correctly
+      - AC5: Test global settings override per-bull settings when disabled
+      - AC6: Test notification history displays correctly, mark as read works
+      - AC7: Test unsubscribe flow with valid/invalid tokens
+      - AC8: Test batching - multiple changes within 1 hour batched into single email
+      - Edge case: Test bull deleted while notification queued (graceful failure)
+      - Edge case: Test email service down (retry logic kicks in)
+      - Edge case: Test Redis connection failure (queue error handling)
+      - Edge case: Test user with no email address (skip notification)
+      - Edge case: Test rapid changes to same bull (batching works)
+      - Integration: Test end-to-end flow from bull update to email received
+    </ideas>
+  </tests>
+</story-context>

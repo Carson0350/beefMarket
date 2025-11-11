@@ -693,32 +693,60 @@ So that I can easily compare their genetic data and photos.
 
 ---
 
-### Story 4.3: Breeder Account Creation & Favorites
+### Story 4.3a: Breeder Account Creation & Login
 
 As a **breeder**,
-I want to create an account and save bulls to favorites,
-So that I can track bulls of interest across browsing sessions.
+I want to create an account and log in,
+So that I can access breeder-specific features like favorites and notifications.
 
 **Acceptance Criteria:**
 
-**Given** I'm browsing bulls
-**When** I create a breeder account
-**Then** my account is created with "Breeder" role
-**And** I can save bulls to favorites with heart/star icon
-**And** favorited bulls are stored in my account
-**And** I can view all favorites on a dedicated page
-**And** I can remove bulls from favorites
-
-**And** favorite state is visible on bull cards (filled heart icon)
+**Given** I'm browsing bulls as a guest
+**When** I want to create a breeder account
+**Then** I see a registration form with Name, Email, Password fields
+**And** my account is created with "Breeder" role automatically
+**And** I can log in with my credentials
+**And** my session persists across page reloads
+**And** I see my name in navigation when logged in
+**And** I can log out successfully
 
 **Prerequisites:** Story 4.2 (Comparison View)
 
 **Technical Notes:**
-- Extend User model to support Breeder role
-- Create Favorite model (many-to-many: User ↔ Bull)
-- Add favorite toggle button to bull cards and detail pages
+- User model already has Role enum with BREEDER
+- Create registration page `/app/register/page.tsx`
+- Create registration API endpoint
+- Update navigation for authenticated state
+- Implement logout functionality
+
+---
+
+### Story 4.3b: Bull Favorites System
+
+As a **logged-in breeder**,
+I want to save bulls to my favorites,
+So that I can track bulls of interest and easily find them later.
+
+**Acceptance Criteria:**
+
+**Given** I'm logged in as a breeder
+**When** I view bull cards or detail pages
+**Then** I can save bulls to favorites with heart icon
+**And** favorited bulls are stored in my account
+**And** I can view all favorites on a dedicated page
+**And** I can remove bulls from favorites
+**And** favorite state is visible on bull cards (filled heart icon)
+**And** guest users are prompted to login when favoriting
+
+**Prerequisites:** Story 4.3a (Breeder Account Creation)
+
+**Technical Notes:**
+- Favorite model already exists in schema
+- Create FavoriteButton component
+- Add favorite toggle to bull cards and detail pages
 - Create `/favorites` page showing all saved bulls
 - Implement optimistic UI updates for favorite toggling
+- Add favorites count to navigation
 
 ---
 

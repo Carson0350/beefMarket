@@ -1,0 +1,193 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Side-by-Side Comparison View</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-2-side-by-side-comparison-view.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to view selected bulls in aligned columns</iWant>
+    <soThat>I can easily compare their genetic data and photos</soThat>
+    <tasks>
+      - Create /compare page route with layout structure
+      - Implement column layout (2-3 columns, responsive stacking)
+      - Display bull photos and basic info at top of columns
+      - Create EPD comparison table with value highlighting
+      - Add pedigree comparison section
+      - Add performance data comparison section
+      - Implement remove bulls functionality
+      - Add navigation features (to bull details, add more bulls)
+      - Implement print-friendly styling (optional)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Comparison page at /compare with bulls in aligned columns (2-3), equal width, side-by-side on desktop
+    AC2: Bull hero images at top of each column, same height, with bull name and ranch name below
+    AC3: EPD data in aligned rows with labels, differences highlighted with color coding (green/red)
+    AC4: Pedigree information (sire/dam) aligned in rows, links to parent bulls if available
+    AC5: Performance data (birth date, weights) aligned, missing data shown as "N/A"
+    AC6: Remove button (X) at top of each column, updates comparison immediately, can remove down to 1 bull
+    AC7: Bull names/images clickable to navigate to detail pages, comparison state preserved
+    AC8: "Add Bull" button to return to browse page, comparison state preserved, can add up to 3 total
+    AC9: Responsive design - columns stack vertically on mobile, horizontal scroll for tables if needed
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Bull Comparison & Favorites</title>
+        <section>Story 4.2: Side-by-Side Comparison View</section>
+        <snippet>Display selected bulls in aligned columns with photos, EPD data, pedigree, and performance metrics. Highlight differences with color coding. Responsive design stacks columns on mobile.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-1-bull-comparison-selection.md</path>
+        <title>Story 4.1: Bull Comparison Selection (Prerequisite)</title>
+        <section>Technical Notes - Comparison Store</section>
+        <snippet>Comparison store created with React Context, session storage persistence. selectedBulls array contains bull IDs, removeBull() function available. Max 3 bulls enforced.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision - Styling Strategy</title>
+        <section>AD-8: Styling Strategy - Tailwind CSS + shadcn/ui</section>
+        <snippet>Use Tailwind CSS for styling. Responsive breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px). Custom components for bull cards, comparison table.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>1-105</lines>
+        <reason>Reference for bull data structure and display patterns. Shows how to display bull photos, name, breed, EPD values, ranch info.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model defines complete data structure including epdData (JSON), pedigree fields (sireName, damName), performance fields (weights), and relationships.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullsPage</symbol>
+        <lines>all</lines>
+        <reason>Reference for fetching and displaying multiple bulls. Shows patterns for data fetching, grid layouts, and responsive design.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>react</package>
+        <version>^18.3.0</version>
+        <usage>Core React for components, hooks (useEffect, useState)</usage>
+      </node>
+      <node>
+        <package>next</package>
+        <version>^14.2.0</version>
+        <usage>Next.js App Router for /compare route, useRouter for navigation, Image component for optimized photos</usage>
+      </node>
+      <node>
+        <package>@heroicons/react</package>
+        <version>^2.2.0</version>
+        <usage>XMarkIcon for remove buttons</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Fetch bull data with related ranch information</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must integrate with comparison store from Story 4.1 (React Context)
+    - Client component required (uses comparison store state)
+    - Redirect to /bulls if no bulls selected (empty state handling)
+    - Fetch bull data using IDs from selectedBulls array
+    - EPD highlighting logic: highest value = green, lowest = red
+    - Consider trait-specific logic (some EPDs like birth weight - lower may be better)
+    - Responsive design: columns stack vertically on mobile (md breakpoint)
+    - Handle missing data gracefully (show "N/A")
+    - Preserve comparison state during navigation
+    - Follow existing Tailwind CSS patterns and component structure
+    - Print-friendly styling optional but recommended
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Compare Page</name>
+      <kind>Next.js Page Component</kind>
+      <signature>
+export default function ComparePage(): JSX.Element
+// Client component that fetches bull data and displays comparison
+      </signature>
+      <path>app/compare/page.tsx</path>
+    </interface>
+    <interface>
+      <name>ComparisonTable</name>
+      <kind>React Component</kind>
+      <signature>
+interface ComparisonTableProps {
+  bulls: Bull[];
+}
+export default function ComparisonTable({ bulls }: ComparisonTableProps): JSX.Element
+// Displays EPD data in aligned rows with highlighting
+      </signature>
+      <path>components/ComparisonTable.tsx</path>
+    </interface>
+    <interface>
+      <name>BullComparisonColumn</name>
+      <kind>React Component</kind>
+      <signature>
+interface BullComparisonColumnProps {
+  bull: Bull;
+  onRemove: () => void;
+}
+export default function BullComparisonColumn({ bull, onRemove }: BullComparisonColumnProps): JSX.Element
+// Displays individual bull in column with photo, info, and remove button
+      </signature>
+      <path>components/BullComparisonColumn.tsx</path>
+    </interface>
+    <interface>
+      <name>Bulls Compare API (Optional)</name>
+      <kind>API Route</kind>
+      <signature>
+GET /api/bulls/compare?ids=id1,id2,id3
+// Returns array of bull objects with full data including ranch info
+      </signature>
+      <path>app/api/bulls/compare/route.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test with varying data completeness (missing EPDs, pedigree).
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/app/compare/ for page tests
+      - __tests__/components/ for ComparisonTable and BullComparisonColumn tests
+    </locations>
+    <ideas>
+      - AC1: Test comparison page renders with 2 bulls and 3 bulls, columns aligned
+      - AC2: Test hero images display at same height, bull names and ranch names shown
+      - AC3: Test EPD table displays with correct values, highlighting works (green for highest, red for lowest)
+      - AC4: Test pedigree section displays sire/dam, handles missing data
+      - AC5: Test performance data displays, "N/A" shown for missing values
+      - AC6: Test remove button removes bull, layout updates, can remove down to 1 bull
+      - AC7: Test clicking bull name/image navigates to detail page, back button returns to comparison
+      - AC8: Test "Add Bull" button returns to browse, comparison state preserved
+      - AC9: Test responsive design - columns stack on mobile, tables scroll horizontally
+      - Edge case: Test with only 1 bull selected (should redirect to browse)
+      - Edge case: Test with missing EPD data for some bulls
+      - Edge case: Test print view formatting
+    </ideas>
+  </tests>
+</story-context>
