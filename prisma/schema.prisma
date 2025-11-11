@@ -27,6 +27,7 @@ model User {
   // Relations
   ranch             Ranch?
   favorites         Favorite[]
+  notifications     Notification[]
   sessions          Session[]
   accounts          Account[]
 }
@@ -106,6 +107,7 @@ model Bull {
   ranch             Ranch     @relation(fields: [ranchId], references: [id], onDelete: Cascade)
   inquiries         Inquiry[]
   favorites         Favorite[]
+  notifications     Notification[]
   
   @@index([ranchId])
   @@index([breed])
@@ -170,6 +172,33 @@ model Favorite {
   @@unique([userId, bullId])
   @@index([userId])
   @@index([bullId])
+}
+
+// Notification Model - Notification history
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  bullId      String
+  type        NotificationType
+  title       String
+  message     String
+  changeData  Json?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bull Bull @relation(fields: [bullId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([bullId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+enum NotificationType {
+  INVENTORY_CHANGE
+  PRICE_CHANGE
 }
 
 // NextAuth.js Models

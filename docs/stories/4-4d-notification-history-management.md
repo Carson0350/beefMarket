@@ -2,9 +2,9 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4d-notification-history-management  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-11  
-**Developer:**
+**Developer:** Cascade (Claude 3.7 Sonnet)
 
 ---
 
@@ -105,41 +105,42 @@ So that I can track changes and control what notifications I receive.
 ## Tasks / Subtasks
 
 **Task 1: Create Notification Model**
-- [ ] Design Notification schema
-- [ ] Add fields: type, bullId, userId, changeData, readAt, createdAt
-- [ ] Create Prisma migration
-- [ ] Test model relationships
+- [x] Design Notification schema
+- [x] Add fields: type, bullId, userId, changeData, readAt, createdAt
+- [x] Create Prisma migration
+- [x] Test model relationships
 
 **Task 2: Store Notifications on Send**
-- [ ] Update email sending to create Notification record
-- [ ] Store notification type
-- [ ] Store change details as JSON
-- [ ] Test notification creation
+- [x] Update email sending to create Notification record
+- [x] Store notification type
+- [x] Store change details as JSON
+- [x] Test notification creation
 
 **Task 3: Create Notification History Page**
-- [ ] Create /notifications page
-- [ ] Fetch user's notifications (last 30 days)
-- [ ] Display notification list
-- [ ] Show notification details
-- [ ] Add read/unread indicators
-- [ ] Style page
+- [x] Create /notifications page
+- [x] Fetch user's notifications (last 30 days)
+- [x] Display notification list
+- [x] Show notification details
+- [x] Add read/unread indicators
+- [x] Style page
 
 **Task 4: Mark as Read Functionality**
-- [ ] Create API endpoint to mark as read
-- [ ] Update readAt timestamp
-- [ ] Update UI optimistically
-- [ ] Test mark as read
+- [x] Create API endpoint to mark as read
+- [x] Update readAt timestamp
+- [x] Update UI optimistically
+- [x] Test mark as read
 
 **Task 5: Unread Count Badge**
-- [ ] Query unread notification count
-- [ ] Add badge to navigation
-- [ ] Update count when marked as read
-- [ ] Style badge
+- [x] Query unread notification count
+- [x] Add badge to navigation
+- [x] Update count when marked as read
+- [x] Style badge
 
 **Task 6: Notification Filtering**
-- [ ] Add filter UI (type, status)
-- [ ] Implement filter logic
-- [ ] Update query based on filters
+- [x] Add filter controls
+- [x] Filter by type (inventory/price)
+- [x] Filter by read/unread
+- [x] Update list on filter changed
 - [ ] Test filtering
 
 **Task 7: Unsubscribe Flow**

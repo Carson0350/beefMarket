@@ -168,9 +168,26 @@ async function notifyInventoryChange(
     },
   });
 
-  // Send email to each user
+  // Send email and save notification for each user
   for (const favorite of favorites) {
     try {
+      // Save notification to database
+      await prisma.notification.create({
+        data: {
+          userId: favorite.userId,
+          bullId: newBull.id,
+          type: 'INVENTORY_CHANGE',
+          title: `Inventory Update: ${newBull.name}`,
+          message: `Inventory changed from ${oldBull.availableStraws} to ${newBull.availableStraws} straws`,
+          changeData: {
+            oldInventory: oldBull.availableStraws,
+            newInventory: newBull.availableStraws,
+            changeType,
+          },
+        },
+      });
+
+      // Send email
       await sendInventoryChangeEmail({
         userEmail: favorite.user.email,
         bull: newBull,
@@ -212,9 +229,28 @@ async function notifyPriceChange(
     },
   });
 
-  // Send email to each user
+  // Send email and save notification for each user
   for (const favorite of favorites) {
     try {
+      // Save notification to database
+      await prisma.notification.create({
+        data: {
+          userId: favorite.userId,
+          bullId: newBull.id,
+          type: 'PRICE_CHANGE',
+          title: isDecrease ? `Price Drop: ${newBull.name}` : `Price Update: ${newBull.name}`,
+          message: `Price changed from $${oldPrice.toFixed(2)} to $${newPrice.toFixed(2)}`,
+          changeData: {
+            oldPrice,
+            newPrice,
+            priceDifference,
+            percentageChange: parseFloat(percentageChange),
+            isDecrease,
+          },
+        },
+      });
+
+      // Send email
       await sendPriceChangeEmail({
         userEmail: favorite.user.email,
         bull: newBull,
