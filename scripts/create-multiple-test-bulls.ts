@@ -3,11 +3,11 @@ import { prisma } from '../lib/db';
 async function createMultipleBulls() {
   try {
     const ranch = await prisma.ranch.findUnique({
-      where: { slug: 'wagner-ranch' },
+      where: { slug: 'premium-cattle-ranch' },
     });
 
     if (!ranch) {
-      console.error('Test ranch not found!');
+      console.error('Test ranch not found! Make sure "premium-cattle-ranch" exists.');
       return;
     }
 
