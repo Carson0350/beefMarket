@@ -93,13 +93,9 @@ export default function BullCard({ bull }: BullCardProps) {
 
           {/* Ranch Name */}
           <div className="mt-auto pt-3 border-t border-gray-200">
-            <Link 
-              href={`/ranch/${bull.ranch.slug}`}
-              onClick={(e) => e.stopPropagation()}
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-            >
+            <span className="text-sm text-gray-600">
               {bull.ranch.name}
-            </Link>
+            </span>
           </div>
         </div>
       </div>
