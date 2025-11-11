@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import BullCard from '@/components/BullCard';
+import ShareButton from '@/components/ShareButton';
 import { ChevronLeftIcon, MapPinIcon, EnvelopeIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 interface PageProps {
@@ -72,6 +73,7 @@ export default async function RanchProfilePage({ params }: PageProps) {
                 <span className="text-lg">{ranch.state}</span>
               </div>
             </div>
+            <ShareButton />
           </div>
 
           {/* Statistics */}

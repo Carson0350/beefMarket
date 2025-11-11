@@ -2,9 +2,9 @@
 
 **Epic:** 3 - Bull Discovery & Browsing  
 **Story ID:** 3-6-shareable-bull-links-copy-functionality  
-**Status:** backlog  
+**Status:** done  
 **Created:** 2025-11-11  
-**Developer:** 
+**Developer:** Amelia (Dev Agent) 
 
 ---
 
