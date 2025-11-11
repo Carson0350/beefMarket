@@ -74,7 +74,7 @@ development_status:
   4-4a-basic-notification-infrastructure: done
   4-4b-notification-preferences-ui: done
   4-4c-price-change-notifications: done
-  4-4d-notification-history-management: review
+  4-4d-notification-history-management: done
   4-4e-notification-batching-queue: backlog
   epic-4-retrospective: optional
   
