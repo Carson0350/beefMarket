@@ -2,9 +2,9 @@
 
 **Epic:** 4 - Bull Comparison & Favorites  
 **Story ID:** 4-4b-notification-preferences-ui  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-11  
-**Developer:**
+**Developer:** Cascade (Claude 3.7 Sonnet)
 
 ---
 
@@ -64,42 +64,42 @@ So that I only receive notifications for bulls I'm actively tracking.
 ## Tasks / Subtasks
 
 **Task 1: Create NotificationToggle Component**
-- [ ] Create reusable NotificationToggle component
-- [ ] Add bell icon (on/off states)
-- [ ] Implement toggle functionality
-- [ ] Add loading state
-- [ ] Add error handling
-- [ ] Style component
+- [x] Create reusable NotificationToggle component
+- [x] Add bell icon (on/off states)
+- [x] Implement toggle functionality
+- [x] Add loading state
+- [x] Add error handling
+- [x] Style component
 
 **Task 2: Update Favorites Page**
-- [ ] Add NotificationToggle to each bull card
-- [ ] Position toggle prominently
-- [ ] Show current notification status
-- [ ] Add tooltip for clarity
-- [ ] Test UI responsiveness
+- [x] Add NotificationToggle to each bull card
+- [x] Position toggle prominently
+- [x] Show current notification status
+- [x] Add tooltip for clarity
+- [x] Test UI responsiveness
 
 **Task 3: Create Toggle API Endpoint**
-- [ ] Create PATCH /api/favorites/[bullId]/notifications
-- [ ] Validate user owns the favorite
-- [ ] Update notificationsEnabled field
-- [ ] Return updated favorite
-- [ ] Handle errors gracefully
+- [x] Create PATCH /api/favorites/[bullId]/notifications
+- [x] Validate user owns the favorite
+- [x] Update notificationsEnabled field
+- [x] Return updated favorite
+- [x] Handle errors gracefully
 
 **Task 4: Implement Bulk Actions**
-- [ ] Add "Enable All" button to favorites page
-- [ ] Add "Disable All" button to favorites page
-- [ ] Create bulk update API endpoint
-- [ ] Add confirmation dialog
-- [ ] Update UI after bulk action
-- [ ] Test bulk operations
+- [x] Add "Enable All" button to favorites page
+- [x] Add "Disable All" button to favorites page
+- [x] Create bulk update API endpoint
+- [x] Add confirmation dialog
+- [x] Update UI after bulk action
+- [x] Test bulk operations
 
 **Task 5: Testing**
-- [ ] Test toggle on individual bulls
-- [ ] Test bulk enable/disable
-- [ ] Test with no favorites
-- [ ] Test with many favorites
-- [ ] Verify database updates
-- [ ] Test error scenarios
+- [x] Test toggle on individual bulls
+- [x] Test bulk enable/disable
+- [x] Test with no favorites
+- [x] Test with many favorites
+- [x] Verify database updates
+- [x] Test error scenarios
 
 ---
 
@@ -311,6 +311,37 @@ import NotificationToggle from '@/components/NotificationToggle';
 
 - Story Context: `docs/stories/4-4b-notification-preferences-ui.context.xml`
 
+### Agent Model Used
+
+Cascade (Claude 3.7 Sonnet)
+
+### Completion Notes
+
+✅ **AC1 Complete:** NotificationToggle component created with bell icons (solid for ON, slash for OFF), visible on each bull card on favorites page
+
+✅ **AC2 Complete:** Toggle updates notificationsEnabled field immediately with optimistic UI updates, shows loading state, persists to database, reverts on error
+
+✅ **AC3 Complete:** Clear visual indicators with BellIconSolid (ON) and BellSlashIcon (OFF), tooltips explain status for each bull
+
+✅ **AC4 Complete:** Bulk actions implemented with "Enable All" and "Disable All" buttons, confirmation dialog before bulk action, updates all favorites at once
+
+**Implementation Details:**
+- Optimistic UI updates for instant feedback
+- Error handling with state reversion on failure
+- Confirmation dialog prevents accidental bulk changes
+- Page refresh after bulk action to show updated state
+- Follows FavoriteButton pattern for consistency
+- Uses existing Heroicons for bell icons
+- Positioned toggle in top-right corner of bull cards
+
 ### File List
 
-(To be filled during implementation)
+**New Files:**
+- `components/NotificationToggle.tsx` - Reusable notification toggle component
+- `components/FavoriteBullCard.tsx` - Bull card wrapper with notification toggle
+- `components/BulkNotificationActions.tsx` - Bulk enable/disable actions with confirmation
+- `app/api/favorites/[bullId]/notifications/route.ts` - Toggle API endpoint
+- `app/api/favorites/notifications/bulk/route.ts` - Bulk update API endpoint
+
+**Modified Files:**
+- `app/favorites/page.tsx` - Added notification toggles and bulk actions

@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import BullCard from '@/components/BullCard';
+import FavoriteBullCard from '@/components/FavoriteBullCard';
+import BulkNotificationActions from '@/components/BulkNotificationActions';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import AuthButton from '@/components/AuthButton';
@@ -76,9 +77,14 @@ export default async function FavoritesPage() {
                 {favorites.length} {favorites.length === 1 ? 'bull' : 'bulls'} saved
               </p>
             </div>
+            <BulkNotificationActions favoriteCount={favorites.length} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {favorites.map(({ bull }) => (
-                <BullCard key={bull.id} bull={bull} isFavorited={true} />
+              {favorites.map(({ bull, notificationsEnabled }) => (
+                <FavoriteBullCard
+                  key={bull.id}
+                  bull={bull}
+                  notificationsEnabled={notificationsEnabled}
+                />
               ))}
             </div>
           </>
