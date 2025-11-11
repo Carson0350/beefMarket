@@ -2,8 +2,8 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@wagnerbeef.com';
-const APP_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+const FROM_EMAIL = 'BeefStore <noreply@beefstore.com>';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 /**
  * Send email verification email to user
@@ -20,7 +20,7 @@ export async function sendVerificationEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: 'Verify your WagnerBeef account',
+      subject: 'Verify your BeefStore account',
       html: getVerificationEmailHTML(verificationUrl),
       text: getVerificationEmailText(verificationUrl),
     });
@@ -49,7 +49,7 @@ function getVerificationEmailHTML(verificationUrl: string): string {
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
-    <h1 style="color: #2c3e50; margin-bottom: 20px;">Welcome to WagnerBeef!</h1>
+    <h1 style="color: #2c3e50; margin-bottom: 20px;">Welcome to BeefStore!</h1>
     
     <p style="font-size: 16px; margin-bottom: 20px;">
       Thank you for creating an account. Please verify your email address to get started.

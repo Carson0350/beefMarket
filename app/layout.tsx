@@ -7,8 +7,8 @@ import { ComparisonProvider } from '@/contexts/ComparisonContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'WagnerBeef - Bull Marketplace',
-  description: 'Professional bull breeding marketplace connecting ranchers with breeders',
+  title: 'BeefStore - Premium Bull Semen Marketplace',
+  description: 'Browse and purchase premium bull semen from top ranches',
 }
 
 export default function RootLayout({

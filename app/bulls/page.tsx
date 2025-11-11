@@ -119,7 +119,7 @@ export default async function BullsPage({ searchParams }: PageProps) {
         <header className="border-b border-gray-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-gray-700">
-              WagnerBeef
+              BeefStore
             </Link>
             <AuthButton />
           </div>
