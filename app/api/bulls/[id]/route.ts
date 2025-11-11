@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import { sendInventoryChangeEmail } from '@/lib/email';
+import { sendInventoryChangeEmail, sendPriceChangeEmail } from '@/lib/email';
 
 // GET /api/bulls/[id] - Get single bull by ID
 export async function GET(
@@ -77,8 +77,9 @@ export async function PATCH(
 
     const body = await request.json();
 
-    // Store old inventory for change detection
+    // Store old values for change detection
     const oldInventory = existingBull.availableStraws;
+    const oldPrice = existingBull.pricePerStraw;
 
     // Update the bull
     const updatedBull = await prisma.bull.update({
@@ -106,6 +107,19 @@ export async function PATCH(
       // Run notification in background (don't await to avoid blocking response)
       notifyInventoryChange(existingBull, updatedBull).catch((error) => {
         console.error('Error sending inventory change notifications:', error);
+      });
+    }
+
+    // Detect price change and send notifications
+    if (
+      body.pricePerStraw !== undefined &&
+      oldPrice !== updatedBull.pricePerStraw &&
+      oldPrice !== null &&
+      updatedBull.pricePerStraw !== null
+    ) {
+      // Run notification in background (don't await to avoid blocking response)
+      notifyPriceChange(existingBull, updatedBull, oldPrice, updatedBull.pricePerStraw).catch((error) => {
+        console.error('Error sending price change notifications:', error);
       });
     }
 
@@ -167,6 +181,52 @@ async function notifyInventoryChange(
     } catch (error) {
       console.error(
         `Failed to send inventory change email to ${favorite.user.email}:`,
+        error
+      );
+      // Continue sending to other users even if one fails
+    }
+  }
+}
+
+// Helper function to notify users of price changes
+async function notifyPriceChange(
+  oldBull: any,
+  newBull: any,
+  oldPrice: number,
+  newPrice: number
+): Promise<void> {
+  const priceDifference = newPrice - oldPrice;
+  const percentageChange = ((priceDifference / oldPrice) * 100).toFixed(1);
+  const isDecrease = priceDifference < 0;
+
+  // Find users who favorited this bull with notifications enabled
+  const favorites = await prisma.favorite.findMany({
+    where: {
+      bullId: newBull.id,
+      notificationsEnabled: true,
+    },
+    include: {
+      user: {
+        select: { email: true },
+      },
+    },
+  });
+
+  // Send email to each user
+  for (const favorite of favorites) {
+    try {
+      await sendPriceChangeEmail({
+        userEmail: favorite.user.email,
+        bull: newBull,
+        oldPrice,
+        newPrice,
+        priceDifference,
+        percentageChange: parseFloat(percentageChange),
+        isDecrease,
+      });
+    } catch (error) {
+      console.error(
+        `Failed to send price change email to ${favorite.user.email}:`,
         error
       );
       // Continue sending to other users even if one fails
