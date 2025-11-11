@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
+import { auth } from '@/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -133,8 +134,12 @@ export async function GET(request: NextRequest) {
       (where.AND as Prisma.BullWhereInput[]).push(...epdConditions);
     }
 
+    // Check if user is logged in to fetch favorites
+    const session = await auth();
+    const userId = session?.user?.id;
+
     // Fetch published, non-archived bulls with ranch data
-    const [bulls, totalCount] = await Promise.all([
+    const [bulls, totalCount, userFavorites] = await Promise.all([
       prisma.bull.findMany({
         where,
         include: {
@@ -153,12 +158,28 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.bull.count({ where }),
+      // Fetch user's favorites if logged in
+      userId
+        ? prisma.favorite.findMany({
+            where: { userId },
+            select: { bullId: true },
+          })
+        : Promise.resolve([]),
     ]);
+
+    // Create a Set of favorited bull IDs for fast lookup
+    const favoritedBullIds = new Set(userFavorites.map((fav) => fav.bullId));
+
+    // Add isFavorited property to each bull
+    const bullsWithFavoriteStatus = bulls.map((bull) => ({
+      ...bull,
+      isFavorited: favoritedBullIds.has(bull.id),
+    }));
 
     const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
-      bulls,
+      bulls: bullsWithFavoriteStatus,
       pagination: {
         currentPage: page,
         totalPages,

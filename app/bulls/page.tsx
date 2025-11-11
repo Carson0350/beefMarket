@@ -97,7 +97,7 @@ async function BullsGrid({ searchParams }: { searchParams: { [key: string]: stri
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {data.bulls.map((bull: any) => (
-          <BullCard key={bull.id} bull={bull} />
+          <BullCard key={bull.id} bull={bull} isFavorited={bull.isFavorited || false} />
         ))}
       </div>
 
