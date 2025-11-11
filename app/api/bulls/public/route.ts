@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Parse filter parameters
+    const search = searchParams.get('search') || '';
     const breeds = searchParams.get('breeds')?.split(',').filter(Boolean) || [];
     const states = searchParams.get('states')?.split(',').filter(Boolean) || [];
     const availability = searchParams.get('availability')?.split(',').filter(Boolean) || [];
@@ -30,6 +31,20 @@ export async function GET(request: NextRequest) {
       status: 'PUBLISHED',
       archived: false,
     };
+
+    // Use AND array for complex conditions
+    const andConditions: Prisma.BullWhereInput[] = [];
+
+    // Search filter (OR across multiple fields)
+    if (search) {
+      andConditions.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { registrationNumber: { contains: search, mode: 'insensitive' } },
+          { ranch: { name: { contains: search, mode: 'insensitive' } } },
+        ],
+      });
+    }
 
     // Breed filter
     if (breeds.length > 0) {
@@ -56,8 +71,13 @@ export async function GET(request: NextRequest) {
       }
 
       if (availabilityConditions.length > 0) {
-        where.OR = availabilityConditions;
+        andConditions.push({ OR: availabilityConditions });
       }
+    }
+
+    // Apply AND conditions if any
+    if (andConditions.length > 0) {
+      where.AND = andConditions;
     }
 
     // Price filter

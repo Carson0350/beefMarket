@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import BullCard from '@/components/BullCard';
 import Pagination from '@/components/Pagination';
 import BullFilters from '@/components/BullFilters';
+import SearchBar from '@/components/SearchBar';
 
 interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -76,6 +77,7 @@ function EmptyState() {
 
 async function BullsGrid({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const data = await fetchBulls(searchParams);
+  const searchQuery = searchParams.search as string | undefined;
 
   if (!data.bulls || data.bulls.length === 0) {
     return <EmptyState />;
@@ -83,6 +85,13 @@ async function BullsGrid({ searchParams }: { searchParams: { [key: string]: stri
 
   return (
     <>
+      {/* Results count */}
+      {searchQuery && (
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {data.pagination.totalCount} result{data.pagination.totalCount !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {data.bulls.map((bull: any) => (
           <BullCard key={bull.id} bull={bull} />
@@ -122,6 +131,11 @@ export default async function BullsPage({ searchParams }: PageProps) {
 
           {/* Bulls Grid */}
           <div className="lg:col-span-3 mt-6 lg:mt-0">
+            {/* Search Bar */}
+            <div className="mb-6">
+              <SearchBar />
+            </div>
+
             <Suspense fallback={<BullsGridSkeleton />}>
               <BullsGrid searchParams={searchParams} />
             </Suspense>
