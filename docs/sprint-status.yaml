@@ -67,10 +67,11 @@ development_status:
   
   # Epic 4: Bull Comparison & Favorites
   epic-4: backlog
-  4-1-bull-comparison-selection: backlog
-  4-2-side-by-side-comparison-view: backlog
-  4-3-breeder-account-creation-favorites: backlog
-  4-4-favorites-notifications: backlog
+  4-1-bull-comparison-selection: done
+  4-2-side-by-side-comparison-view: done
+  4-3a-breeder-account-creation: review
+  4-3b-bull-favorites-system: ready-for-dev
+  4-4-favorites-notifications: ready-for-dev
   epic-4-retrospective: optional
   
   # Epic 5: Inquiry & Communication

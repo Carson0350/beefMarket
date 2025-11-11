@@ -27,7 +27,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        router.push('/dashboard');
+        // Redirect breeders to bulls page, ranch owners to dashboard
+        router.push('/bulls');
         router.refresh();
       }
     } catch (error) {
@@ -92,7 +93,7 @@ export default function LoginPage() {
 
           <div className="text-center text-sm">
             <span className="text-gray-600">Don&apos;t have an account? </span>
-            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Sign up
             </Link>
           </div>

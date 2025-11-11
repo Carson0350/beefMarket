@@ -3,6 +3,9 @@ import BullCard from '@/components/BullCard';
 import Pagination from '@/components/Pagination';
 import BullFilters from '@/components/BullFilters';
 import SearchBar from '@/components/SearchBar';
+import BullsPageClient from '@/components/BullsPageClient';
+import AuthButton from '@/components/AuthButton';
+import Link from 'next/link';
 
 interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -110,39 +113,51 @@ async function BullsGrid({ searchParams }: { searchParams: { [key: string]: stri
 
 export default async function BullsPage({ searchParams }: PageProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">Browse Bulls</h1>
-          <p className="mt-2 text-gray-600">
-            Discover quality breeding bulls from ranches across the country
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <BullFilters />
+    <BullsPageClient>
+      <div className="min-h-screen bg-gray-50 pb-32">
+        {/* Navigation Header */}
+        <header className="border-b border-gray-200 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-gray-700">
+              WagnerBeef
+            </Link>
+            <AuthButton />
           </div>
+        </header>
 
-          {/* Bulls Grid */}
-          <div className="lg:col-span-3 mt-6 lg:mt-0">
-            {/* Search Bar */}
-            <div className="mb-6">
-              <SearchBar />
+        {/* Page Header */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-3xl font-bold text-gray-900">Browse Bulls</h1>
+            <p className="mt-2 text-gray-600">
+              Discover quality breeding bulls from ranches across the country
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+            {/* Filters Sidebar */}
+            <div className="lg:col-span-1">
+              <BullFilters />
             </div>
 
-            <Suspense fallback={<BullsGridSkeleton />}>
-              <BullsGrid searchParams={searchParams} />
-            </Suspense>
+            {/* Bulls Grid */}
+            <div className="lg:col-span-3 mt-6 lg:mt-0">
+              {/* Search Bar */}
+              <div className="mb-6">
+                <SearchBar />
+              </div>
+
+              <Suspense fallback={<BullsGridSkeleton />}>
+                <BullsGrid searchParams={searchParams} />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </BullsPageClient>
   );
 }
 
