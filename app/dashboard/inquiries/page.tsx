@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import InquiryDashboard from '@/components/InquiryDashboard';
+import InquiryDashboardClient from '@/components/InquiryDashboardClient';
 
 export const metadata = {
   title: 'Inquiries | Dashboard',
@@ -107,7 +107,7 @@ export default async function InquiriesPage({
         </div>
 
         {/* Dashboard Component */}
-        <InquiryDashboard
+        <InquiryDashboardClient
           inquiries={inquiries}
           counts={counts}
           currentStatus={searchParams.status}
