@@ -1,0 +1,408 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.3</storyId>
+    <title>Inquiry Dashboard for Ranch Owners</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-3-inquiry-dashboard-for-ranch-owners.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to view and manage all inquiries about my bulls in a centralized dashboard</iWant>
+    <soThat>I can track breeder interest and ensure I don't miss any potential sales opportunities</soThat>
+    <tasks>
+**Task 1: Create Inquiry Dashboard Page** (AC: 5.3.1)
+- Create `/app/dashboard/inquiries/page.tsx`
+- Add authentication check (ranch owner only)
+- Set up page layout with header
+- Add navigation breadcrumbs
+- Style with Tailwind CSS
+
+**Task 2: Implement GET /api/inquiries Endpoint** (AC: 5.3.2, 5.3.5, 5.3.8)
+- Create GET handler in `/app/api/inquiries/route.ts`
+- Verify user is authenticated and is ranch owner
+- Filter inquiries by authenticated user's ranch ID
+- Support query parameters: status, page, limit
+- Sort by createdAt DESC within status groups
+- Implement pagination (20 items per page)
+- Include bull details (name, slug, heroImage)
+- Return inquiry count and pagination metadata
+
+**Task 3: Create Inquiry List Component** (AC: 5.3.3, 5.3.4)
+- Create `components/InquiryList.tsx`
+- Group inquiries by status (Unread, Responded, Archived)
+- Display count badge for each status group
+- Render inquiry cards with thumbnail, name, date, preview
+- Make Unread section expanded by default
+- Add expand/collapse functionality for status groups
+- Style for visual hierarchy
+
+**Task 4: Implement Inquiry Card Component** (AC: 5.3.4, 5.3.7)
+- Create `components/InquiryCard.tsx`
+- Display bull thumbnail (100x75px)
+- Show breeder name and relative date
+- Truncate message to 100 characters
+- Add click handler to expand/collapse details
+- Render full details when expanded
+- Include bull link and breeder contact info
+- Add status indicator badge
+
+**Task 5: Add Unread Count Badge to Navigation** (AC: 5.3.6)
+- Fetch unread inquiry count in dashboard layout
+- Display badge on "Inquiries" nav link
+- Update count when inquiries are marked as responded
+- Style badge (red background, white text)
+- Position badge on top-right of nav item
+
+**Task 6: Implement Pagination** (AC: 5.3.8)
+- Create pagination component or use existing
+- Display page numbers and navigation arrows
+- Handle page changes with URL query params
+- Update inquiry list on page change
+- Show current page and total pages
+- Disable prev/next buttons at boundaries
+
+**Task 7: Optimize Performance** (AC: 5.3.9)
+- Add database indexes (ranchId, status, createdAt)
+- Implement efficient queries (select only needed fields)
+- Use Next.js Server Components for initial load
+- Add loading states during data fetching
+- Test with 100 inquiries to verify <2s load time
+
+**Task 8: Testing**
+- Test dashboard access (auth required)
+- Test ranch-specific filtering (can't see other ranches)
+- Test status grouping and counts
+- Test inquiry card display
+- Test expand/collapse functionality
+- Test pagination with multiple pages
+- Test unread count badge updates
+- Test performance with 100 inquiries
+- Test responsive design on mobile/tablet
+- Integration test: end-to-end dashboard flow
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+### AC-5.3.1: Dashboard Access
+**Given** I'm logged in as a ranch owner  
+**When** I navigate to `/dashboard/inquiries`  
+**Then** I should see the inquiry dashboard page
+**And** the page is only accessible to authenticated ranch owners
+
+### AC-5.3.2: Ranch-Specific Filtering
+**Given** I'm viewing the inquiry dashboard  
+**When** the page loads  
+**Then** I should only see inquiries for bulls that belong to my ranch
+**And** I cannot see inquiries for other ranches' bulls
+
+### AC-5.3.3: Status Grouping
+**Given** I'm viewing the inquiry dashboard  
+**When** the inquiries are displayed  
+**Then** they should be grouped by status:
+- Unread (default expanded)
+- Responded (collapsed by default)
+- Archived (collapsed by default)
+**And** each group shows the count of inquiries in that status
+
+### AC-5.3.4: Inquiry List Display
+**Given** I'm viewing inquiries in a status group  
+**When** I look at each inquiry item  
+**Then** each item should display:
+- Bull name with thumbnail image (100x75px)
+- Breeder name
+- Date received (relative time, e.g., "2 hours ago")
+- Message preview (first 100 characters with ellipsis)
+**And** items are visually distinct and easy to scan
+
+### AC-5.3.5: Chronological Sorting
+**Given** inquiries are displayed in a status group  
+**When** I review the list  
+**Then** inquiries should be sorted by date (newest first) within each status group
+
+### AC-5.3.6: Unread Count Badge
+**Given** I have unread inquiries  
+**When** I view the dashboard navigation  
+**Then** I should see a badge showing the count of unread inquiries
+**And** the badge updates when inquiry status changes
+
+### AC-5.3.7: Inquiry Detail View
+**Given** I'm viewing the inquiry list  
+**When** I click on an inquiry item  
+**Then** the inquiry should expand to show full details:
+- Bull information (name, photo, link to bull page)
+- Breeder contact information (name, email, phone)
+- Full inquiry message
+- Timestamp (full date and time)
+- Status indicator
+**And** I can collapse the detail view by clicking again
+
+### AC-5.3.8: Pagination
+**Given** I have more than 20 inquiries in a status group  
+**When** I view the inquiry list  
+**Then** inquiries should be paginated with 20 items per page
+**And** I can navigate between pages using pagination controls
+
+### AC-5.3.9: Performance
+**Given** I have up to 100 inquiries  
+**When** I load the inquiry dashboard  
+**Then** the page should load in less than 2 seconds
+**And** pagination navigation should respond in less than 300ms
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>APIs > GET /api/inquiries</section>
+        <snippet>Authenticated endpoint for ranch owners. Returns inquiries filtered by ranch ownership. Supports query params: status (UNREAD/RESPONDED/ARCHIVED), page, limit. Returns inquiry array with bull details (name, slug, heroImage) and pagination metadata (total, page, limit, totalPages). Sorted by createdAt DESC.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Detailed Design > InquiryDashboard Page</section>
+        <snippet>Server-side rendered dashboard at /dashboard/inquiries. Displays inquiries grouped by status (Unread, Responded, Archived). Each inquiry shows bull thumbnail, breeder name, date, message preview. Expandable detail view. Pagination: 20 items per page. Performance target: <2s load for 100 inquiries.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows > Workflow 3: Ranch Owner Views Inquiries</section>
+        <snippet>Ranch owner logs in, navigates to dashboard (sees inquiry count badge), clicks "Inquiries" link. System loads /dashboard/inquiries page, fetches inquiries for ranch owner's ranch. Page renders inquiry list grouped by status, sorted newest first. Ranch owner can click inquiry to view full details, filter by status, search by breeder/bull name.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>NFR > Performance > Inquiry Dashboard</section>
+        <snippet>Initial page load: <2 seconds for 100 inquiries. Pagination: <300ms per page navigation. Status filter application: <200ms (client-side). Database queries optimized with indexes on ranchId, status, createdAt. Pagination limits: 20 inquiries per page (default), max 100.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>NFR > Security > Data Protection</section>
+        <snippet>Inquiry data visible only to owning ranch (row-level security). Breeder contact information not exposed publicly. Session-based authentication via NextAuth.js. Authorization checks: Requires RANCH_OWNER role + ownership verification.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-8.3: Inquiry Dashboard</section>
+        <snippet>Ranch owners access centralized inquiry dashboard to view and manage all inquiries. Dashboard displays inquiries grouped by status with filtering and search. Each inquiry shows bull details, breeder contact, and message. Unread count badge in navigation alerts ranch owners to new inquiries.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-1: Framework - Next.js App Router</section>
+        <snippet>Next.js 14+ with App Router for full-stack development. Server Components for initial data fetching (reduces client JS). File-based routing. Built-in image optimization. TypeScript + Tailwind CSS support.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/dashboard/page.tsx</path>
+        <kind>page</kind>
+        <symbol>DashboardPage</symbol>
+        <lines>1-35</lines>
+        <reason>Existing dashboard page showing authentication pattern with NextAuth session check, redirect for unauthenticated users, and Tailwind CSS styling. New inquiries page will follow similar structure.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry model</symbol>
+        <lines>126-159</lines>
+        <reason>Inquiry model with all fields needed for dashboard: bullId, ranchId, breederName, breederEmail, breederPhone, message, status (enum), timestamps. Relations to Bull and Ranch. Indexes on ranchId, bullId, status, createdAt for efficient queries.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/bulls/public/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>GET handler</symbol>
+        <lines>N/A</lines>
+        <reason>Example of GET endpoint with query params, pagination, filtering, and Prisma queries. Shows pattern for building where clauses, pagination logic, and response formatting.</reason>
+      </artifact>
+      <artifact>
+        <path>components/NotificationList.tsx</path>
+        <kind>component</kind>
+        <symbol>NotificationList</symbol>
+        <lines>N/A</lines>
+        <reason>Example of list component with expand/collapse functionality, status grouping, and card display. Can reference for UI patterns in InquiryList component.</reason>
+      </artifact>
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>auth</symbol>
+        <lines>N/A</lines>
+        <reason>NextAuth configuration and auth() function for session management. Used in dashboard pages to verify authentication and get user session.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="@prisma/client" version="^6.19.0">Database ORM for inquiry queries with filtering, pagination, and relations</package>
+        <package name="next" version="^14.2.0">Framework for Server Components, API routes, and routing</package>
+        <package name="next-auth" version="^5.0.0-beta.30">Authentication and session management for protected dashboard routes</package>
+        <package name="react" version="^18.3.0">UI components for InquiryList and InquiryCard</package>
+        <package name="date-fns" version="^4.1.0">Date formatting for relative time display (e.g., "2 hours ago")</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Dashboard page must be protected - only authenticated RANCH_OWNER role can access</constraint>
+    <constraint>Row-level security: Ranch owners can ONLY see inquiries for their own ranch (filter by ranchId)</constraint>
+    <constraint>Use Next.js Server Components for initial page load to improve performance</constraint>
+    <constraint>Pagination: 20 inquiries per page (default), support page query parameter</constraint>
+    <constraint>Status grouping: Unread (expanded by default), Responded (collapsed), Archived (collapsed)</constraint>
+    <constraint>Sorting: Inquiries sorted by createdAt DESC (newest first) within each status group</constraint>
+    <constraint>Performance target: Page load <2 seconds for 100 inquiries</constraint>
+    <constraint>Pagination navigation: <300ms response time</constraint>
+    <constraint>Database indexes required: ranchId, status, createdAt (should already exist in schema)</constraint>
+    <constraint>Query optimization: Select only needed fields, use Prisma include for bull details</constraint>
+    <constraint>Relative time display: Use date-fns formatDistanceToNow() for "2 hours ago" format</constraint>
+    <constraint>Message preview: Truncate to 100 characters with ellipsis</constraint>
+    <constraint>Bull thumbnail: 100x75px, use Next.js Image component for optimization</constraint>
+    <constraint>Unread count badge: Fetch count of inquiries with status='UNREAD' for current ranch</constraint>
+    <constraint>Responsive design: Dashboard must work on mobile, tablet, and desktop</constraint>
+    <constraint>Follow existing dashboard patterns from app/dashboard/page.tsx</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/inquiries</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/inquiries?status={status}&amp;page={page}&amp;limit={limit}
+Query Params: status (optional: UNREAD|RESPONDED|ARCHIVED), page (default: 1), limit (default: 20)
+Response 200: {
+  inquiries: Array&lt;{
+    id, bullId, bullName, bullSlug, bullHeroImage,
+    breederName, breederEmail, breederPhone,
+    message, status, createdAt, respondedAt
+  }&gt;,
+  pagination: { total, page, limit, totalPages }
+}
+Response 401: { error: 'Unauthorized' }
+Response 403: { error: 'Forbidden' }
+Response 500: { error: 'Internal server error' }</signature>
+      <path>app/api/inquiries/route.ts</path>
+    </interface>
+    <interface>
+      <name>InquiryDashboard Page</name>
+      <kind>Next.js Server Component</kind>
+      <signature>async function InquiriesPage({ searchParams }: { searchParams: { status?: string; page?: string } })
+- Checks auth session (ranch owner only)
+- Fetches ranch for current user
+- Queries inquiries with filtering and pagination
+- Groups inquiries by status
+- Renders InquiryList component with data</signature>
+      <path>app/dashboard/inquiries/page.tsx</path>
+    </interface>
+    <interface>
+      <name>InquiryList Component</name>
+      <kind>Client Component</kind>
+      <signature>function InquiryList({ inquiries, totalCount, currentPage, pageSize })
+Props: inquiries (grouped by status), totalCount, currentPage, pageSize
+- Manages expand/collapse state for status groups
+- Renders status sections with count badges
+- Maps inquiries to InquiryCard components
+- Renders pagination controls</signature>
+      <path>components/InquiryList.tsx</path>
+    </interface>
+    <interface>
+      <name>InquiryCard Component</name>
+      <kind>Client Component</kind>
+      <signature>function InquiryCard({ inquiry })
+Props: inquiry object with bull and breeder details
+- Displays bull thumbnail, breeder name, date, message preview
+- Manages expand/collapse state for detail view
+- Shows full details when expanded (bull link, contact info, full message)
+- Includes status indicator badge</signature>
+      <path>components/InquiryCard.tsx</path>
+    </interface>
+    <interface>
+      <name>Prisma - Inquiry.findMany</name>
+      <kind>Database query</kind>
+      <signature>await prisma.inquiry.findMany({
+  where: { ranchId: string, status?: InquiryStatus },
+  include: { bull: { select: { id, name, slug, heroImage } } },
+  orderBy: { createdAt: 'desc' },
+  skip: number,
+  take: number
+})</signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Prisma - Inquiry.count</name>
+      <kind>Database query</kind>
+      <signature>await prisma.inquiry.count({
+  where: { ranchId: string, status?: InquiryStatus }
+})</signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Testing approach should include authentication tests, authorization tests (row-level security), integration tests for the full dashboard flow, and performance tests. Key areas:
+
+1. **Authentication Tests**: Verify dashboard requires login, redirects unauthenticated users, only allows RANCH_OWNER role
+2. **Authorization Tests**: Verify ranch owners can only see their own inquiries, cannot access other ranches' data
+3. **Integration Tests**: Full dashboard load, status grouping, pagination, expand/collapse, unread count badge
+4. **Performance Tests**: Measure page load time with 100 inquiries (target: <2s), pagination response time (target: <300ms)
+5. **UI Tests**: Responsive design on different screen sizes, inquiry card display, message truncation
+6. **API Tests**: GET /api/inquiries with various query params, error handling, pagination metadata
+
+Manual testing recommended for UI/UX aspects. Automated tests for API and business logic if test framework is set up.
+    </standards>
+    <locations>
+      <location>__tests__/api/inquiries.test.ts (if tests are added)</location>
+      <location>__tests__/pages/dashboard/inquiries.test.tsx (if tests are added)</location>
+      <location>__tests__/components/InquiryList.test.tsx (if tests are added)</location>
+      <location>Manual testing via browser for UI/UX verification</location>
+    </locations>
+    <ideas>
+      <test id="AC-5.3.1">
+        <criteria>AC-5.3.1: Dashboard Access</criteria>
+        <approach>Integration test: Navigate to /dashboard/inquiries without auth → verify redirect to /login. Login as ranch owner → verify dashboard loads. Login as breeder → verify 403 or redirect.</approach>
+      </test>
+      <test id="AC-5.3.2">
+        <criteria>AC-5.3.2: Ranch-Specific Filtering</criteria>
+        <approach>Integration test: Create inquiries for multiple ranches. Login as Ranch A owner → verify only Ranch A inquiries shown. Verify Ranch B inquiries not visible. Test with direct API call to confirm filtering.</approach>
+      </test>
+      <test id="AC-5.3.3">
+        <criteria>AC-5.3.3: Status Grouping</criteria>
+        <approach>Manual test: Create inquiries with different statuses (UNREAD, RESPONDED, ARCHIVED). Load dashboard → verify three sections with correct counts. Verify Unread expanded by default, others collapsed.</approach>
+      </test>
+      <test id="AC-5.3.4">
+        <criteria>AC-5.3.4: Inquiry List Display</criteria>
+        <approach>Manual test: Verify each inquiry card shows bull thumbnail (100x75px), breeder name, relative date ("2 hours ago"), message preview (100 chars max). Check visual distinction and scannability.</approach>
+      </test>
+      <test id="AC-5.3.5">
+        <criteria>AC-5.3.5: Chronological Sorting</criteria>
+        <approach>Integration test: Create inquiries with different timestamps. Load dashboard → verify inquiries sorted newest first within each status group. Check database query includes orderBy: { createdAt: 'desc' }.</approach>
+      </test>
+      <test id="AC-5.3.6">
+        <criteria>AC-5.3.6: Unread Count Badge</criteria>
+        <approach>Manual test: Create unread inquiries → verify badge shows correct count in navigation. Mark inquiry as responded → verify badge count decreases. Test badge visibility and styling.</approach>
+      </test>
+      <test id="AC-5.3.7">
+        <criteria>AC-5.3.7: Inquiry Detail View</criteria>
+        <approach>Manual test: Click inquiry card → verify expansion shows full details (bull info with link, breeder contact, full message, timestamp, status). Click again → verify collapse. Test on multiple inquiries.</approach>
+      </test>
+      <test id="AC-5.3.8">
+        <criteria>AC-5.3.8: Pagination</criteria>
+        <approach>Integration test: Create 25 inquiries → verify pagination shows (page 1 of 2). Click next → verify page 2 loads with remaining 5 inquiries. Verify prev/next buttons disabled at boundaries. Test URL query params.</approach>
+      </test>
+      <test id="AC-5.3.9">
+        <criteria>AC-5.3.9: Performance</criteria>
+        <approach>Performance test: Create 100 inquiries. Measure page load time with browser DevTools → verify <2 seconds. Measure pagination navigation → verify <300ms. Check database query execution time.</approach>
+      </test>
+      <test id="api-endpoint">
+        <criteria>GET /api/inquiries Endpoint</criteria>
+        <approach>API tests: Test with valid auth → 200 with inquiries. Test without auth → 401. Test as breeder → 403. Test status filter → verify correct filtering. Test pagination params → verify correct skip/take. Test response structure.</approach>
+      </test>
+      <test id="responsive-design">
+        <criteria>Responsive Design</criteria>
+        <approach>Manual test: Load dashboard on mobile (375px), tablet (768px), desktop (1440px). Verify layout adapts, cards stack properly, navigation works, images scale correctly, text remains readable.</approach>
+      </test>
+    </ideas>
+  </tests>
+</story-context>

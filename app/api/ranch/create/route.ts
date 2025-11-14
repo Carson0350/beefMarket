@@ -15,13 +15,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check email verification
-    if (!session.user.emailVerified) {
-      return NextResponse.json(
-        { success: false, message: 'Email must be verified before creating a ranch profile' },
-        { status: 403 }
-      );
-    }
+    // Check email verification - TEMPORARILY DISABLED FOR DEVELOPMENT
+    // if (!session.user.emailVerified) {
+    //   return NextResponse.json(
+    //     { success: false, message: 'Email must be verified before creating a ranch profile' },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Check if user already has a ranch
     const existingRanch = await prisma.ranch.findUnique({

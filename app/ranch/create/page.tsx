@@ -29,10 +29,11 @@ export default function CreateRanchPage() {
       return;
     }
 
-    if (!session.user?.emailVerified) {
-      router.push('/check-email');
-      return;
-    }
+    // TEMPORARILY DISABLED FOR DEVELOPMENT
+    // if (!session.user?.emailVerified) {
+    //   router.push('/check-email');
+    //   return;
+    // }
   }, [session, status, router]);
 
   // Update slug preview as user types ranch name

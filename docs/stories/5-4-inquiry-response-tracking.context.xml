@@ -1,0 +1,368 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.4</storyId>
+    <title>Inquiry Response Tracking</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-4-inquiry-response-tracking.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to mark inquiries as responded or archived and add internal notes</iWant>
+    <soThat>I can track which inquiries I've handled and keep my inquiry list organized</soThat>
+    <tasks>
+**Task 1: Create PATCH /api/inquiries/[id] Endpoint**
+- Create `/app/api/inquiries/[id]/route.ts`
+- Implement PATCH handler for status and notes updates
+- Verify user is authenticated and is ranch owner
+- Verify ranch ownership of inquiry (authorization check)
+- Support updating: status (RESPONDED/ARCHIVED), internalNotes
+- Set respondedAt timestamp when status changes to RESPONDED
+- Return updated inquiry object
+- Handle errors (401, 403, 404, 500)
+
+**Task 2: Add Status Update Buttons**
+- Add "Mark as Responded" button to inquiry detail view
+- Add "Archive" button to inquiry detail view
+- Call PATCH API endpoint on button click
+- Show loading state during API call
+- Handle success and error responses
+- Update UI optimistically (before API response)
+
+**Task 3: Implement Reply via Email Button**
+- Add "Reply via Email" button to inquiry detail view
+- Generate mailto link with pre-filled data:
+  - To: breeder email
+  - Subject: "Re: Inquiry about [Bull Name]"
+  - Body: Template with ranch contact info
+- Open default email client on click
+- Position button prominently in detail view
+
+**Task 4: Display Responded Timestamp**
+- Show respondedAt timestamp in inquiry detail view
+- Format as relative time for recent responses (e.g., "Responded 2 hours ago")
+- Format as full date for older responses (e.g., "Responded on Nov 14, 2025")
+- Use date-fns for formatting
+- Only show if status is RESPONDED
+
+**Task 5: Add Internal Notes Field**
+- Add textarea for internal notes in inquiry detail view
+- Max length: 1000 characters
+- Show character count (e.g., "250/1000")
+- Add "Save Notes" button
+- Call PATCH API endpoint to save notes
+- Show success/error feedback
+- Notes visible only to ranch owner (not in breeder view)
+
+**Task 6: Implement Status Filtering**
+- Add filter dropdown in dashboard header
+- Options: All, Unread, Responded, Archived
+- Update URL query params on filter change
+- Reload inquiry list with filtered results
+- Persist filter selection in URL
+- Show active filter in dropdown
+
+**Task 7: Optimize UI Updates**
+- Implement optimistic updates for status changes
+- Update local state immediately on button click
+- Revert if API call fails
+- Update count badges in real-time
+- Move inquiry to correct status section without page reload
+- Use React state management or SWR for data fetching
+
+**Task 8: Testing**
+- Test PATCH endpoint with valid data
+- Test authorization (only ranch owner can update their inquiries)
+- Test status transitions (UNREAD → RESPONDED, UNREAD → ARCHIVED)
+- Test respondedAt timestamp is set correctly
+- Test internal notes save and retrieve
+- Test Reply via Email button opens email client
+- Test status filtering
+- Test optimistic UI updates
+- Integration test: full response tracking flow
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+### AC-5.4.1: Mark as Responded
+**Given** I'm viewing an inquiry detail  
+**When** I click "Mark as Responded"  
+**Then** the inquiry status should change to "RESPONDED"
+**And** the respondedAt timestamp should be set to current time
+**And** the inquiry should move to the "Responded" section
+
+### AC-5.4.2: Reply via Email Button
+**Given** I'm viewing an inquiry detail  
+**When** I click "Reply via Email"  
+**Then** my default email client should open
+**And** the email should be pre-filled with:
+- To: breeder's email address
+- Subject: "Re: Inquiry about [Bull Name]"
+- Body: Template with ranch contact information
+
+### AC-5.4.3: Responded Timestamp
+**Given** an inquiry has been marked as responded  
+**When** I view the inquiry detail  
+**Then** I should see the responded timestamp
+**And** recent responses should show relative time (e.g., "Responded 2 hours ago")
+**And** older responses should show full date (e.g., "Responded on Nov 14, 2025")
+
+### AC-5.4.4: Add Internal Notes
+**Given** I'm viewing an inquiry detail  
+**When** I add text to the internal notes field  
+**Then** I should be able to save notes (max 1000 characters)
+**And** the notes should be visible only to me (ranch owner)
+**And** I should be able to edit notes at any time
+**And** a character count should be displayed (e.g., "250/1000")
+
+### AC-5.4.5: Archive Inquiry
+**Given** I'm viewing an inquiry detail  
+**When** I click "Archive"  
+**Then** the inquiry status should change to "ARCHIVED"
+**And** the inquiry should move to the "Archived" section
+
+### AC-5.4.6: Archived Inquiries Accessible
+**Given** I have archived inquiries  
+**When** I view the "Archived" section  
+**Then** I should see all archived inquiries
+**And** I should be able to view full details of archived inquiries
+**And** archived inquiries should remain accessible indefinitely
+
+### AC-5.4.7: Status Changes Reflected Immediately
+**Given** I update an inquiry status  
+**When** the update is successful  
+**Then** the UI should update without requiring a page reload
+**And** count badges should update instantly
+**And** the inquiry should move to the correct status section
+
+### AC-5.4.8: Filter by Status
+**Given** I'm viewing the inquiry dashboard  
+**When** I select a filter (Unread/Responded/Archived/All)  
+**Then** the inquiry list should show only inquiries matching that status
+**And** the filter selection should persist in the URL query params
+**And** the active filter should be highlighted in the dropdown
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>APIs > PATCH /api/inquiries/[id]</section>
+        <snippet>Authenticated endpoint for ranch owners. Updates inquiry status (RESPONDED/ARCHIVED) and/or internal notes. Requires RANCH_OWNER role and ownership verification. Sets respondedAt timestamp when status changes to RESPONDED. Request body: { status?: 'RESPONDED'|'ARCHIVED', internalNotes?: string }. Returns updated inquiry object. Validates internalNotes max 1000 chars.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows > Workflow 4: Ranch Owner Responds to Inquiry</section>
+        <snippet>Ranch owner clicks inquiry in dashboard, views full details (bull info, breeder contact, message, timestamp). Clicks "Reply via Email" → opens email client with pre-filled To (breeder email), Subject ("Re: Inquiry about [Bull Name]"), Body (template with ranch contact). Ranch owner composes/sends email externally. Returns to platform, clicks "Mark as Responded" → PATCH updates status to RESPONDED, sets respondedAt. UI updates inquiry status in list.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Data Models > Inquiry Model</section>
+        <snippet>Inquiry model includes status field (InquiryStatus enum: UNREAD, RESPONDED, ARCHIVED), internalNotes (optional, max 1000 chars, visible only to ranch owner), respondedAt (timestamp, set when status changes to RESPONDED). All fields support updates via PATCH endpoint.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>NFR > Security > Authorization</section>
+        <snippet>Inquiry updates require RANCH_OWNER role + ownership check. Ranch owner can only update inquiries for their own ranch. Authorization verified by checking inquiry.ranchId matches user's ranch.id. Unauthorized attempts return 403 Forbidden.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-8.3: Inquiry Dashboard - Response Tracking</section>
+        <snippet>Ranch owners can mark inquiries as responded or archived. Internal notes field for tracking conversation details. Reply via Email button opens email client with pre-filled recipient and subject. Status changes reflected immediately in dashboard with updated counts.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry model</symbol>
+        <lines>126-159</lines>
+        <reason>Inquiry model has all fields needed: status (InquiryStatus enum), internalNotes (optional Text), respondedAt (optional DateTime). Status transitions: UNREAD → RESPONDED or ARCHIVED. respondedAt set when status becomes RESPONDED.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/bulls/[id]/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>PATCH handler</symbol>
+        <lines>N/A</lines>
+        <reason>Example of PATCH endpoint pattern with authentication, authorization (ownership check), validation, and error handling. Shows how to update a resource and return updated object.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/inquiries/route.ts</path>
+        <kind>api-route</kind>
+        <symbol>POST, GET handlers (from Stories 5-2, 5-3)</symbol>
+        <lines>N/A</lines>
+        <reason>Existing inquiries API route. Story 5-4 adds [id]/route.ts for PATCH operations. Shows authentication and error handling patterns to follow.</reason>
+      </artifact>
+      <artifact>
+        <path>components/InquiryCard.tsx</path>
+        <kind>component</kind>
+        <symbol>InquiryCard (to be created in Story 5-3)</symbol>
+        <lines>N/A</lines>
+        <reason>Story 5-3 creates InquiryCard component. Story 5-4 enhances it with action buttons (Mark as Responded, Archive, Reply via Email), internal notes field, and respondedAt display.</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/inquiries/page.tsx</path>
+        <kind>page</kind>
+        <symbol>InquiriesPage (to be created in Story 5-3)</symbol>
+        <lines>N/A</lines>
+        <reason>Story 5-3 creates dashboard page. Story 5-4 adds status filtering dropdown to page header. Filter updates URL query params and reloads inquiry list.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="@prisma/client" version="^6.19.0">Database ORM for inquiry updates (status, internalNotes, respondedAt)</package>
+        <package name="next" version="^14.2.0">Framework for API routes and dynamic routes</package>
+        <package name="next-auth" version="^5.0.0-beta.30">Authentication and authorization for protected endpoints</package>
+        <package name="react" version="^18.3.0">UI components for action buttons, notes field, filtering</package>
+        <package name="date-fns" version="^4.1.0">Date formatting for respondedAt timestamp (relative and absolute)</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>PATCH endpoint must verify authentication (ranch owner only)</constraint>
+    <constraint>Authorization check: Ranch owner can only update inquiries for their own ranch (verify inquiry.ranchId matches user's ranch.id)</constraint>
+    <constraint>respondedAt timestamp must be set automatically when status changes to RESPONDED</constraint>
+    <constraint>respondedAt should NOT be set when status changes to ARCHIVED</constraint>
+    <constraint>Internal notes max length: 1000 characters</constraint>
+    <constraint>Internal notes visible only to ranch owner (never exposed to breeder)</constraint>
+    <constraint>Status can only transition: UNREAD → RESPONDED or UNREAD → ARCHIVED (no reverse transitions in MVP)</constraint>
+    <constraint>Reply via Email uses mailto: link with pre-filled To, Subject, Body</constraint>
+    <constraint>Email subject format: "Re: Inquiry about [Bull Name]"</constraint>
+    <constraint>Email body template should include ranch contact info (name, email, phone)</constraint>
+    <constraint>UI updates must be optimistic (update immediately, revert on error)</constraint>
+    <constraint>Count badges must update in real-time when status changes</constraint>
+    <constraint>Status filter persists in URL query params (e.g., ?status=RESPONDED)</constraint>
+    <constraint>Relative time format for recent responses (within 7 days): "Responded 2 hours ago"</constraint>
+    <constraint>Absolute date format for older responses: "Responded on Nov 14, 2025"</constraint>
+    <constraint>Use date-fns formatDistanceToNow() and format() for timestamp display</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PATCH /api/inquiries/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>PATCH /api/inquiries/[id]
+Path Params: id (inquiry ID)
+Request Body: { status?: 'RESPONDED'|'ARCHIVED', internalNotes?: string }
+Response 200: { inquiry: { id, status, respondedAt, internalNotes, updatedAt } }
+Response 401: { error: 'Unauthorized' }
+Response 403: { error: 'Forbidden' } (not ranch owner or wrong ranch)
+Response 404: { error: 'Inquiry not found' }
+Response 500: { error: 'Internal server error' }</signature>
+      <path>app/api/inquiries/[id]/route.ts</path>
+    </interface>
+    <interface>
+      <name>InquiryCard Enhancement</name>
+      <kind>Client Component</kind>
+      <signature>Enhanced InquiryCard component with:
+- Action buttons: "Mark as Responded", "Archive", "Reply via Email"
+- Internal notes textarea with character count and Save button
+- respondedAt timestamp display (conditional on status)
+- Optimistic UI updates for status changes
+- Loading states during API calls</signature>
+      <path>components/InquiryCard.tsx</path>
+    </interface>
+    <interface>
+      <name>Status Filter Dropdown</name>
+      <kind>UI Component</kind>
+      <signature>Filter dropdown in dashboard header:
+- Options: All, Unread, Responded, Archived
+- Updates URL query param: ?status={value}
+- Triggers page reload with filtered results
+- Shows active filter selection</signature>
+      <path>app/dashboard/inquiries/page.tsx</path>
+    </interface>
+    <interface>
+      <name>mailto: Link</name>
+      <kind>Email protocol</kind>
+      <signature>mailto:{breederEmail}?subject={encodedSubject}&amp;body={encodedBody}
+- To: breeder email address
+- Subject: URI-encoded "Re: Inquiry about [Bull Name]"
+- Body: URI-encoded template with ranch contact info</signature>
+      <path>components/InquiryCard.tsx</path>
+    </interface>
+    <interface>
+      <name>Prisma - Inquiry.update</name>
+      <kind>Database operation</kind>
+      <signature>await prisma.inquiry.update({
+  where: { id: string },
+  data: {
+    status?: 'RESPONDED' | 'ARCHIVED',
+    internalNotes?: string,
+    respondedAt?: new Date() // only if status → RESPONDED
+  }
+})</signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Testing approach should include API tests for PATCH endpoint, authorization tests, UI tests for action buttons and optimistic updates, and integration tests for full response tracking flow. Key areas:
+
+1. **API Tests**: PATCH endpoint with valid/invalid data, authentication/authorization checks, status transitions, respondedAt timestamp setting
+2. **Authorization Tests**: Verify ranch owners can only update their own inquiries, unauthorized users get 403
+3. **UI Tests**: Action buttons trigger correct API calls, optimistic updates work, loading states display, error handling
+4. **Integration Tests**: Full flow from marking as responded to UI update, internal notes save/retrieve, status filtering
+5. **Manual Tests**: Reply via Email button opens email client with correct pre-filled data, mailto link format
+
+Focus on authorization (row-level security) and optimistic UI updates.
+    </standards>
+    <locations>
+      <location>__tests__/api/inquiries/[id].test.ts (if tests are added)</location>
+      <location>__tests__/components/InquiryCard.test.tsx (if tests are added)</location>
+      <location>Manual testing for mailto: link and email client integration</location>
+    </locations>
+    <ideas>
+      <test id="AC-5.4.1">
+        <criteria>AC-5.4.1: Mark as Responded</criteria>
+        <approach>Integration test: Click "Mark as Responded" button → verify PATCH API called with status='RESPONDED' → verify respondedAt timestamp set → verify inquiry moves to Responded section → verify UI updates without page reload.</approach>
+      </test>
+      <test id="AC-5.4.2">
+        <criteria>AC-5.4.2: Reply via Email Button</criteria>
+        <approach>Manual test: Click "Reply via Email" → verify email client opens → verify To field has breeder email → verify Subject is "Re: Inquiry about [Bull Name]" → verify Body has ranch contact template. Test mailto: link format.</approach>
+      </test>
+      <test id="AC-5.4.3">
+        <criteria>AC-5.4.3: Responded Timestamp</criteria>
+        <approach>Unit test: Create inquiry with respondedAt timestamp → verify relative time display for recent (within 7 days) → verify absolute date for older. Test date-fns formatting functions.</approach>
+      </test>
+      <test id="AC-5.4.4">
+        <criteria>AC-5.4.4: Add Internal Notes</criteria>
+        <approach>Integration test: Add notes to textarea → click Save → verify PATCH API called with internalNotes → verify notes saved to database → verify notes displayed on reload → test character count (1000 max) → test edit functionality.</approach>
+      </test>
+      <test id="AC-5.4.5">
+        <criteria>AC-5.4.5: Archive Inquiry</criteria>
+        <approach>Integration test: Click "Archive" button → verify PATCH API called with status='ARCHIVED' → verify inquiry moves to Archived section → verify respondedAt NOT set (only for RESPONDED status).</approach>
+      </test>
+      <test id="AC-5.4.6">
+        <criteria>AC-5.4.6: Archived Inquiries Accessible</criteria>
+        <approach>Manual test: Archive inquiry → navigate to Archived section → verify inquiry visible → click to expand → verify full details accessible → verify inquiry persists (not deleted).</approach>
+      </test>
+      <test id="AC-5.4.7">
+        <criteria>AC-5.4.7: Status Changes Reflected Immediately</criteria>
+        <approach>UI test: Update inquiry status → verify optimistic update (UI changes before API response) → verify count badges update → verify inquiry moves to correct section → test error handling (revert on API failure).</approach>
+      </test>
+      <test id="AC-5.4.8">
+        <criteria>AC-5.4.8: Filter by Status</criteria>
+        <approach>Integration test: Select filter "Responded" → verify URL updates to ?status=RESPONDED → verify only responded inquiries shown → test All/Unread/Archived filters → verify filter persists on page reload.</approach>
+      </test>
+      <test id="authorization">
+        <criteria>Authorization - Row-Level Security</criteria>
+        <approach>API test: Ranch A owner tries to update Ranch B inquiry → verify 403 Forbidden. Breeder tries to update inquiry → verify 403. Verify inquiry.ranchId checked against user's ranch.id.</approach>
+      </test>
+      <test id="status-transitions">
+        <criteria>Status Transitions</criteria>
+        <approach>API test: Test UNREAD → RESPONDED (respondedAt set) → verify success. Test UNREAD → ARCHIVED (respondedAt NOT set) → verify success. Test invalid transitions if any restrictions added.</approach>
+      </test>
+    </ideas>
+  </tests>
+</story-context>

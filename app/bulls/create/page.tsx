@@ -108,10 +108,11 @@ export default function CreateBullPage() {
       return;
     }
 
-    if (!session.user?.emailVerified) {
-      router.push('/check-email');
-      return;
-    }
+    // TEMPORARILY DISABLED FOR DEVELOPMENT
+    // if (!session.user?.emailVerified) {
+    //   router.push('/check-email');
+    //   return;
+    // }
   }, [session, status, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

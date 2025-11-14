@@ -1,0 +1,181 @@
+<story-context id="5-1-inquiry-contact-form" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5-1</storyId>
+    <title>Inquiry Contact Form</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-1-inquiry-contact-form.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to submit an inquiry about a bull through a contact form on the bull detail page</iWant>
+    <soThat>I can easily reach out to the ranch owner to express interest or ask questions</soThat>
+    <tasks>
+      - Create InquiryForm component (components/InquiryForm.tsx)
+      - Implement form validation with Zod schema
+      - Pre-fill message field with bull name
+      - Implement form submission logic
+      - Handle success and error states
+      - Integrate with bull detail page (app/bulls/[slug]/page.tsx)
+      - Add comprehensive testing
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-5.1.1">Form visible on published bull detail pages with clear labeling</criterion>
+    <criterion id="AC-5.1.2">Form includes required fields (name, email, message) and optional phone field with asterisk markers</criterion>
+    <criterion id="AC-5.1.3">Message field pre-filled with "I'm interested in [Bull Name]" and editable</criterion>
+    <criterion id="AC-5.1.4">Client-side validation with immediate feedback, error messages, and disabled submit until valid</criterion>
+    <criterion id="AC-5.1.5">Form submission shows loading state, disables inputs, submits to POST /api/inquiries</criterion>
+    <criterion id="AC-5.1.6">Success confirmation message displays and form resets</criterion>
+    <criterion id="AC-5.1.7">Form fields clear after success except pre-filled message</criterion>
+    <criterion id="AC-5.1.8">Error handling with clear, actionable messages and retry capability</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Detailed Design > InquiryForm Component</section>
+        <snippet>InquiryForm component renders contact form on bull detail pages, validates input, submits to API. Inputs: Bull ID, breeder input (name, email, phone, message). Outputs: API request payload.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Data Models > CreateInquiryRequest</section>
+        <snippet>Request body interface: bullId (string), breederName (string, 2-100 chars), breederEmail (string, valid email), breederPhone (optional string), message (string, 10-2000 chars)</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows > Workflow 1: Breeder Submits Inquiry</section>
+        <snippet>User views bull page, clicks Contact Ranch, fills form (name, email, phone optional, message), client validation runs, submits POST to /api/inquiries, API validates and creates inquiry, returns 201, UI shows success message and resets form.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-8.1: Submit Inquiry</section>
+        <snippet>Breeders can contact ranch owners about bulls. Contact form on bull detail page with breeder name, email, phone (optional), message. Confirmation message after submission.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-9: Form Handling - React Hook Form + Zod</section>
+        <snippet>Use React Hook Form for performant forms with minimal re-renders. Zod for type-safe validation with reusable schemas. Client-side validation for immediate feedback, server-side validation for security. Helpful error messages for low digital literacy users.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>app/bulls/[slug]/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullDetailPage</symbol>
+        <lines>68-358</lines>
+        <reason>Integration point for InquiryForm component. Server component that fetches bull data and renders detail page. Need to add InquiryForm component to this page.</reason>
+      </artifact>
+      <artifact>
+        <path>components/FavoriteButton.tsx</path>
+        <kind>component</kind>
+        <symbol>FavoriteButton</symbol>
+        <reason>Example of client component with API interaction pattern. Shows how to handle loading states and error handling in components.</reason>
+      </artifact>
+      <artifact>
+        <path>components/ShareButton.tsx</path>
+        <kind>component</kind>
+        <symbol>ShareButton</symbol>
+        <reason>Example of action button component on bull detail page. Reference for styling and positioning patterns.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/db.ts</path>
+        <kind>utility</kind>
+        <symbol>prisma</symbol>
+        <reason>Prisma client instance used throughout application for database operations.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry</symbol>
+        <lines>632-659</lines>
+        <reason>Inquiry model definition with fields: id, bullId, ranchId, breederName, breederEmail, breederPhone, message, status, internalNotes, respondedAt, timestamps. Validates form data structure.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0">Framework for React application and API routes</package>
+        <package name="react" version="^18.3.0">UI library for building components</package>
+        <package name="@prisma/client" version="^6.19.0">Database ORM for type-safe queries</package>
+        <package name="tailwindcss" version="^3.4.0">Utility-first CSS framework for styling</package>
+        <package name="@heroicons/react" version="^2.2.0">Icon library for UI elements</package>
+      </node>
+      <needed>
+        <package name="react-hook-form">Form state management library (not currently installed, needs to be added)</package>
+        <package name="zod">Schema validation library (not currently installed, needs to be added)</package>
+        <package name="@hookform/resolvers">React Hook Form resolver for Zod (not currently installed, needs to be added)</package>
+      </needed>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Component must be client component ('use client') for form interactivity</constraint>
+    <constraint>Follow existing Tailwind CSS patterns from bull detail page</constraint>
+    <constraint>Form must be mobile-responsive (sm, md, lg breakpoints)</constraint>
+    <constraint>Touch-friendly input sizes (44px min height) for mobile users</constraint>
+    <constraint>Accessible design with ARIA labels and keyboard navigation</constraint>
+    <constraint>Form validation must match server-side validation in API route (Story 5-2)</constraint>
+    <constraint>Error messages must be user-friendly for low digital literacy users</constraint>
+    <constraint>Success message must include ranch name for confirmation</constraint>
+    <constraint>Form must not block page render (lazy load if needed)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/inquiries</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/inquiries - Request: { bullId, breederName, breederEmail, breederPhone?, message } - Response: 201 { inquiry } or 400/404/500 with error</signature>
+      <path>app/api/inquiries/route.ts</path>
+      <note>API endpoint will be created in Story 5-2. Form should handle all expected response codes.</note>
+    </interface>
+    <interface>
+      <name>InquiryFormProps</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface InquiryFormProps { bullId: string; ranchId: string; bullName: string; ranchName: string; }</signature>
+      <path>components/InquiryForm.tsx</path>
+      <note>Props passed from bull detail page to form component</note>
+    </interface>
+    <interface>
+      <name>InquiryFormData</name>
+      <kind>TypeScript interface</kind>
+      <signature>interface InquiryFormData { breederName: string; breederEmail: string; breederPhone?: string; message: string; }</signature>
+      <path>components/InquiryForm.tsx</path>
+      <note>Form data structure matching Zod schema and API request</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      No existing test framework detected in package.json. Recommend adding Jest + React Testing Library for component testing. Follow patterns: unit tests for validation schema, integration tests for form submission, manual testing for email client integration.
+    </standards>
+    <locations>
+      - Create tests in: __tests__/components/InquiryForm.test.tsx
+      - Integration tests: __tests__/integration/inquiry-submission.test.tsx
+    </locations>
+    <ideas>
+      <test ac="AC-5.1.2">Verify all form fields render with correct types and required markers</test>
+      <test ac="AC-5.1.3">Test message field pre-fills with bull name and is editable</test>
+      <test ac="AC-5.1.4">Test validation: name length, email format, phone format, message length</test>
+      <test ac="AC-5.1.4">Test submit button disabled when form invalid</test>
+      <test ac="AC-5.1.5">Test form submission calls API with correct payload</test>
+      <test ac="AC-5.1.6">Test success message displays and form resets</test>
+      <test ac="AC-5.1.7">Test form clears except pre-filled message after success</test>
+      <test ac="AC-5.1.8">Test error handling for 400, 404, 500 responses</test>
+      <test ac="AC-5.1.8">Test form data persists on error</test>
+      <test>Test responsive layout on mobile/tablet/desktop viewports</test>
+      <test>Test accessibility: keyboard navigation, ARIA labels, screen reader compatibility</test>
+    </ideas>
+  </tests>
+</story-context>

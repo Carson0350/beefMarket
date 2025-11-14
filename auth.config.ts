@@ -24,10 +24,11 @@ export const authConfig = {
       
       if (requiresVerification) {
         if (!isLoggedIn) return false; // Redirect to login
-        if (!isEmailVerified && !isOnVerificationPage) {
-          // Redirect unverified users to check-email page
-          return Response.redirect(new URL('/check-email', nextUrl));
-        }
+        // TEMPORARILY DISABLED FOR DEVELOPMENT
+        // if (!isEmailVerified && !isOnVerificationPage) {
+        //   // Redirect unverified users to check-email page
+        //   return Response.redirect(new URL('/check-email', nextUrl));
+        // }
         return true;
       }
       
