@@ -2,8 +2,11 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
+import { auth } from '@/auth';
 import { ChevronLeftIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import ShareButton from '@/components/ShareButton';
+import FavoriteButton from '@/components/FavoriteButton';
+import InquiryForm from '@/components/InquiryForm';
 
 interface PageProps {
   params: { slug: string };
@@ -68,6 +71,22 @@ export default async function BullDetailPage({ params }: PageProps) {
 
   if (!bull) {
     notFound();
+  }
+
+  // Check if current user has favorited this bull
+  const session = await auth();
+  let isFavorited = false;
+  
+  if (session?.user?.id) {
+    const favorite = await prisma.favorite.findUnique({
+      where: {
+        userId_bullId: {
+          userId: session.user.id,
+          bullId: bull.id,
+        },
+      },
+    });
+    isFavorited = !!favorite;
   }
 
   const availability = getAvailabilityStatus(bull.availableStraws);
@@ -137,7 +156,10 @@ export default async function BullDetailPage({ params }: PageProps) {
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-start justify-between mb-4">
                 <h1 className="text-3xl font-bold text-gray-900">{bull.name}</h1>
-                <ShareButton />
+                <div className="flex items-center gap-3">
+                  <FavoriteButton bullId={bull.id} initialIsFavorited={isFavorited} size="lg" />
+                  <ShareButton />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -303,16 +325,14 @@ export default async function BullDetailPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* Contact Ranch Button */}
-              <div className="mt-6">
-                <Link
-                  href={`/ranch/${bull.ranch.slug}`}
-                  className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Contact Ranch for Inquiry
-                </Link>
-              </div>
             </div>
+
+            {/* Contact Form */}
+            <InquiryForm 
+              bullId={bull.id}
+              bullName={bull.name}
+              ranchName={bull.ranch.name}
+            />
           </div>
         </div>
       </div>
@@ -330,7 +350,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${bull.name} - ${bull.breed} Bull | Wagner Beef`,
+    title: `${bull.name} - ${bull.breed} Bull | BeefStore`,
     description: `View detailed information about ${bull.name}, a ${bull.breed} bull from ${bull.ranch.name}. Registration: ${bull.registrationNumber || 'N/A'}`,
   };
 }

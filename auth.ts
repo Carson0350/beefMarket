@@ -19,9 +19,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // Find user by email
+        // Find user by email (convert to lowercase to match registration)
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: email.toLowerCase() },
         });
 
         if (!user) {

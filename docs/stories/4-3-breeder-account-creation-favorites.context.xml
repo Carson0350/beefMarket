@@ -1,0 +1,239 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>Breeder Account Creation & Favorites</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-3-breeder-account-creation-favorites.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to create an account and save bulls to favorites</iWant>
+    <soThat>I can track bulls of interest across browsing sessions</soThat>
+    <tasks>
+      - Extend User model for Breeder role (already exists in schema)
+      - Create Favorite model with many-to-many relationship
+      - Create breeder registration flow
+      - Update login flow to support Breeder role
+      - Create favorites API endpoints (GET all, POST add, DELETE remove)
+      - Add favorite button to BullCard component
+      - Add favorite button to bull detail page
+      - Create favorites page with empty state
+      - Implement guest user prompts for login
+      - Add favorites count to navigation
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Breeder account creation with Sign Up button, registration form (Name, Email, Password), role auto-set to "Breeder"
+    AC2: Breeder login with email/password, session persists, name shown in navigation
+    AC3: Favorite button (heart icon) on bull cards, filled/unfilled state, optimistic UI update, persists after reload
+    AC4: Favorite button on bull detail page, syncs with browse page
+    AC5: Favorites page shows all favorited bulls in card grid, empty state with link to browse
+    AC6: Remove from favorites updates UI immediately, syncs across pages
+    AC7: Guest users prompted to sign up/log in when favoriting, return to current page after login
+    AC8: Favorites count badge in navigation, updates when favorites change
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Bull Comparison & Favorites</title>
+        <section>Story 4.3: Breeder Account Creation & Favorites</section>
+        <snippet>Enable breeders to create accounts and save bulls to favorites/watchlist. Breeder role automatically assigned. Favorite state persists across sessions. Guest users prompted to login.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision - Authentication</title>
+        <section>AD-2: Authentication - NextAuth.js v5</section>
+        <snippet>NextAuth.js v5 configured with email/password provider, JWT sessions, bcrypt password hashing. Session data accessible in server components. Middleware protects authenticated routes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-3-authentication-system-with-nextauthjs.md</path>
+        <title>Story 1.3: Authentication System (Prerequisite)</title>
+        <section>Technical Notes</section>
+        <snippet>NextAuth.js configured with Credentials provider, session strategy with JWT, bcrypt password hashing. API routes: /api/auth/signin, /api/auth/signup, /api/auth/signout. Middleware protects authenticated routes.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User, Role, Favorite</symbol>
+        <lines>18-38, 158-172</lines>
+        <reason>User model already has Role enum with BREEDER option. Favorite model already exists with many-to-many relationship (User ↔ Bull). Need to verify implementation matches story requirements.</reason>
+      </artifact>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>1-105</lines>
+        <reason>Existing bull card component needs favorite button added. Currently wrapped in Link, need to handle click events for favorite button without triggering navigation.</reason>
+      </artifact>
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>NextAuth configuration</symbol>
+        <lines>all</lines>
+        <reason>NextAuth.js configuration file. Need to verify session includes user role and ID for favorites functionality.</reason>
+      </artifact>
+      <artifact>
+        <path>app/login/page.tsx</path>
+        <kind>page</kind>
+        <symbol>LoginPage</symbol>
+        <lines>all</lines>
+        <reason>Existing login page from Epic 1. Reference for creating registration page with similar patterns and styling.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>next-auth</package>
+        <version>^5.0.0-beta.30</version>
+        <usage>Authentication with session management, useSession hook for client components</usage>
+      </node>
+      <node>
+        <package>@auth/prisma-adapter</package>
+        <version>^2.11.1</version>
+        <usage>Prisma adapter for NextAuth.js session storage</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for Favorite model operations</usage>
+      </node>
+      <node>
+        <package>@heroicons/react</package>
+        <version>^2.2.0</version>
+        <usage>HeartIcon (outline and solid) for favorite button</usage>
+      </node>
+      <node>
+        <package>bcryptjs</package>
+        <version>^3.0.3</version>
+        <usage>Password hashing for breeder registration</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - User model already has Role enum with BREEDER option (no schema changes needed)
+    - Favorite model already exists in schema (verify implementation)
+    - Must integrate with existing NextAuth.js configuration from Epic 1
+    - Session must include user ID and role for authorization
+    - Favorite button must not trigger navigation when clicked on bull cards
+    - Use optimistic UI updates for immediate feedback
+    - Handle authentication errors gracefully
+    - Guest users can browse but must login to favorite
+    - Cascade delete favorites when user or bull deleted
+    - Unique constraint on userId + bullId prevents duplicates
+    - Follow existing authentication patterns and styling
+    - Reuse BullCard component with minimal modifications
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Favorite Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  bullId    String
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bull Bull @relation(fields: [bullId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, bullId])
+  @@index([userId])
+  @@index([bullId])
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Favorites API - Get All</name>
+      <kind>API Route</kind>
+      <signature>
+GET /api/favorites
+Response: { favorites: Array&lt;{ id, userId, bullId, createdAt, bull: Bull }> }
+Auth: Required (session)
+      </signature>
+      <path>app/api/favorites/route.ts</path>
+    </interface>
+    <interface>
+      <name>Favorites API - Toggle</name>
+      <kind>API Route</kind>
+      <signature>
+POST /api/favorites/[bullId] - Add to favorites
+DELETE /api/favorites/[bullId] - Remove from favorites
+Auth: Required (session)
+      </signature>
+      <path>app/api/favorites/[bullId]/route.ts</path>
+    </interface>
+    <interface>
+      <name>FavoriteButton Component</name>
+      <kind>React Component</kind>
+      <signature>
+interface FavoriteButtonProps {
+  bullId: string;
+  initialIsFavorited: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+export default function FavoriteButton(props: FavoriteButtonProps): JSX.Element
+// Handles toggle, optimistic updates, guest user prompts
+      </signature>
+      <path>components/FavoriteButton.tsx</path>
+    </interface>
+    <interface>
+      <name>Registration Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default function RegisterPage(): JSX.Element
+// Breeder registration form with name, email, password
+// Auto-assigns BREEDER role
+      </signature>
+      <path>app/register/page.tsx</path>
+    </interface>
+    <interface>
+      <name>Favorites Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default async function FavoritesPage(): Promise&lt;JSX.Element>
+// Server component that fetches user's favorites
+// Requires authentication, redirects to login if not authenticated
+      </signature>
+      <path>app/favorites/page.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test authentication flows, optimistic updates, and cascade deletes.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/api/favorites/ for API endpoint tests
+      - __tests__/components/FavoriteButton.test.tsx for component tests
+      - __tests__/app/favorites/ for page tests
+    </locations>
+    <ideas>
+      - AC1: Test breeder registration creates account with BREEDER role
+      - AC2: Test breeder login succeeds, session persists, name shown in nav
+      - AC3: Test favorite button on bull cards toggles state, persists after reload
+      - AC4: Test favorite button on detail page syncs with browse page
+      - AC5: Test favorites page shows favorited bulls, empty state displays correctly
+      - AC6: Test remove from favorites updates UI immediately across all pages
+      - AC7: Test guest user clicking favorite shows login prompt, returns after login
+      - AC8: Test favorites count badge updates when favorites change
+      - Edge case: Test duplicate favorite (unique constraint prevents)
+      - Edge case: Test favoriting deleted bull (handled gracefully)
+      - Edge case: Test network error during toggle (reverts optimistic update)
+      - Edge case: Test rapid clicking favorite button (debounce or disable during request)
+      - Edge case: Test cascade delete when user deleted
+    </ideas>
+  </tests>
+</story-context>

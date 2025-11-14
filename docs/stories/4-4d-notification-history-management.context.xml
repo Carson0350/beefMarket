@@ -1,0 +1,251 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4d</storyId>
+    <title>Notification History & Management</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4d-notification-history-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to view my notification history and manage my notification preferences</iWant>
+    <soThat>I can track changes and control what notifications I receive</soThat>
+    <tasks>
+      - Design and create Notification model (type, bullId, userId, changeData, readAt, createdAt)
+      - Update email sending functions to create Notification records
+      - Create /notifications page to display notification history (last 30 days)
+      - Implement mark as read functionality with API endpoint
+      - Add unread count badge to navigation
+      - Implement notification filtering (type, read/unread status)
+      - Create unsubscribe flow with secure tokens
+      - Add unsubscribe links to email templates
+      - Create unsubscribe landing page
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Notification model stores type (inventory/price), bull info, change details (JSON), timestamp, read/unread status, queryable by user
+    AC2: Notification history page shows last 30 days, type indicator, bull name/thumbnail, change summary, relative timestamp, read/unread indicator, link to bull, sorted newest first
+    AC3: Clicking notification marks as read, updates database, updates UI, reduces unread count badge, persists
+    AC4: Unread count badge visible in navigation, updates when notifications marked as read
+    AC5: Filters available: type (inventory/price/all), read/unread status, updates list immediately
+    AC6: Unsubscribe link in emails leads to page with bull info, options to disable for bull or all, confirmation, no more emails after
+    AC7: Unsubscribe tokens are secure, valid for 30 days, single-use or user-specific, expired tokens show message
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/4-4a-basic-notification-infrastructure.md</path>
+        <title>Story 4.4a: Basic Notification Infrastructure (Prerequisite)</title>
+        <section>Email Sending</section>
+        <snippet>Email sending functions (sendInventoryChangeEmail) already exist. These need to be updated to also create Notification records in database after sending email.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-4b-notification-preferences-ui.md</path>
+        <title>Story 4.4b: Notification Preferences UI (Prerequisite)</title>
+        <section>NotificationToggle</section>
+        <snippet>Notification preferences UI exists for per-bull control. Unsubscribe flow will leverage same notificationsEnabled field to disable notifications.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-4c-price-change-notifications.md</path>
+        <title>Story 4.4c: Price Change Notifications (Prerequisite)</title>
+        <section>Email Sending</section>
+        <snippet>Price change email function (sendPriceChangeEmail) exists. Also needs to create Notification records with type PRICE_CHANGE.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>components/AuthButton.tsx</path>
+        <kind>component</kind>
+        <symbol>AuthButton</symbol>
+        <lines>all</lines>
+        <reason>Navigation component where unread notification count badge will be added. Already has Favorites count badge pattern to follow.</reason>
+      </artifact>
+      <artifact>
+        <path>app/favorites/page.tsx</path>
+        <kind>page</kind>
+        <symbol>FavoritesPage</symbol>
+        <lines>all</lines>
+        <reason>Reference for authenticated page pattern with list display and empty state. Notification history page will follow similar structure.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendInventoryChangeEmail, sendPriceChangeEmail</symbol>
+        <lines>all</lines>
+        <reason>Email sending functions that need to be updated to create Notification records. Also where unsubscribe links will be added to email templates.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User, Bull, Favorite</symbol>
+        <lines>all</lines>
+        <reason>Existing models that Notification will relate to. Need to add Notification model with relationships to User and Bull.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for Notification model operations (create, findMany, update)</usage>
+      </node>
+      <node>
+        <package>next</package>
+        <version>^14.2.0</version>
+        <usage>Next.js for notifications page and API routes</usage>
+      </node>
+      <node>
+        <package>crypto</package>
+        <version>built-in</version>
+        <usage>Node.js crypto module for generating secure unsubscribe tokens</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Requires Stories 4.4a, 4.4b, 4.4c complete (notifications being sent)
+    - Notification model needs migration (new model, enum, relationships)
+    - Store notifications AFTER email is sent successfully (don't store if email fails)
+    - changeData field is JSON - store old/new values, change type, etc.
+    - Notification history limited to last 30 days (performance)
+    - Unread count badge should update reactively
+    - Unsubscribe tokens must be cryptographically secure
+    - Token expiration: 30 days from generation
+    - Unsubscribe should update notificationsEnabled field (reuse existing field)
+    - Mark as read should be optimistic UI update
+    - Filtering should be client-side or server-side based on performance
+    - Follow existing page patterns (favorites page structure)
+    - Cascade delete notifications when user or bull deleted
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Notification Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  bullId     String
+  type       NotificationType
+  changeData Json
+  readAt     DateTime?
+  createdAt  DateTime         @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bull Bull @relation(fields: [bullId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+enum NotificationType {
+  INVENTORY_CHANGE
+  PRICE_CHANGE
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Notifications History Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default async function NotificationsPage(): Promise&lt;JSX.Element&gt;
+// Server component that fetches user's notifications (last 30 days)
+// Requires authentication, redirects to login if not authenticated
+// Shows empty state if no notifications
+// Displays notifications with read/unread indicators
+      </signature>
+      <path>app/notifications/page.tsx</path>
+    </interface>
+    <interface>
+      <name>Mark as Read API</name>
+      <kind>API Route</kind>
+      <signature>
+PATCH /api/notifications/[id]/read
+Response: { success: boolean }
+Auth: Required (session)
+Updates readAt timestamp for notification
+      </signature>
+      <path>app/api/notifications/[id]/read/route.ts</path>
+    </interface>
+    <interface>
+      <name>Unsubscribe Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default async function UnsubscribePage({
+  searchParams
+}: {
+  searchParams: { token: string, bullId?: string }
+}): Promise&lt;JSX.Element&gt;
+// Verifies token, shows unsubscribe options, handles confirmation
+      </signature>
+      <path>app/unsubscribe/page.tsx</path>
+    </interface>
+    <interface>
+      <name>generateUnsubscribeToken</name>
+      <kind>Function</kind>
+      <signature>
+function generateUnsubscribeToken(
+  userId: string,
+  bullId: string
+): string
+// Generates secure HMAC token for unsubscribe links
+      </signature>
+      <path>lib/tokens.ts (or lib/email.ts)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test notification storage, history display, mark as read, and unsubscribe flow.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/models/notification.test.ts
+      - __tests__/app/notifications/
+      - __tests__/api/notifications/
+      - Manual testing via notification creation and history page
+    </locations>
+    <ideas>
+      - AC1: Test Notification model creation with all fields
+      - AC1: Test notification types (INVENTORY_CHANGE, PRICE_CHANGE)
+      - AC1: Test changeData JSON storage
+      - AC1: Test querying notifications by userId
+      - AC2: Test notifications page shows last 30 days only
+      - AC2: Test notifications sorted newest first
+      - AC2: Test notification type indicator displayed
+      - AC2: Test bull name and thumbnail shown
+      - AC2: Test relative timestamp (e.g., "2 hours ago")
+      - AC2: Test link to bull page works
+      - AC3: Test marking notification as read updates database
+      - AC3: Test readAt timestamp set correctly
+      - AC3: Test UI updates to show read state
+      - AC3: Test unread count decreases
+      - AC4: Test unread count badge shows in navigation
+      - AC4: Test badge updates when notifications marked as read
+      - AC4: Test badge shows correct count
+      - AC5: Test filter by type (inventory, price, all)
+      - AC5: Test filter by read/unread status
+      - AC5: Test filters update list immediately
+      - AC6: Test unsubscribe link in email
+      - AC6: Test unsubscribe page shows bull info
+      - AC6: Test disable notifications for specific bull
+      - AC6: Test disable all notifications
+      - AC6: Test confirmation message shown
+      - AC7: Test unsubscribe token generation
+      - AC7: Test token verification
+      - AC7: Test token expiration (30 days)
+      - AC7: Test expired token shows error message
+      - Edge case: Test with 0 notifications (empty state)
+      - Edge case: Test with many notifications (pagination consideration)
+      - Edge case: Test notification for deleted bull
+      - Edge case: Test cascade delete when user deleted
+      - Edge case: Test invalid unsubscribe token
+    </ideas>
+  </tests>
+</story-context>

@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import SessionProvider from '@/components/SessionProvider'
+import { ComparisonProvider } from '@/contexts/ComparisonContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'WagnerBeef - Bull Marketplace',
-  description: 'Professional bull breeding marketplace connecting ranchers with breeders',
+  title: 'BeefStore - Premium Bull Semen Marketplace',
+  description: 'Browse and purchase premium bull semen from top ranches',
 }
 
 export default function RootLayout({
@@ -16,7 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <SessionProvider>
+          <ComparisonProvider>{children}</ComparisonProvider>
+        </SessionProvider>
+      </body>
     </html>
   )
 }

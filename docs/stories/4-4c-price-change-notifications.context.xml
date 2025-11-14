@@ -1,0 +1,182 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4c</storyId>
+    <title>Price Change Notifications</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4c-price-change-notifications.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to receive notifications when favorited bulls' prices change</iWant>
+    <soThat>I can take advantage of price decreases or plan for increases</soThat>
+    <tasks>
+      - Add price change detection to bull update endpoint
+      - Calculate price difference and percentage change
+      - Create HTML email template for price changes
+      - Style price decreases prominently (green/positive)
+      - Style price increases neutrally
+      - Create sendPriceChangeEmail function
+      - Test with price increases and decreases
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: System detects price changes on bull update, calculates difference and percentage, identifies increase vs decrease
+    AC2: Email sent immediately with bull name/link, old/new price, difference, percentage, visual indicator for decreases, ranch info
+    AC3: Price decreases highlighted prominently with green color, "Price Drop!" message, savings amount shown
+    AC4: Price increases shown clearly with neutral colors, professional tone, new price and increase amount
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/4-4a-basic-notification-infrastructure.md</path>
+        <title>Story 4.4a: Basic Notification Infrastructure (Prerequisite)</title>
+        <section>Change Detection Logic</section>
+        <snippet>Inventory change detection pattern already implemented. Price change detection will follow same pattern: compare old vs new values, determine change type, find users with notifications enabled, send emails.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-4a-basic-notification-infrastructure.md</path>
+        <title>Story 4.4a: Email Template Pattern</title>
+        <section>Email Template</section>
+        <snippet>Email template structure established with HTML/text versions, subject line variations, mobile-responsive design. Price change template will follow same pattern with price-specific styling.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendInventoryChangeEmail</symbol>
+        <lines>all</lines>
+        <reason>Reference for email sending pattern from Story 4.4a. Price change email will follow same structure: function signature, Resend integration, HTML template generation, error handling.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model with pricePerStraw field. This is the field that will be monitored for changes. Field is nullable (Decimal?), need to handle null values.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/favorites/route.ts</path>
+        <kind>api</kind>
+        <symbol>GET favorites</symbol>
+        <lines>all</lines>
+        <reason>Pattern for querying favorites with user relationships. Price change notification will use same query to find users who favorited a bull with notifications enabled.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>resend</package>
+        <version>^6.4.2</version>
+        <usage>Email service for sending price change notifications</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for querying favorites and bull prices</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Requires Story 4.4a complete (notification infrastructure must exist)
+    - Follow same change detection pattern as inventory notifications
+    - Use existing Resend email service (lib/email.ts)
+    - Price field is nullable (Decimal?) - handle null values gracefully
+    - Price decreases should be visually emphasized (green, positive messaging)
+    - Price increases should be neutral (not negative or alarming)
+    - Calculate percentage change safely (avoid division by zero)
+    - Email sending must be non-blocking (async, don't crash if email fails)
+    - Hook into same bull update endpoint as inventory detection
+    - Mobile-responsive email template
+    - Follow existing email template patterns
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>sendPriceChangeEmail</name>
+      <kind>Function</kind>
+      <signature>
+export async function sendPriceChangeEmail({
+  userEmail: string,
+  bull: Bull & { ranch: Ranch },
+  oldPrice: number,
+  newPrice: number,
+  priceDifference: number,
+  percentageChange: number,
+  isDecrease: boolean
+}): Promise&lt;{ success: boolean; error?: string }&gt;
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+    <interface>
+      <name>notifyPriceChange</name>
+      <kind>Function</kind>
+      <signature>
+async function notifyPriceChange(
+  oldBull: Bull,
+  newBull: Bull & { ranch: Ranch }
+): Promise&lt;void&gt;
+// Calculates price difference/percentage, finds users with notifications enabled, sends emails
+      </signature>
+      <path>app/api/bulls/[id]/route.ts (or similar)</path>
+    </interface>
+    <interface>
+      <name>getPriceChangeEmailHTML</name>
+      <kind>Function</kind>
+      <signature>
+function getPriceChangeEmailHTML({
+  bull: Bull,
+  oldPrice: number,
+  newPrice: number,
+  priceDifference: number,
+  percentageChange: number,
+  isDecrease: boolean
+}): string
+// Generates HTML email with price comparison, styled based on increase/decrease
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test price change detection, calculations, and email delivery.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/lib/email.test.ts for price change email functions
+      - __tests__/api/notifications/ for price change detection
+      - Manual testing via bull price updates in development
+    </locations>
+    <ideas>
+      - AC1: Test price change detection (100→150, 150→100, 100→100.50)
+      - AC1: Test price difference calculation (positive and negative)
+      - AC1: Test percentage change calculation (various scenarios)
+      - AC1: Test identifying increase vs decrease
+      - AC2: Test email sent with correct old/new prices
+      - AC2: Test email includes price difference and percentage
+      - AC2: Test email includes bull name and link
+      - AC2: Test email includes ranch information
+      - AC3: Test price decrease email has green styling
+      - AC3: Test "Price Drop!" message appears for decreases
+      - AC3: Test savings amount displayed correctly
+      - AC4: Test price increase email has neutral styling
+      - AC4: Test increase amount displayed correctly
+      - AC4: Test professional tone maintained for increases
+      - Edge case: Test price change from null to value (new price set)
+      - Edge case: Test price change from value to null (price removed)
+      - Edge case: Test very small price change ($0.01)
+      - Edge case: Test very large percentage change (100%+)
+      - Edge case: Test with 0 users favoriting bull (no emails sent)
+      - Edge case: Test with multiple users favoriting same bull (all get emails)
+      - Edge case: Test with notifications disabled (no email sent)
+      - Edge case: Test division by zero (oldPrice = 0)
+    </ideas>
+  </tests>
+</story-context>

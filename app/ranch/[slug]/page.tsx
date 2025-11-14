@@ -220,7 +220,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${ranch.name} - ${ranch.state} | Wagner Beef`,
+    title: `${ranch.name} - ${ranch.state} | BeefStore`,
     description: ranch.about || `View bulls from ${ranch.name}, a cattle ranch in ${ranch.state}.`,
   };
 }

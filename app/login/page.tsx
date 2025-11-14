@@ -27,7 +27,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        router.push('/dashboard');
+        // Redirect breeders to bulls page, ranch owners to dashboard
+        router.push('/bulls');
         router.refresh();
       }
     } catch (error) {
@@ -42,7 +43,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
-            Sign in to WagnerBeef
+            Sign in to BeefStore
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -92,9 +93,9 @@ export default function LoginPage() {
 
           <div className="text-center text-sm">
             <span className="text-gray-600">Don&apos;t have an account? </span>
-            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign up
-            </Link>
+            <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-gray-700">
+            BeefStore
+          </Link>
           </div>
         </form>
       </div>

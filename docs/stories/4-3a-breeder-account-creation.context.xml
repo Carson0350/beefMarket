@@ -1,0 +1,218 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3a</storyId>
+    <title>Breeder Account Creation & Login</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-3a-breeder-account-creation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to create an account and log in</iWant>
+    <soThat>I can access breeder-specific features like favorites and notifications</soThat>
+    <tasks>
+      - Verify User model has Role enum with BREEDER (already exists)
+      - Create breeder registration page
+      - Create registration API endpoint
+      - Implement form validation and password hashing
+      - Update login flow to support Breeder role
+      - Update navigation for authenticated state
+      - Implement logout functionality
+      - Test session persistence
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Breeder account creation with registration form (Name, Email, Password), role auto-set to "Breeder", form validation, password strength requirements
+    AC2: Breeder login with email/password, session persists, name shown in navigation
+    AC3: Navigation updates for authenticated users - show name/email, logout button, hide Sign Up/Login
+    AC4: Session persistence across page reloads and navigation
+    AC5: Logout functionality clears session and redirects
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Bull Comparison & Favorites</title>
+        <section>Story 4.3a: Breeder Account Creation & Login</section>
+        <snippet>Enable breeders to create accounts and log in. Breeder role automatically assigned. Session persists across page reloads. Navigation updates for authenticated state.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision - Authentication</title>
+        <section>AD-2: Authentication - NextAuth.js v5</section>
+        <snippet>NextAuth.js v5 configured with email/password provider, JWT sessions, bcrypt password hashing. Session data accessible in server components. Middleware protects authenticated routes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-3-authentication-system-with-nextauthjs.md</path>
+        <title>Story 1.3: Authentication System (Prerequisite)</title>
+        <section>Technical Notes</section>
+        <snippet>NextAuth.js configured with Credentials provider, session strategy with JWT, bcrypt password hashing. API routes: /api/auth/signin, /api/auth/signup, /api/auth/signout. Middleware protects authenticated routes.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User, Role</symbol>
+        <lines>18-38</lines>
+        <reason>User model already has Role enum with BREEDER option (default). Verify no schema changes needed for registration.</reason>
+      </artifact>
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>NextAuth configuration</symbol>
+        <lines>all</lines>
+        <reason>NextAuth.js configuration file. Need to verify session includes user ID and role. May need to extend callbacks to include role in session.</reason>
+      </artifact>
+      <artifact>
+        <path>app/login/page.tsx</path>
+        <kind>page</kind>
+        <symbol>LoginPage</symbol>
+        <lines>all</lines>
+        <reason>Existing login page from Epic 1. Reference for creating registration page with similar patterns, styling, and form handling.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>next-auth</package>
+        <version>^5.0.0-beta.30</version>
+        <usage>Authentication with session management, useSession hook for client components, signIn/signOut functions</usage>
+      </node>
+      <node>
+        <package>@auth/prisma-adapter</package>
+        <version>^2.11.1</version>
+        <usage>Prisma adapter for NextAuth.js session storage</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for User model operations</usage>
+      </node>
+      <node>
+        <package>bcryptjs</package>
+        <version>^3.0.3</version>
+        <usage>Password hashing for breeder registration</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - User model already has Role enum with BREEDER option (no schema changes needed)
+    - Must integrate with existing NextAuth.js configuration from Epic 1
+    - Session must include user ID and role for authorization
+    - Password must be hashed with bcrypt before storage
+    - Follow existing authentication patterns and styling from login page
+    - Auto-login after successful registration
+    - Handle authentication errors gracefully
+    - Form validation on client and server side
+    - Password minimum 8 characters
+    - Email must be unique (database constraint)
+    - Session timeout configured in NextAuth
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>User Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+enum Role {
+  RANCH_OWNER
+  BREEDER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String    // bcrypt hashed
+  role          Role      @default(BREEDER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  ranch         Ranch?
+  favorites     Favorite[]
+  sessions      Session[]
+  accounts      Account[]
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Registration API</name>
+      <kind>API Route</kind>
+      <signature>
+POST /api/auth/register
+Body: { name?: string, email: string, password: string }
+Response: { user: { id, email, role } } | { error: string }
+Status: 200 (success) | 400 (validation error) | 500 (server error)
+      </signature>
+      <path>app/api/auth/register/route.ts</path>
+    </interface>
+    <interface>
+      <name>Registration Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default function RegisterPage(): JSX.Element
+// Client component with registration form
+// Fields: name (optional), email, password, confirmPassword
+// Validates input, calls registration API, auto-logins on success
+      </signature>
+      <path>app/register/page.tsx</path>
+    </interface>
+    <interface>
+      <name>NextAuth Session</name>
+      <kind>Type Definition</kind>
+      <signature>
+interface Session {
+  user: {
+    id: string;
+    email: string;
+    role: Role;
+    name?: string;
+  }
+}
+// Session should include user ID and role for authorization
+      </signature>
+      <path>auth.ts or types/next-auth.d.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test registration flow, login, session persistence, and navigation updates.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/api/auth/register.test.ts for registration API tests
+      - __tests__/app/register/ for registration page tests
+      - __tests__/integration/auth-flow.test.ts for end-to-end auth tests
+    </locations>
+    <ideas>
+      - AC1: Test breeder registration with valid data creates account with BREEDER role
+      - AC1: Test registration with existing email shows error
+      - AC1: Test password validation (minimum length, match confirmation)
+      - AC1: Test form validation (required fields, email format)
+      - AC2: Test breeder login with correct credentials succeeds
+      - AC2: Test login with incorrect credentials shows error
+      - AC2: Test session persists after page reload
+      - AC3: Test navigation shows user name when logged in
+      - AC3: Test navigation shows Sign Up/Login when logged out
+      - AC3: Test logout button appears when logged in
+      - AC4: Test session persists across page navigation
+      - AC4: Test session expires after configured timeout
+      - AC5: Test logout clears session and redirects
+      - Edge case: Test concurrent registration with same email
+      - Edge case: Test weak password rejection
+      - Edge case: Test SQL injection attempts in email/password
+      - Edge case: Test XSS attempts in name field
+      - Edge case: Test network error during registration
+      - Edge case: Test auto-login after registration
+    </ideas>
+  </tests>
+</story-context>

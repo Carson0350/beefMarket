@@ -1,0 +1,260 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.2</storyId>
+    <title>Inquiry Email Notifications to Ranch Owners</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-2-inquiry-email-notifications-to-ranch-owners.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to receive email notifications when breeders inquire about my bulls</iWant>
+    <soThat>I can respond quickly to sales opportunities</soThat>
+    <tasks>
+      - Verify Resend API key configuration
+      - Create inquiry notification email template
+      - Add sendInquiryNotification function to lib/email.ts
+      - Integrate email sending into POST /api/inquiries endpoint
+      - Implement retry logic (3 attempts with exponential backoff)
+      - Add email delivery logging
+      - Test email delivery and template rendering
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Ranch owner receives email within 5 seconds of inquiry submission
+    AC2: Email subject line: "New Inquiry: [Bull Name] from [Breeder Name]"
+    AC3: Email body includes: bull name, bull photo, breeder name, breeder email, breeder phone, full message
+    AC4: Email includes direct link to inquiry dashboard
+    AC5: Reply-to header is set to breeder's email address
+    AC6: Email is mobile-responsive and professionally branded
+    AC7: Failed email deliveries are logged and retried up to 3 times
+    AC8: Inquiry is saved to database even if email delivery fails
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Data Models - InquiryEmailData</section>
+        <snippet>Email template data: ranchOwnerName, ranchName, bullName, bullPhotoUrl, breederName, breederEmail, breederPhone, message, dashboardUrl, timestamp. Subject: "New Inquiry: [Bull Name] from [Breeder Name]". Reply-to: breeder email.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows - Workflow 2: Email Notification</section>
+        <snippet>Inquiry created → trigger email service → fetch ranch owner details → fetch bull details → generate HTML email → send via Resend with reply-to → log delivery. Non-blocking, async processing.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>NFR - Email Delivery Reliability</section>
+        <snippet>Retry logic: 3 attempts with exponential backoff (1s, 5s, 15s). Failure logging for manual review. Inquiry saved even if email fails. Dead letter queue for failed emails.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/5-1-inquiry-contact-form.md</path>
+        <title>Story 5.1: Inquiry Contact Form (Prerequisite)</title>
+        <section>Tasks</section>
+        <snippet>POST /api/inquiries endpoint creates inquiry records. Inquiry model with breederName, breederEmail, breederPhone, message. This story adds email notification to that endpoint.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendVerificationEmail, sendInventoryChangeEmail, sendPriceChangeEmail</symbol>
+        <lines>all</lines>
+        <reason>Existing email service using Resend. Contains patterns for HTML email templates, error handling, and email sending. Will add sendInquiryNotification function following same structure.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/inquiries/route.ts</path>
+        <kind>api</kind>
+        <symbol>POST handler</symbol>
+        <lines>all</lines>
+        <reason>Created in Story 5.1. Need to modify to trigger email notification after inquiry creation. Email sending must be async and non-blocking.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry, Ranch, Bull</symbol>
+        <lines>42-63, 65-118, 125-153</lines>
+        <reason>Need to fetch ranch owner email from Ranch model and bull details for email template. Inquiry has ranchId and bullId relationships.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>resend</package>
+        <version>^6.4.2</version>
+        <usage>Email service for sending inquiry notifications (already installed)</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database queries for ranch owner and bull details</usage>
+      </node>
+      <node>
+        <package>date-fns</package>
+        <version>^4.1.0</version>
+        <usage>Date formatting for email timestamps</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use existing Resend email service (lib/email.ts) - no new email provider
+    - Email delivery must be asynchronous (non-blocking API response)
+    - Inquiry creation must succeed even if email fails (graceful degradation)
+    - Retry logic: 3 attempts with exponential backoff (1s, 5s, 15s)
+    - Timeout: 10 seconds per email send attempt
+    - Reply-to header set to breeder email for direct response
+    - No sensitive data in email subject lines
+    - SPF/DKIM configured via Resend (no action needed)
+    - Email must be mobile-responsive and professionally branded
+    - Dashboard link: /dashboard/inquiries
+    - Email delivery target: within 5 seconds
+    - Log all email delivery attempts (success/failure)
+    - Store Resend message ID for tracking
+    - Follow existing email template patterns from lib/email.ts
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>sendInquiryNotification</name>
+      <kind>Email Service Function</kind>
+      <signature>
+export async function sendInquiryNotification({
+  ranchOwnerEmail,
+  ranchOwnerName,
+  ranchName,
+  bull,
+  inquiry,
+}: {
+  ranchOwnerEmail: string;
+  ranchOwnerName: string;
+  ranchName: string;
+  bull: {
+    name: string;
+    slug: string;
+    heroImage: string;
+  };
+  inquiry: {
+    breederName: string;
+    breederEmail: string;
+    breederPhone: string | null;
+    message: string;
+    createdAt: Date;
+  };
+}): Promise&lt;{ success: boolean; error?: string; messageId?: string }&gt;
+
+// Sends email via Resend
+// Subject: "New Inquiry: [Bull Name] from [Breeder Name]"
+// Reply-to: inquiry.breederEmail
+// HTML template with bull photo, breeder contact, message
+// Includes link to /dashboard/inquiries
+// Returns success status and Resend message ID
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+    <interface>
+      <name>Inquiry Email Template</name>
+      <kind>HTML Email Template</kind>
+      <signature>
+function getInquiryNotificationEmailHTML({
+  ranchOwnerName,
+  ranchName,
+  bull,
+  inquiry,
+  dashboardUrl,
+}: EmailTemplateParams): string
+
+// Mobile-responsive HTML email
+// Sections: Header, Bull info with photo, Breeder contact details, Message content, CTA button to dashboard
+// Professional branding (BeefStore logo, colors)
+// Footer with timestamp and notification preferences link
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+    <interface>
+      <name>Email Retry Logic</name>
+      <kind>Utility Function</kind>
+      <signature>
+async function sendEmailWithRetry(
+  emailFn: () => Promise&lt;any&gt;,
+  maxRetries: number = 3
+): Promise&lt;{ success: boolean; error?: string }&gt;
+
+// Attempts email send up to maxRetries times
+// Exponential backoff: 1s, 5s, 15s
+// Logs each attempt and final outcome
+// Returns success status
+      </signature>
+      <path>lib/email.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach: manual testing and TypeScript type safety. Focus on email delivery, template rendering, and error handling.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/lib/email.test.ts for email service functions
+      - __tests__/api/inquiries.test.ts for email integration
+    </locations>
+    <ideas>
+      - AC1: Test email sent within 5 seconds of inquiry submission
+      - AC2: Test subject line format with bull and breeder names
+      - AC3: Test email body contains all required data
+      - AC4: Test dashboard link is correct and clickable
+      - AC5: Test reply-to header set to breeder email
+      - AC6: Test email renders correctly on mobile devices
+      - AC7: Test retry logic executes on transient failures
+      - AC7: Test email delivery logged with success/failure
+      - AC8: Test inquiry saved even when email fails
+      - Unit test: Email template renders with correct data
+      - Unit test: Reply-to header set correctly
+      - Integration test: Submit inquiry → email sent
+      - Integration test: Resend API failure → inquiry still saved
+      - Integration test: Retry logic with mock failures
+      - Manual test: Receive email in inbox
+      - Manual test: Click "Reply" → breeder email pre-filled
+      - Manual test: Click dashboard link → navigates correctly
+      - Manual test: View email on mobile device
+      - Edge case: Invalid ranch owner email
+      - Edge case: Missing bull photo
+      - Edge case: Very long message (2000 chars)
+      - Edge case: Special characters in names/message
+      - Edge case: Resend API timeout
+    </ideas>
+  </tests>
+
+  <notes>
+    <important>
+      Email sending must NOT block the API response. The inquiry should be saved to the database first, then email sending happens asynchronously. If email fails after all retries, the inquiry is still accessible in the dashboard.
+    </important>
+    <sequencing>
+      Depends on Story 5.1 (Inquiry Contact Form) being complete. The POST /api/inquiries endpoint must exist and create inquiries before adding email notifications.
+    </sequencing>
+    <patterns>
+      Follow existing email patterns from lib/email.ts:
+      - HTML + text versions (or HTML only for transactional)
+      - Try-catch error handling
+      - Return success/error object
+      - Use Resend client from lib/email.ts
+      - Professional email styling (inline CSS)
+      - Mobile-responsive design
+      - Clear CTA buttons
+    </patterns>
+    <infrastructure>
+      Resend already configured:
+      - RESEND_API_KEY in environment variables
+      - Free tier: 3,000 emails/month
+      - FROM_EMAIL: BeefStore &lt;noreply@beefstore.com&gt;
+      - SPF/DKIM configured for deliverability
+    </infrastructure>
+  </notes>
+</story-context>

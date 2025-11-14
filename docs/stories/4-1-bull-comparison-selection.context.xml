@@ -1,0 +1,181 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>1</storyId>
+    <title>Bull Comparison Selection</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-1-bull-comparison-selection.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to select 2-3 bulls for comparison</iWant>
+    <soThat>I can evaluate them side-by-side</soThat>
+    <tasks>
+      - Create comparison state management (Zustand store with session storage)
+      - Add comparison checkbox to BullCard component
+      - Create ComparisonBar component (floating, bottom of screen)
+      - Create BullThumbnail component for comparison bar
+      - Implement Compare Now button with navigation
+      - Integrate with browse page
+      - Handle edge cases (max 3 bulls, session persistence, navigation)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Comparison checkbox visible on each bull card, clicking adds bull to comparison
+    AC2: Maximum 3 bulls enforced, checkboxes disabled when limit reached
+    AC3: Floating comparison bar appears when 1+ bulls selected, shows thumbnails and names
+    AC4: Remove button on each bull in comparison bar, updates state and re-enables checkbox
+    AC5: Session persistence - comparison state survives navigation and refresh, clears on browser close
+    AC6: Compare Now button enabled when 2+ bulls selected, shows count, navigates to /compare
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 4: Bull Comparison & Favorites</title>
+        <section>Story 4.1: Bull Comparison Selection</section>
+        <snippet>Add side-by-side comparison functionality for breeders to efficiently evaluate multiple bulls. Comparison state management with max 3 bulls, floating comparison bar, session persistence.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision - State Management</title>
+        <section>AD-7: State Management - React Context + URL State</section>
+        <snippet>Use React Context for global state (comparison state, auth state, toast notifications). URL Parameters for shareable state (search filters, pagination). Alternatives considered: Zustand (lightweight but unnecessary for this scale), Redux (overkill).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Bull Comparison Feature</section>
+        <snippet>Breeders need ability to compare 2-3 bulls side-by-side to evaluate genetic data efficiently. Key to "find perfect bull in 5 minutes" magic moment.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>1-105</lines>
+        <reason>Existing bull card component that needs comparison checkbox added. Shows bull photo, name, breed, EPD values, ranch name. Currently wrapped in Link to detail page.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullsPage</symbol>
+        <lines>all</lines>
+        <reason>Browse page that displays BullCard components in grid. Needs ComparisonBar component added to layout.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull</symbol>
+        <lines>64-115</lines>
+        <reason>Bull model defines data structure. Comparison will use bull id, name, heroImage, breed for display in comparison bar.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>react</package>
+        <version>^18.3.0</version>
+        <usage>Core React for components and hooks</usage>
+      </node>
+      <node>
+        <package>next</package>
+        <version>^14.2.0</version>
+        <usage>Next.js framework with App Router for routing and navigation</usage>
+      </node>
+      <node>
+        <package>typescript</package>
+        <version>^5</version>
+        <usage>Type safety for state management and component props</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Architecture specifies React Context for state management (not Zustand as suggested in story)
+    - Must use sessionStorage (not localStorage) - comparison is session-specific
+    - Client component pattern required (comparison is interactive)
+    - Comparison bar must be responsive and mobile-friendly
+    - Maximum 3 bulls enforced at state level
+    - Must integrate with existing BullCard component without breaking current functionality
+    - Follow existing component patterns and styling (Tailwind CSS)
+    - Comparison state should not interfere with other page navigation
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ComparisonContext</name>
+      <kind>React Context</kind>
+      <signature>
+interface ComparisonContextType {
+  selectedBulls: string[]; // Bull IDs
+  addBull: (bullId: string) => void;
+  removeBull: (bullId: string) => void;
+  clearComparison: () => void;
+  isSelected: (bullId: string) => boolean;
+  canAddMore: boolean;
+}
+      </signature>
+      <path>contexts/ComparisonContext.tsx</path>
+    </interface>
+    <interface>
+      <name>BullCard Props Extension</name>
+      <kind>Component Props</kind>
+      <signature>
+interface BullCardProps {
+  bull: {
+    id: string; // Add id to existing interface
+    slug: string;
+    name: string;
+    breed: string;
+    heroImage: string;
+    epdData?: any;
+    availableStraws: number;
+    ranch: {
+      name: string;
+      slug: string;
+    };
+  };
+}
+      </signature>
+      <path>components/BullCard.tsx</path>
+    </interface>
+    <interface>
+      <name>ComparisonBar Component</name>
+      <kind>React Component</kind>
+      <signature>
+export default function ComparisonBar(): JSX.Element | null
+// Returns null when no bulls selected
+// Displays floating bar with selected bulls when 1+ bulls selected
+      </signature>
+      <path>components/ComparisonBar.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established in codebase. For this story, focus on manual testing and TypeScript type safety. Consider adding unit tests for comparison state logic and integration tests for user flows in future stories.
+    </standards>
+    <locations>
+      No test directory currently exists. Tests would be added to:
+      - __tests__/components/ for component tests
+      - __tests__/contexts/ for context/state tests
+    </locations>
+    <ideas>
+      - AC1: Test checkbox appears on bull cards and clicking toggles comparison state
+      - AC2: Test max 3 bulls enforcement - 4th checkbox should be disabled
+      - AC3: Test comparison bar appears/disappears based on selection count
+      - AC4: Test remove button updates state and re-enables checkbox
+      - AC5: Test session persistence - select bulls, navigate away, return - state preserved
+      - AC5: Test session clear - close browser, reopen - state cleared
+      - AC6: Test Compare Now button disabled with 1 bull, enabled with 2+, navigates to /compare
+      - Edge case: Test removing last bull hides comparison bar
+      - Edge case: Test browser refresh maintains comparison state
+    </ideas>
+  </tests>
+</story-context>

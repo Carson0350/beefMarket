@@ -1,0 +1,274 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4e</storyId>
+    <title>Notification Batching & Queue (OPTIONAL)</title>
+    <status>backlog</status>
+    <generatedAt>2025-11-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-4e-notification-batching-queue.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to receive batched notifications instead of individual emails for every change</iWant>
+    <soThat>I'm not overwhelmed by too many emails</soThat>
+    <tasks>
+      - Install and configure BullMQ and Redis for job queue
+      - Create NotificationPreferences model (frequency, types, enabled)
+      - Replace direct email sending with queue jobs
+      - Implement notification batching (1 hour window)
+      - Create account settings page for notification preferences
+      - Implement daily digest cron job
+      - Implement weekly digest cron job
+      - Create batch email templates
+      - Test queue reliability and load handling
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Notifications added to BullMQ job queue, processed asynchronously, retry on failure, logged, don't block requests
+    AC2: Multiple notifications batched by user, 1 hour batching window, single email with all changes, max 1 email per hour per user
+    AC3: Account settings page with frequency options (immediate/hourly/daily/weekly), notification type checkboxes, global enable/disable, save preferences
+    AC4: Daily digest sent at end of day (6 PM), summary of all changes, grouped by bull, links to bulls, only one email per day
+    AC5: Weekly digest sent at end of week (Sunday evening), summary of week's changes, grouped by bull, highlights significant changes, only one email per week
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>Scalability Considerations</section>
+        <snippet>Monolithic architecture appropriate for MVP scale. Can evolve to microservices if needed. This story adds job queue infrastructure for reliable async processing at scale.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-4a-basic-notification-infrastructure.md</path>
+        <title>Story 4.4a: Basic Notification Infrastructure (Prerequisite)</title>
+        <section>Email Sending</section>
+        <snippet>Direct email sending implemented. This story replaces direct sending with queue-based sending for reliability and batching.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-4d-notification-history-management.md</path>
+        <title>Story 4.4d: Notification History (Prerequisite)</title>
+        <section>Notification Model</section>
+        <snippet>Notification model exists for storing notification history. Queue will use this model to track pending/sent notifications.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendInventoryChangeEmail, sendPriceChangeEmail</symbol>
+        <lines>all</lines>
+        <reason>Current email sending functions that will be replaced with queue jobs. Need to refactor to add jobs to queue instead of sending directly.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User, Notification</symbol>
+        <lines>all</lines>
+        <reason>Need to add NotificationPreferences model with relationship to User. Notification model needs sentAt field for tracking batched sends.</reason>
+      </artifact>
+      <artifact>
+        <path>package.json</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <lines>all</lines>
+        <reason>Need to add BullMQ and ioredis dependencies. Check for conflicts with existing dependencies.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>bullmq</package>
+        <version>^5.0.0</version>
+        <usage>Job queue for reliable notification processing and batching (NEW DEPENDENCY)</usage>
+      </node>
+      <node>
+        <package>ioredis</package>
+        <version>^5.3.0</version>
+        <usage>Redis client for BullMQ connection (NEW DEPENDENCY)</usage>
+      </node>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database access for NotificationPreferences and Notification models</usage>
+      </node>
+      <node>
+        <package>node-cron</package>
+        <version>^3.0.0</version>
+        <usage>Cron job scheduler for daily/weekly digests (NEW DEPENDENCY - OPTIONAL, could use Next.js cron routes)</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - OPTIONAL STORY - Only implement if users report too many emails or system needs high volume handling
+    - Requires Redis server installed and running (local dev and production)
+    - Requires Stories 4.4a-4.4d complete (notification infrastructure must exist)
+    - BullMQ requires Redis 6.2.0 or higher
+    - Queue worker must run as separate process or in Next.js API route
+    - Batching window: 1 hour (configurable)
+    - Daily digest time: 6 PM user's timezone (or UTC if timezone not available)
+    - Weekly digest time: Sunday evening
+    - NotificationPreferences model needs migration
+    - Notification model needs sentAt field added (migration)
+    - Must handle queue failures gracefully (retry logic)
+    - Must prevent duplicate emails (check sentAt before sending)
+    - Cron jobs need to be reliable (consider using external scheduler in production)
+    - Redis connection must be pooled and reused
+    - Queue monitoring recommended for production
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NotificationPreferences Model</name>
+      <kind>Prisma Model</kind>
+      <signature>
+model NotificationPreferences {
+  id              String                @id @default(cuid())
+  userId          String                @unique
+  frequency       NotificationFrequency @default(IMMEDIATE)
+  enabledTypes    NotificationType[]
+  globallyEnabled Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  HOURLY
+  DAILY
+  WEEKLY
+}
+      </signature>
+      <path>prisma/schema.prisma</path>
+    </interface>
+    <interface>
+      <name>Notification Queue</name>
+      <kind>BullMQ Queue</kind>
+      <signature>
+export const notificationQueue = new Queue('notifications', {
+  connection: redisConnection
+});
+
+// Job data structure
+interface NotificationJob {
+  userId: string;
+  bullId: string;
+  type: 'INVENTORY_CHANGE' | 'PRICE_CHANGE';
+  changeData: Record&lt;string, any&gt;;
+}
+      </signature>
+      <path>lib/queue.ts</path>
+    </interface>
+    <interface>
+      <name>Notification Worker</name>
+      <kind>BullMQ Worker</kind>
+      <signature>
+const worker = new Worker(
+  'notifications',
+  async (job: Job&lt;NotificationJob&gt;) => {
+    await processNotification(job.data);
+  },
+  { connection: redisConnection }
+);
+      </signature>
+      <path>lib/workers/notification-worker.ts</path>
+    </interface>
+    <interface>
+      <name>Notification Settings Page</name>
+      <kind>Next.js Page</kind>
+      <signature>
+export default async function NotificationSettingsPage(): Promise&lt;JSX.Element&gt;
+// Server component for notification preferences
+// Requires authentication
+// Shows frequency selector, type checkboxes, global toggle
+      </signature>
+      <path>app/settings/notifications/page.tsx</path>
+    </interface>
+    <interface>
+      <name>Daily Digest Cron</name>
+      <kind>Cron Job</kind>
+      <signature>
+// Runs daily at 6 PM
+async function sendDailyDigests(): Promise&lt;void&gt;
+// Queries notifications from last 24 hours
+// Groups by user with DAILY frequency preference
+// Sends digest email
+// Marks notifications as sent
+      </signature>
+      <path>lib/cron/daily-digest.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach not yet established. Focus on manual testing and TypeScript type safety. Test queue reliability, batching logic, and digest generation. Load testing recommended for queue performance.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/lib/queue.test.ts for queue operations
+      - __tests__/lib/workers/ for worker logic
+      - __tests__/lib/cron/ for digest jobs
+      - Load testing with many queued jobs
+    </locations>
+    <ideas>
+      - AC1: Test adding job to queue
+      - AC1: Test worker processes job successfully
+      - AC1: Test retry on job failure
+      - AC1: Test queue doesn't block API requests
+      - AC1: Test queue logging and monitoring
+      - AC2: Test batching notifications by user
+      - AC2: Test 1 hour batching window
+      - AC2: Test single email with multiple changes
+      - AC2: Test max 1 email per hour per user
+      - AC3: Test notification settings page displays
+      - AC3: Test frequency selector (immediate/hourly/daily/weekly)
+      - AC3: Test notification type checkboxes
+      - AC3: Test global enable/disable toggle
+      - AC3: Test saving preferences to database
+      - AC4: Test daily digest sent at 6 PM
+      - AC4: Test digest includes all day's changes
+      - AC4: Test digest grouped by bull
+      - AC4: Test only one email per day
+      - AC5: Test weekly digest sent Sunday evening
+      - AC5: Test digest includes week's changes
+      - AC5: Test digest highlights significant changes
+      - AC5: Test only one email per week
+      - Edge case: Test Redis connection failure
+      - Edge case: Test queue worker crash and recovery
+      - Edge case: Test duplicate job prevention
+      - Edge case: Test timezone handling for digests
+      - Edge case: Test very large batch (100+ notifications)
+      - Load test: Test queue with 1000+ jobs
+      - Load test: Test concurrent workers
+    </ideas>
+  </tests>
+
+  <notes>
+    <important>
+      This story is OPTIONAL and should be deferred unless:
+      1. Users report receiving too many individual emails
+      2. System needs to handle high notification volume (100+ notifications/hour)
+      3. Redis infrastructure is available and team is comfortable maintaining it
+      
+      The basic notification system (Stories 4.4a-4.4d) provides immediate value without this complexity.
+      Recommend implementing 4.4a-4.4d first, gathering user feedback, then deciding if batching is needed.
+    </important>
+    <infrastructure>
+      Requires Redis server:
+      - Local development: Install Redis locally or use Docker
+      - Production: Consider Redis Cloud, AWS ElastiCache, or similar managed service
+      - Monitoring: Recommended to monitor queue depth, job failures, worker health
+    </infrastructure>
+    <alternatives>
+      If Redis is not available, consider:
+      - Simple database-based queue (less reliable, lower performance)
+      - Third-party service like Inngest or Trigger.dev
+      - Defer batching until scale requires it
+    </alternatives>
+  </notes>
+</story-context>
