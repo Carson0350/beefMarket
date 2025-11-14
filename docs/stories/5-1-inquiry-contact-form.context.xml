@@ -1,0 +1,249 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.1</storyId>
+    <title>Inquiry Contact Form</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-1-inquiry-contact-form.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>breeder</asA>
+    <iWant>to submit an inquiry about a bull</iWant>
+    <soThat>I can contact the ranch owner to discuss purchasing semen</soThat>
+    <tasks>
+      - Create Inquiry data model in Prisma schema (if not exists)
+      - Create POST /api/inquiries endpoint with validation
+      - Create InquiryForm component with client-side validation
+      - Integrate form into bull detail pages
+      - Implement rate limiting (10 requests/hour per IP)
+      - Test form submission and validation
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Contact form is visible on all published bull detail pages
+    AC2: Form includes fields: breeder name (required), email (required), phone (optional), message (required)
+    AC3: Message field is pre-filled with "I'm interested in [Bull Name]"
+    AC4: Client-side validation provides immediate feedback on invalid inputs
+    AC5: Form submission is disabled until all required fields are valid
+    AC6: Successful submission shows confirmation message: "Your inquiry has been sent to [Ranch Name]"
+    AC7: Form resets after successful submission
+    AC8: Error messages are clear and actionable for validation failures
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Data Models and Contracts</section>
+        <snippet>Inquiry model with fields: id, bullId, ranchId, breederName, breederEmail, breederPhone, message, status, internalNotes, respondedAt. InquiryStatus enum: UNREAD, RESPONDED, ARCHIVED. Indexes on ranchId, bullId, status, createdAt.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>APIs and Interfaces - POST /api/inquiries</section>
+        <snippet>Public endpoint (no auth). Rate limiting: 10 requests/hour per IP. Validation: breederName 2-100 chars, valid email, optional phone, message 10-2000 chars. Returns 201 with inquiry object. Triggers async email notification.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows - Workflow 1: Breeder Submits Inquiry</section>
+        <snippet>Form submission flow: validate → verify bull exists → create inquiry with status=UNREAD → trigger async email → return 201 → show success message → reset form.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry, InquiryStatus</symbol>
+        <lines>125-159</lines>
+        <reason>Inquiry model already defined with all required fields. InquiryStatus enum exists with UNREAD, RESPONDED, ARCHIVED values. Indexes already configured. No migration needed - model is ready to use.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/[slug]/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullDetailPage</symbol>
+        <lines>all</lines>
+        <reason>Bull detail page where InquiryForm component will be integrated. Need to add "Contact Ranch" section below bull details.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/email.ts</path>
+        <kind>utility</kind>
+        <symbol>sendVerificationEmail, sendInventoryChangeEmail</symbol>
+        <lines>1-102</lines>
+        <reason>Existing email service patterns using Resend. Reference for email sending structure. Story 5.2 will add sendInquiryNotification function following same pattern.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database ORM for inquiry CRUD operations</usage>
+      </node>
+      <node>
+        <package>zod</package>
+        <version>latest</version>
+        <usage>Validation schemas for inquiry form data</usage>
+      </node>
+      <node>
+        <package>react-hook-form</package>
+        <version>latest</version>
+        <usage>Form management and validation in InquiryForm component</usage>
+      </node>
+      <node>
+        <package>@hookform/resolvers</package>
+        <version>latest</version>
+        <usage>Zod resolver for React Hook Form integration</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Inquiry model already exists in schema - no migration needed
+    - Public endpoint (no authentication required) - accessible to all visitors
+    - Rate limiting required: 10 requests per hour per IP address
+    - Server-side validation is authoritative (client-side is UX enhancement)
+    - XSS prevention: Sanitize message content before storage
+    - CSRF protection via NextAuth.js tokens
+    - Email notification is async (handled in Story 5.2, not this story)
+    - Form must work for both logged-in and guest users
+    - Mobile-first responsive design required
+    - Bull must exist and be PUBLISHED status to accept inquiries
+    - Form validation on both client and server sides
+    - Message field pre-filled with "I'm interested in [Bull Name]"
+    - Success message includes ranch name for confirmation
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>POST /api/inquiries</name>
+      <kind>API Route</kind>
+      <signature>
+POST /api/inquiries
+Content-Type: application/json
+
+Request Body:
+{
+  "bullId": "string",
+  "breederName": "string (2-100 chars)",
+  "breederEmail": "string (valid email)",
+  "breederPhone": "string (optional, valid phone)",
+  "message": "string (10-2000 chars)"
+}
+
+Response 201:
+{
+  "inquiry": {
+    "id": "string",
+    "bullId": "string",
+    "ranchId": "string",
+    "breederName": "string",
+    "breederEmail": "string",
+    "breederPhone": "string | null",
+    "message": "string",
+    "status": "UNREAD",
+    "createdAt": "ISO8601 timestamp"
+  }
+}
+
+Errors:
+- 400: Validation error (invalid input)
+- 404: Bull not found or not published
+- 429: Rate limit exceeded
+- 500: Server error
+      </signature>
+      <path>app/api/inquiries/route.ts</path>
+    </interface>
+    <interface>
+      <name>InquiryForm Component</name>
+      <kind>React Client Component</kind>
+      <signature>
+interface InquiryFormProps {
+  bullId: string;
+  bullName: string;
+  ranchName: string;
+}
+
+export default function InquiryForm({ bullId, bullName, ranchName }: InquiryFormProps): JSX.Element
+// Client component with React Hook Form
+// Fields: breederName, breederEmail, breederPhone (optional), message
+// Pre-fills message with "I'm interested in [Bull Name]"
+// Client-side validation with Zod
+// Submits to POST /api/inquiries
+// Shows success/error messages
+      </signature>
+      <path>components/InquiryForm.tsx</path>
+    </interface>
+    <interface>
+      <name>Inquiry Validation Schema</name>
+      <kind>Zod Schema</kind>
+      <signature>
+const createInquirySchema = z.object({
+  bullId: z.string().cuid(),
+  breederName: z.string().min(2).max(100),
+  breederEmail: z.string().email(),
+  breederPhone: z.string().optional(),
+  message: z.string().min(10).max(2000)
+});
+      </signature>
+      <path>app/api/inquiries/route.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach: manual testing and TypeScript type safety. Focus on validation logic, API integration, and user experience.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/api/inquiries.test.ts for API endpoint
+      - __tests__/components/InquiryForm.test.tsx for form component
+    </locations>
+    <ideas>
+      - AC1: Test form renders on published bull detail pages
+      - AC1: Test form does NOT render on draft bulls
+      - AC2: Test all form fields present (name, email, phone, message)
+      - AC3: Test message pre-filled with bull name
+      - AC4: Test client-side validation (invalid email, short message, etc.)
+      - AC5: Test submit button disabled when form invalid
+      - AC6: Test success message displays with ranch name
+      - AC7: Test form resets after successful submission
+      - AC8: Test clear error messages for validation failures
+      - API test: POST with valid data → 201 response
+      - API test: POST with invalid data → 400 with error details
+      - API test: POST with non-existent bull → 404
+      - API test: POST with draft bull → 404
+      - API test: Rate limiting (11th request within hour → 429)
+      - API test: Verify inquiry saved to database with correct ranchId
+      - Edge case: Very long message (2000 chars)
+      - Edge case: Special characters in message
+      - Edge case: International phone formats
+      - Edge case: Concurrent submissions from same IP
+    </ideas>
+  </tests>
+
+  <notes>
+    <important>
+      This story focuses ONLY on form submission and inquiry creation. Email notifications are handled in Story 5.2. The API should return 201 immediately after saving the inquiry - email sending is async and non-blocking.
+    </important>
+    <sequencing>
+      Story 5.1 is the foundation for Epic 5. Must be completed before:
+      - Story 5.2 (Email Notifications) - adds email trigger to this API
+      - Story 5.3 (Inquiry Dashboard) - displays inquiries created here
+      - Story 5.4 (Response Tracking) - updates inquiries created here
+      - Story 5.5 (Analytics) - analyzes inquiries created here
+    </sequencing>
+    <patterns>
+      Follow existing patterns:
+      - API routes: /app/api/[resource]/route.ts
+      - Components: /components/[ComponentName].tsx
+      - Validation: Zod schemas for type-safe validation
+      - Forms: React Hook Form for form management
+      - Error handling: Try-catch with clear error messages
+    </patterns>
+  </notes>
+</story-context>

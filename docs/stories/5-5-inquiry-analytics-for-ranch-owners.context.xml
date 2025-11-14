@@ -1,0 +1,317 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.5</storyId>
+    <title>Inquiry Analytics for Ranch Owners</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/5-5-inquiry-analytics-for-ranch-owners.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>ranch owner</asA>
+    <iWant>to see inquiry statistics</iWant>
+    <soThat>I can understand which bulls generate the most interest</soThat>
+    <tasks>
+      - Create GET /api/inquiries/analytics endpoint with authentication
+      - Implement analytics calculations (total, unread, response rate, top bulls)
+      - Create InquiryAnalytics component for metrics display
+      - Create chart component for inquiries over time
+      - Integrate analytics into inquiry dashboard
+      - Implement bull filter from analytics (click bull name to filter)
+      - Optimize queries with aggregation and indexes
+      - Test performance with 1000 inquiries
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: Analytics section displays at top of inquiry dashboard
+    AC2: Metrics shown: Total inquiries (all time), Unread count, Response rate percentage
+    AC3: "Top Bulls" section shows 5 bulls with most inquiries and their counts
+    AC4: "Inquiries Over Time" chart shows monthly inquiry counts for last 6 months
+    AC5: Clicking a bull name in analytics filters inquiry list to that bull
+    AC6: Analytics calculate in &lt;1 second for 1000 inquiries
+    AC7: Response rate calculation: (responded count / total inquiries) * 100
+    AC8: Analytics are ranch-specific (only show data for authenticated ranch owner's ranch)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>APIs - GET /api/inquiries/analytics</section>
+        <snippet>Authentication required (RANCH_OWNER role). Authorization: user can only access analytics for their own ranch. Response: totalInquiries, unreadCount, responseRate (percentage), topBulls (top 5 with counts), inquiriesOverTime (monthly counts for 6 months).</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Workflows - Workflow 5: Ranch Owner Views Analytics</section>
+        <snippet>Ranch owner on inquiry dashboard → analytics section displays at top → GET /api/inquiries/analytics fetches metrics → displays total inquiries, unread count, response rate, top 5 bulls by inquiry count.</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>NFR - Performance</section>
+        <snippet>Analytics calculation: &lt;1 second for 1000 inquiries. Database aggregation for efficiency. Indexes on ranchId, status, createdAt, bullId. Consider caching analytics data.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/5-3-inquiry-dashboard-for-ranch-owners.md</path>
+        <title>Story 5.3: Inquiry Dashboard (Prerequisite)</title>
+        <section>Tasks</section>
+        <snippet>Dashboard at /app/dashboard/inquiries/page.tsx. Inquiry list supports filtering by status. Unread count badge already implemented. Analytics will integrate into this page.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/5-4-inquiry-response-tracking.md</path>
+        <title>Story 5.4: Response Tracking (Prerequisite)</title>
+        <section>Tasks</section>
+        <snippet>Status values: UNREAD, RESPONDED, ARCHIVED. respondedAt timestamp set when status changes to RESPONDED. Response rate uses RESPONDED status count.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Inquiry, InquiryStatus, Bull</symbol>
+        <lines>125-159</lines>
+        <reason>Inquiry model with indexes on ranchId, bullId, status, createdAt for performant aggregation queries. Bull relationship for top bulls query.</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/inquiries/page.tsx</path>
+        <kind>page</kind>
+        <symbol>InquiryDashboardPage</symbol>
+        <lines>all</lines>
+        <reason>Created in Story 5.3. Need to add InquiryAnalytics component at top of page above inquiry list.</reason>
+      </artifact>
+      <artifact>
+        <path>components/NotificationList.tsx</path>
+        <kind>component</kind>
+        <symbol>NotificationList</symbol>
+        <lines>all</lines>
+        <reason>Reference for metrics display patterns and card grid layouts. Similar structure needed for analytics metrics cards.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>@prisma/client</package>
+        <version>^6.19.0</version>
+        <usage>Database aggregation queries (count, groupBy) for analytics</usage>
+      </node>
+      <node>
+        <package>next-auth</package>
+        <version>^5.0.0-beta.30</version>
+        <usage>Session management and authentication</usage>
+      </node>
+      <node>
+        <package>recharts</package>
+        <version>latest</version>
+        <usage>Chart visualization library for inquiries over time (NEW DEPENDENCY)</usage>
+      </node>
+      <node>
+        <package>date-fns</package>
+        <version>^4.1.0</version>
+        <usage>Date manipulation for monthly grouping and formatting</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Authentication required: RANCH_OWNER role only
+    - Authorization: user can only access analytics for their own ranch
+    - Ranch-specific data isolation (filter by ranchId)
+    - Performance target: &lt;1 second for 1000 inquiries
+    - Database aggregation for efficient queries (Prisma groupBy, count)
+    - Use existing indexes: ranchId, status, createdAt, bullId
+    - Response rate formula: (RESPONDED count / total inquiries) * 100
+    - Top bulls: GROUP BY bullId, ORDER BY count DESC, LIMIT 5
+    - Monthly counts: last 6 months from current date
+    - Analytics section at top of dashboard (above inquiry list)
+    - Clicking bull name filters inquiry list to that bull
+    - Consider caching analytics data (refresh every 5 minutes)
+    - Mobile-responsive chart design
+    - Handle empty state (no inquiries yet)
+    - Chart library: Recharts (React-friendly, responsive)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GET /api/inquiries/analytics</name>
+      <kind>API Route</kind>
+      <signature>
+GET /api/inquiries/analytics?dateRange=all
+Authorization: Required (RANCH_OWNER role)
+
+Query Parameters:
+- dateRange: "all" | "30d" | "90d" (optional, defaults to "all")
+
+Response 200:
+{
+  "totalInquiries": number,
+  "unreadCount": number,
+  "responseRate": number (percentage, e.g., 75.5),
+  "topBulls": [
+    {
+      "bullId": "string",
+      "bullName": "string",
+      "bullSlug": "string",
+      "inquiryCount": number
+    }
+  ],
+  "inquiriesOverTime": [
+    {
+      "month": "2025-11",
+      "count": number
+    }
+  ]
+}
+
+Errors:
+- 401: Unauthorized (not logged in)
+- 403: Forbidden (not ranch owner)
+- 500: Server error
+      </signature>
+      <path>app/api/inquiries/analytics/route.ts</path>
+    </interface>
+    <interface>
+      <name>InquiryAnalytics Component</name>
+      <kind>React Client Component</kind>
+      <signature>
+interface InquiryAnalyticsProps {
+  ranchId: string;
+  onBullFilter?: (bullId: string) => void;
+}
+
+export default function InquiryAnalytics({ ranchId, onBullFilter }: InquiryAnalyticsProps): JSX.Element
+
+// Fetches analytics data from GET /api/inquiries/analytics
+// Displays metrics cards: Total Inquiries, Unread Count, Response Rate
+// Displays "Top Bulls" section with clickable bull names
+// Displays "Inquiries Over Time" chart
+// Loading state while fetching
+// Empty state if no inquiries
+      </signature>
+      <path>components/InquiryAnalytics.tsx</path>
+    </interface>
+    <interface>
+      <name>InquiryChart Component</name>
+      <kind>React Client Component</kind>
+      <signature>
+interface InquiryChartProps {
+  data: Array&lt;{ month: string; count: number }&gt;;
+}
+
+export default function InquiryChart({ data }: InquiryChartProps): JSX.Element
+
+// Bar chart or line chart for monthly inquiry trend
+// X-axis: last 6 months
+// Y-axis: inquiry count
+// Responsive design (mobile-friendly)
+// Uses Recharts library
+      </signature>
+      <path>components/InquiryChart.tsx</path>
+    </interface>
+    <interface>
+      <name>Analytics Calculation Functions</name>
+      <kind>Utility Functions</kind>
+      <signature>
+async function calculateInquiryAnalytics(ranchId: string): Promise&lt;InquiryAnalyticsResponse&gt;
+
+// Queries:
+// 1. Total count: prisma.inquiry.count({ where: { ranchId } })
+// 2. Unread count: prisma.inquiry.count({ where: { ranchId, status: 'UNREAD' } })
+// 3. Responded count: prisma.inquiry.count({ where: { ranchId, status: 'RESPONDED' } })
+// 4. Top bulls: prisma.inquiry.groupBy({ by: ['bullId'], where: { ranchId }, _count: true, orderBy: { _count: { bullId: 'desc' } }, take: 5 })
+// 5. Monthly counts: prisma.inquiry.groupBy({ by: ['createdAt'], where: { ranchId, createdAt: { gte: sixMonthsAgo } }, _count: true })
+// 
+// Calculations:
+// - responseRate = (respondedCount / totalCount) * 100
+// - Group monthly counts by month
+      </signature>
+      <path>app/api/inquiries/analytics/route.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses Next.js 14 with TypeScript. Testing approach: manual testing and TypeScript type safety. Focus on calculation accuracy, performance, and data visualization.
+    </standards>
+    <locations>
+      No test directory currently exists. Future tests would be in:
+      - __tests__/api/inquiries/analytics.test.ts for analytics endpoint
+      - __tests__/components/InquiryAnalytics.test.tsx for analytics component
+    </locations>
+    <ideas>
+      - AC1: Test analytics section displays at top of dashboard
+      - AC2: Test total inquiries count is accurate
+      - AC2: Test unread count matches UNREAD status count
+      - AC2: Test response rate calculation is correct
+      - AC3: Test top bulls query returns 5 bulls
+      - AC3: Test top bulls ordered by inquiry count (descending)
+      - AC3: Test bull names and counts displayed correctly
+      - AC4: Test inquiries over time shows last 6 months
+      - AC4: Test monthly counts aggregated correctly
+      - AC4: Test chart renders with correct data
+      - AC5: Test clicking bull name filters inquiry list
+      - AC5: Test bull filter updates URL query param
+      - AC6: Performance test with 1000 inquiries (&lt;1 second)
+      - AC7: Test response rate formula: (responded / total) * 100
+      - AC7: Test response rate displays as percentage (e.g., "75.5%")
+      - AC8: Test analytics filtered by ranch (only owner's data)
+      - AC8: Test ranch owner cannot see other ranch's analytics
+      - API test: GET /api/inquiries/analytics returns correct metrics
+      - API test: Unauthorized user → 401
+      - API test: BREEDER role → 403
+      - API test: Analytics calculation with 0 inquiries
+      - API test: Analytics calculation with 1000 inquiries
+      - Manual test: View analytics section on dashboard
+      - Manual test: Verify metrics display correctly
+      - Manual test: Click bull name → inquiry list filters
+      - Manual test: View chart on mobile device
+      - Manual test: Empty state (no inquiries)
+      - Edge case: All inquiries UNREAD (0% response rate)
+      - Edge case: All inquiries RESPONDED (100% response rate)
+      - Edge case: Exactly 5 bulls (no more, no less)
+      - Edge case: More than 5 bulls (only top 5 shown)
+      - Edge case: Single bull with all inquiries
+      - Edge case: Inquiries only in current month (chart shows 0 for other months)
+    </ideas>
+  </tests>
+
+  <notes>
+    <important>
+      Performance is critical for analytics. Use Prisma aggregation functions (count, groupBy) instead of fetching all inquiries and calculating in memory. Leverage existing database indexes for fast queries.
+    </important>
+    <sequencing>
+      Depends on:
+      - Story 5.1 (Inquiry Contact Form) - inquiries must exist
+      - Story 5.3 (Inquiry Dashboard) - dashboard page must exist
+      - Story 5.4 (Response Tracking) - respondedAt timestamp for response rate
+      
+      This is the final story in Epic 5.
+    </sequencing>
+    <patterns>
+      Follow existing patterns:
+      - Analytics components: Display metrics in card grid
+      - Dashboard integration: Add components to dashboard pages
+      - API aggregation: Use Prisma groupBy and count
+      - Chart libraries: Recharts for React-friendly charts
+    </patterns>
+    <optimization>
+      Performance strategies:
+      - Use database aggregation (don't fetch all records)
+      - Leverage existing indexes (ranchId, status, createdAt, bullId)
+      - Consider caching analytics data (refresh every 5 minutes)
+      - Use Prisma select to fetch only needed fields for top bulls
+      - Batch queries where possible (single transaction)
+    </optimization>
+    <optional>
+      Optional enhancements for future:
+      - Export analytics to CSV
+      - Date range selector (last 30 days, last 90 days, all time)
+      - Comparison metrics (vs. previous period)
+      - Average response time calculation
+      - Inquiry conversion tracking (inquiry → sale)
+    </optional>
+  </notes>
+</story-context>
