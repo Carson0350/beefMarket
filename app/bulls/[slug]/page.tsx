@@ -6,6 +6,7 @@ import { auth } from '@/auth';
 import { ChevronLeftIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import ShareButton from '@/components/ShareButton';
 import FavoriteButton from '@/components/FavoriteButton';
+import InquiryForm from '@/components/InquiryForm';
 
 interface PageProps {
   params: { slug: string };
@@ -324,16 +325,14 @@ export default async function BullDetailPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* Contact Ranch Button */}
-              <div className="mt-6">
-                <Link
-                  href={`/ranch/${bull.ranch.slug}`}
-                  className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Contact Ranch for Inquiry
-                </Link>
-              </div>
             </div>
+
+            {/* Contact Form */}
+            <InquiryForm 
+              bullId={bull.id}
+              bullName={bull.name}
+              ranchName={bull.ranch.name}
+            />
           </div>
         </div>
       </div>

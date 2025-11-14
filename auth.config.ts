@@ -22,10 +22,13 @@ export const authConfig = {
       const isOnVerificationPage = nextUrl.pathname.startsWith('/verify-email') || 
                                      nextUrl.pathname.startsWith('/check-email');
       
+      // DEVELOPMENT: Skip email verification in development mode
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      
       if (requiresVerification) {
         if (!isLoggedIn) return false; // Redirect to login
-        if (!isEmailVerified && !isOnVerificationPage) {
-          // Redirect unverified users to check-email page
+        if (!isEmailVerified && !isOnVerificationPage && !isDevelopment) {
+          // Redirect unverified users to check-email page (skip in dev)
           return Response.redirect(new URL('/check-email', nextUrl));
         }
         return true;
