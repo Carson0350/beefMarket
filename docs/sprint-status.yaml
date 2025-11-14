@@ -56,13 +56,13 @@ development_status:
   epic-2-retrospective: optional
   
   # Epic 3: Bull Discovery & Browsing
-  epic-3: ready-for-dev
-  3-1-public-bull-browse-page-with-card-grid: ready-for-dev
-  3-2-advanced-filtering-system: ready-for-dev
-  3-3-text-search-functionality: ready-for-dev
-  3-4-detailed-bull-profile-page: ready-for-dev
-  3-5-ranch-public-profile-page: ready-for-dev
-  3-6-shareable-bull-links-copy-functionality: ready-for-dev
+  epic-3: done
+  3-1-public-bull-browse-page-with-card-grid: done
+  3-2-advanced-filtering-system: done
+  3-3-text-search-functionality: done
+  3-4-detailed-bull-profile-page: done
+  3-5-ranch-public-profile-page: done
+  3-6-shareable-bull-links-copy-functionality: done
   epic-3-retrospective: optional
   
   # Epic 4: Bull Comparison & Favorites
