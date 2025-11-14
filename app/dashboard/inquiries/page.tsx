@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import InquiryDashboardClient from '@/components/InquiryDashboardClient';
+import InquiryAnalytics from '@/components/InquiryAnalytics';
 
 export const metadata = {
   title: 'Inquiries | Dashboard',
@@ -104,6 +105,11 @@ export default async function InquiriesPage({
           <p className="mt-2 text-gray-600">
             Manage inquiries from potential buyers for {ranch.name}
           </p>
+        </div>
+
+        {/* Analytics Section */}
+        <div className="mb-8">
+          <InquiryAnalytics />
         </div>
 
         {/* Dashboard Component */}
