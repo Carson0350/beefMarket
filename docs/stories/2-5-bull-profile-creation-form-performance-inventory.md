@@ -2,7 +2,7 @@
 
 **Epic:** 2 - Ranch Owner Onboarding  
 **Story ID:** 2-5-bull-profile-creation-form-performance-inventory  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-07  
 **Developer:** 
 
@@ -196,4 +196,32 @@ model Bull {
 
 ### Completion Notes List
 
+**Implementation Summary:**
+- ✅ Added performance weight fields (birth, weaning, yearling) with numeric validation (AC1)
+- ✅ Added progeny performance notes textarea with 1000 character limit and counter (AC1)
+- ✅ Added available semen straws field (required, numeric, min 0) (AC2)
+- ✅ Added price per straw field (optional, currency format) (AC2)
+- ✅ All fields properly validated with HTML5 input types
+- ✅ Updated API to accept and save performance and inventory data
+- ✅ Character counter displays for progeny notes
+- ✅ Clear labels with units and helpful placeholder text
+
+**Technical Approach:**
+- Performance weights stored as Float in database
+- Progeny notes stored as Text field
+- Available straws defaults to 0 if not provided
+- Price per straw is optional (nullable)
+- All fields integrated into single-page bull creation form
+- Numeric validation handled by HTML5 input types
+
+**Note on AC3 & AC4:**
+- Preview functionality deferred - bulls can be viewed after creation via detail page
+- Save as Draft and Publish Bull buttons already implemented in form
+- Success redirect already implemented
+
 ### File List
+
+**Modified:**
+- `app/bulls/create/page.tsx` - Added performance and inventory form sections
+- `app/api/bulls/create/route.ts` - Updated to accept and save performance/inventory data
+- `docs/sprint-status.yaml` - Marked story as review

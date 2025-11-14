@@ -26,7 +26,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, breed, registrationNumber, birthDate, heroImage, additionalImages, status } = await request.json();
+    const { 
+      name, 
+      breed, 
+      registrationNumber, 
+      birthDate, 
+      heroImage, 
+      additionalImages, 
+      epdData,
+      geneticMarkers,
+      dnaTestResults,
+      sireName,
+      damName,
+      notableAncestors,
+      birthWeight,
+      weaningWeight,
+      yearlingWeight,
+      progenyNotes,
+      availableStraws,
+      pricePerStraw,
+      status 
+    } = await request.json();
 
     // Validate required fields
     if (!name || !breed) {
@@ -73,6 +93,22 @@ export async function POST(request: Request) {
         birthDate: birthDate ? new Date(birthDate) : null,
         heroImage,
         additionalImages: additionalImages || [],
+        // Genetic data
+        epdData: epdData || null,
+        geneticMarkers: geneticMarkers || null,
+        dnaTestResults: dnaTestResults || null,
+        // Pedigree
+        sireName: sireName || null,
+        damName: damName || null,
+        notableAncestors: notableAncestors || [],
+        // Performance
+        birthWeight: birthWeight || null,
+        weaningWeight: weaningWeight || null,
+        yearlingWeight: yearlingWeight || null,
+        progenyNotes: progenyNotes || null,
+        // Inventory
+        availableStraws: availableStraws || 0,
+        pricePerStraw: pricePerStraw || null,
         status: status || 'DRAFT',
       },
     });

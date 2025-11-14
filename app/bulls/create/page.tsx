@@ -87,6 +87,28 @@ export default function CreateBullPage() {
     breed: '',
     registrationNumber: '',
     birthDate: '',
+    // EPD Data
+    epdBirthWeight: '',
+    epdWeaningWeight: '',
+    epdYearlingWeight: '',
+    epdMilk: '',
+    epdMarbling: '',
+    epdRibeyeArea: '',
+    // Genetic Info
+    geneticMarkers: '',
+    dnaTestResults: '',
+    // Pedigree
+    sireName: '',
+    damName: '',
+    notableAncestors: [''],
+    // Performance
+    birthWeight: '',
+    weaningWeight: '',
+    yearlingWeight: '',
+    progenyNotes: '',
+    // Inventory
+    availableStraws: '',
+    pricePerStraw: '',
   });
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -114,9 +136,28 @@ export default function CreateBullPage() {
     }
   }, [session, status, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAncestorChange = (index: number, value: string) => {
+    const newAncestors = [...formData.notableAncestors];
+    newAncestors[index] = value;
+    setFormData(prev => ({ ...prev, notableAncestors: newAncestors }));
+  };
+
+  const addAncestor = () => {
+    if (formData.notableAncestors.length < 6) {
+      setFormData(prev => ({ ...prev, notableAncestors: [...prev.notableAncestors, ''] }));
+    }
+  };
+
+  const removeAncestor = (index: number) => {
+    if (formData.notableAncestors.length > 1) {
+      const newAncestors = formData.notableAncestors.filter((_, i) => i !== index);
+      setFormData(prev => ({ ...prev, notableAncestors: newAncestors }));
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,13 +267,42 @@ export default function CreateBullPage() {
       const heroPhoto = photos[0];
       const additionalPhotos = photos.slice(1).map(p => p.url);
 
+      // Build EPD data object (only include non-empty values)
+      const epdData: Record<string, number> = {};
+      if (formData.epdBirthWeight) epdData.birthWeight = parseFloat(formData.epdBirthWeight);
+      if (formData.epdWeaningWeight) epdData.weaningWeight = parseFloat(formData.epdWeaningWeight);
+      if (formData.epdYearlingWeight) epdData.yearlingWeight = parseFloat(formData.epdYearlingWeight);
+      if (formData.epdMilk) epdData.milk = parseFloat(formData.epdMilk);
+      if (formData.epdMarbling) epdData.marbling = parseFloat(formData.epdMarbling);
+      if (formData.epdRibeyeArea) epdData.ribeyeArea = parseFloat(formData.epdRibeyeArea);
+
+      // Filter out empty notable ancestors
+      const notableAncestors = formData.notableAncestors.filter(a => a.trim() !== '');
+
       const response = await fetch('/api/bulls/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          breed: formData.breed,
+          registrationNumber: formData.registrationNumber || null,
+          birthDate: formData.birthDate || null,
           heroImage: heroPhoto.url,
           additionalImages: additionalPhotos,
+          epdData: Object.keys(epdData).length > 0 ? epdData : null,
+          geneticMarkers: formData.geneticMarkers || null,
+          dnaTestResults: formData.dnaTestResults || null,
+          sireName: formData.sireName || null,
+          damName: formData.damName || null,
+          notableAncestors,
+          // Performance data
+          birthWeight: formData.birthWeight ? parseFloat(formData.birthWeight) : null,
+          weaningWeight: formData.weaningWeight ? parseFloat(formData.weaningWeight) : null,
+          yearlingWeight: formData.yearlingWeight ? parseFloat(formData.yearlingWeight) : null,
+          progenyNotes: formData.progenyNotes || null,
+          // Inventory
+          availableStraws: formData.availableStraws ? parseInt(formData.availableStraws) : 0,
+          pricePerStraw: formData.pricePerStraw ? parseFloat(formData.pricePerStraw) : null,
           status,
         }),
       });
@@ -402,6 +472,362 @@ export default function CreateBullPage() {
               )}
             </div>
 
+            {/* Genetic Data Section */}
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Genetic Data (Optional)</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Add Expected Progeny Differences (EPDs) and genetic information to help breeders evaluate genetics.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* EPD Birth Weight */}
+                <div>
+                  <label htmlFor="epdBirthWeight" className="block text-sm font-medium text-gray-700">
+                    Birth Weight EPD (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="epdBirthWeight"
+                    name="epdBirthWeight"
+                    value={formData.epdBirthWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 2.5"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Expected difference in birth weight of calves</p>
+                </div>
+
+                {/* EPD Weaning Weight */}
+                <div>
+                  <label htmlFor="epdWeaningWeight" className="block text-sm font-medium text-gray-700">
+                    Weaning Weight EPD (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="epdWeaningWeight"
+                    name="epdWeaningWeight"
+                    value={formData.epdWeaningWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 45"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Expected difference in weaning weight</p>
+                </div>
+
+                {/* EPD Yearling Weight */}
+                <div>
+                  <label htmlFor="epdYearlingWeight" className="block text-sm font-medium text-gray-700">
+                    Yearling Weight EPD (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="epdYearlingWeight"
+                    name="epdYearlingWeight"
+                    value={formData.epdYearlingWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 75"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Expected difference in yearling weight</p>
+                </div>
+
+                {/* EPD Milk */}
+                <div>
+                  <label htmlFor="epdMilk" className="block text-sm font-medium text-gray-700">
+                    Milk EPD (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="epdMilk"
+                    name="epdMilk"
+                    value={formData.epdMilk}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 25"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Maternal milk production ability</p>
+                </div>
+
+                {/* EPD Marbling */}
+                <div>
+                  <label htmlFor="epdMarbling" className="block text-sm font-medium text-gray-700">
+                    Marbling EPD
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="epdMarbling"
+                    name="epdMarbling"
+                    value={formData.epdMarbling}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 0.45"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Intramuscular fat (meat quality)</p>
+                </div>
+
+                {/* EPD Ribeye Area */}
+                <div>
+                  <label htmlFor="epdRibeyeArea" className="block text-sm font-medium text-gray-700">
+                    Ribeye Area EPD (sq in)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="epdRibeyeArea"
+                    name="epdRibeyeArea"
+                    value={formData.epdRibeyeArea}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 0.75"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Expected ribeye muscle area</p>
+                </div>
+              </div>
+
+              {/* Genetic Markers */}
+              <div className="mt-4">
+                <label htmlFor="geneticMarkers" className="block text-sm font-medium text-gray-700">
+                  Genetic Markers
+                </label>
+                <input
+                  type="text"
+                  id="geneticMarkers"
+                  name="geneticMarkers"
+                  value={formData.geneticMarkers}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                  placeholder="e.g., Polled, Black, Homozygous"
+                />
+              </div>
+
+              {/* DNA Test Results */}
+              <div className="mt-4">
+                <label htmlFor="dnaTestResults" className="block text-sm font-medium text-gray-700">
+                  DNA Test Results
+                </label>
+                <textarea
+                  id="dnaTestResults"
+                  name="dnaTestResults"
+                  value={formData.dnaTestResults}
+                  onChange={handleChange}
+                  rows={3}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                  placeholder="Enter DNA test results or genetic testing information..."
+                />
+              </div>
+            </div>
+
+            {/* Pedigree Section */}
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Pedigree Information (Optional)</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Add sire, dam, and notable ancestors to showcase bloodlines.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Sire Name */}
+                <div>
+                  <label htmlFor="sireName" className="block text-sm font-medium text-gray-700">
+                    Sire Name
+                  </label>
+                  <input
+                    type="text"
+                    id="sireName"
+                    name="sireName"
+                    value={formData.sireName}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., Champion Sire 123"
+                  />
+                </div>
+
+                {/* Dam Name */}
+                <div>
+                  <label htmlFor="damName" className="block text-sm font-medium text-gray-700">
+                    Dam Name
+                  </label>
+                  <input
+                    type="text"
+                    id="damName"
+                    name="damName"
+                    value={formData.damName}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., Elite Dam 456"
+                  />
+                </div>
+              </div>
+
+              {/* Notable Ancestors */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notable Ancestors (up to 6)
+                </label>
+                {formData.notableAncestors.map((ancestor, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={ancestor}
+                      onChange={(e) => handleAncestorChange(index, e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                      placeholder={`Notable ancestor ${index + 1}`}
+                    />
+                    {formData.notableAncestors.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeAncestor(index)}
+                        className="px-3 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {formData.notableAncestors.length < 6 && (
+                  <button
+                    type="button"
+                    onClick={addAncestor}
+                    className="mt-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    + Add Ancestor
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Performance Data Section */}
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Data (Optional)</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Add actual performance weights and progeny information.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Birth Weight */}
+                <div>
+                  <label htmlFor="birthWeight" className="block text-sm font-medium text-gray-700">
+                    Birth Weight (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="birthWeight"
+                    name="birthWeight"
+                    value={formData.birthWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 85"
+                  />
+                </div>
+
+                {/* Weaning Weight */}
+                <div>
+                  <label htmlFor="weaningWeight" className="block text-sm font-medium text-gray-700">
+                    Weaning Weight (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="weaningWeight"
+                    name="weaningWeight"
+                    value={formData.weaningWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 650"
+                  />
+                </div>
+
+                {/* Yearling Weight */}
+                <div>
+                  <label htmlFor="yearlingWeight" className="block text-sm font-medium text-gray-700">
+                    Yearling Weight (lbs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="yearlingWeight"
+                    name="yearlingWeight"
+                    value={formData.yearlingWeight}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 1200"
+                  />
+                </div>
+              </div>
+
+              {/* Progeny Notes */}
+              <div className="mt-4">
+                <label htmlFor="progenyNotes" className="block text-sm font-medium text-gray-700">
+                  Progeny Performance Notes
+                </label>
+                <textarea
+                  id="progenyNotes"
+                  name="progenyNotes"
+                  value={formData.progenyNotes}
+                  onChange={handleChange}
+                  rows={4}
+                  maxLength={1000}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                  placeholder="Describe offspring performance, awards, or notable traits..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {formData.progenyNotes.length}/1000 characters
+                </p>
+              </div>
+            </div>
+
+            {/* Inventory & Pricing Section */}
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Inventory & Pricing</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Set semen availability and pricing information.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Available Straws */}
+                <div>
+                  <label htmlFor="availableStraws" className="block text-sm font-medium text-gray-700">
+                    Available Semen Straws <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    id="availableStraws"
+                    name="availableStraws"
+                    value={formData.availableStraws}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 100"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Number of straws currently available</p>
+                </div>
+
+                {/* Price Per Straw */}
+                <div>
+                  <label htmlFor="pricePerStraw" className="block text-sm font-medium text-gray-700">
+                    Price Per Straw (USD)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    id="pricePerStraw"
+                    name="pricePerStraw"
+                    value={formData.pricePerStraw}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="e.g., 50.00"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Leave blank if price varies or contact only</p>
+                </div>
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div className="flex gap-4 pt-4">
               <button
@@ -418,7 +844,7 @@ export default function CreateBullPage() {
                 disabled={loading || uploading}
                 className="flex-1 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Saving...' : 'Continue to Genetic Data'}
+                {loading ? 'Saving...' : 'Publish Bull'}
               </button>
             </div>
           </form>

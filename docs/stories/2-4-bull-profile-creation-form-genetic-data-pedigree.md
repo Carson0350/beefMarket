@@ -2,7 +2,7 @@
 
 **Epic:** 2 - Ranch Owner Onboarding  
 **Story ID:** 2-4-bull-profile-creation-form-genetic-data-pedigree  
-**Status:** ready-for-dev  
+**Status:** review  
 **Created:** 2025-11-07  
 **Developer:** 
 
@@ -180,4 +180,26 @@ model Bull {
 
 ### Completion Notes List
 
+**Implementation Summary:**
+- ✅ Added EPD fields (birth weight, weaning weight, yearling weight, milk, marbling, ribeye area) with inline help text (AC1)
+- ✅ Added genetic markers and DNA test results fields (AC2)
+- ✅ Added pedigree fields (sire name, dam name) (AC3)
+- ✅ Implemented dynamic notable ancestors array (up to 6) with add/remove functionality (AC3)
+- ✅ All fields are optional for flexibility (AC4)
+- ✅ Updated API to accept and save genetic data and pedigree information
+- ✅ EPD data stored as JSON object in database for flexibility
+- ✅ Form includes helpful placeholder text and units for all fields
+
+**Technical Approach:**
+- EPD data stored as JSON in `epdData` field for flexibility across breeds
+- Notable ancestors stored as string array
+- All genetic and pedigree fields are optional
+- Numeric validation handled by HTML5 input type="number"
+- Form integrated into existing single-page bull creation form
+
 ### File List
+
+**Modified:**
+- `app/bulls/create/page.tsx` - Added genetic data and pedigree form sections
+- `app/api/bulls/create/route.ts` - Updated to accept and save genetic data
+- `docs/sprint-status.yaml` - Marked story as review
