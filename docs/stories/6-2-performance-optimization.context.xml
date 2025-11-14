@@ -1,0 +1,267 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>2</storyId>
+    <title>Performance Optimization</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/6-2-performance-optimization.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>pages to load quickly</iWant>
+    <soThat>I have a smooth browsing experience even on slower connections</soThat>
+    <tasks>
+      - Task 1: Run Performance Audit and Establish Baseline (AC: #5)
+      - Task 2: Optimize Images (AC: #1, #3, #6)
+      - Task 3: Optimize Code Splitting and Bundle Size (AC: #2, #5, #7)
+      - Task 4: Optimize Font Loading (AC: #1, #3, #8)
+      - Task 5: Optimize Database Queries (AC: #9)
+      - Task 6: Implement Caching Strategy (AC: #1, #2, #9)
+      - Task 7: Optimize API Routes (AC: #4, #9)
+      - Task 8: Add Loading States and Skeletons (AC: #10)
+      - Task 9: Optimize Third-Party Scripts (AC: #1, #2, #5)
+      - Task 10: Performance Testing on Slow Connections (AC: #1, #2, #3)
+      - Task 11: Final Performance Audit and Documentation (AC: #1-10)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Initial page load completes in &lt;3 seconds on 4G connection
+    2. Time to interactive is &lt;5 seconds
+    3. Largest Contentful Paint (LCP) is &lt;2.5 seconds
+    4. First Input Delay (FID) is &lt;100ms
+    5. Lighthouse Performance score is &gt;85
+    6. Images are optimized with WebP format and lazy loading
+    7. Code is split and tree-shaken to minimize bundle size
+    8. Fonts are optimized with proper loading strategy
+    9. API responses are fast (&lt;500ms for typical queries)
+    10. Loading states provide visual feedback during data fetching
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 6: Polish &amp; Production Readiness - Story 6.2</title>
+        <section>Story 6.2: Performance Optimization</section>
+        <snippet>Performance metrics meet targets: Initial page load &lt;3 seconds on 4G, Time to interactive &lt;5 seconds, Largest Contentful Paint &lt;2.5 seconds, Lighthouse Performance score &gt;85. Images optimized (WebP, lazy loading), code split and tree-shaken, fonts optimized.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Performance</title>
+        <section>NFR-1: Page Load Performance</section>
+        <snippet>Initial page load &lt;3 seconds on 4G connection, Time to interactive &lt;5 seconds, Lighthouse score &gt;85. Critical for ranch owners and breeders with slower rural internet connections. Implementation: Code splitting, lazy loading, CDN for images (Cloudinary).</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Image Performance</title>
+        <section>NFR-2: Image Performance</section>
+        <snippet>WebP format with JPEG fallback, lazy loading below fold, progressive JPEG, max initial load 500KB total images. Bull photos are critical but shouldn't slow down experience. Implementation: Cloudinary automatic optimization.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Search/Filter Performance</title>
+        <section>NFR-3: Search/Filter Performance</section>
+        <snippet>Filter application &lt;200ms, search results &lt;500ms. Instant filter and search results for efficient bull discovery. Implementation: Client-side filtering for small datasets, indexed database queries, debounced search input.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Performance Optimizations</title>
+        <section>Performance Optimizations</section>
+        <snippet>Cloudinary automatic WebP conversion. Multiple image sizes: thumbnail (300px), medium (800px), large (1200px). Lazy loading below fold. Next.js Image component for automatic optimization. Route-based code splitting (automatic with App Router). Dynamic imports for heavy components. ISR with 1-hour revalidation for static pages. Database indexes on: ranch_id, breed, status, created_at. Connection pooling via Prisma.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Image Storage - Cloudinary</title>
+        <section>AD-4: Image Storage - Cloudinary</section>
+        <snippet>Automatic image optimization (WebP, compression). Multiple size transformations. CDN delivery. Lazy loading. Simple SDK integration. Upload: Signed uploads from client to Cloudinary. Storage: Store Cloudinary URLs in database. Delivery: Automatic format selection (WebP with fallback).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>next.config.js</path>
+        <kind>config</kind>
+        <symbol>nextConfig</symbol>
+        <lines>1-18</lines>
+        <reason>Next.js configuration for image optimization. Currently configured for Cloudinary remote patterns. Will need bundle analyzer and additional performance optimizations.</reason>
+      </artifact>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>1-146</lines>
+        <reason>Core component rendered many times on browse page. Already uses Next.js Image with sizes prop and lazy loading. Key optimization target for bundle size and rendering performance.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullsPage</symbol>
+        <lines>1-168</lines>
+        <reason>Main browse page - performance critical. Already has loading skeleton (BullsGridSkeleton). Uses Suspense for progressive loading. Currently uses cache: 'no-store' which should be optimized.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>component</kind>
+        <symbol>BullsGridSkeleton</symbol>
+        <lines>36-51</lines>
+        <reason>Loading skeleton implementation for browse page. Good pattern to replicate across other pages for perceived performance.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/[slug]/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullDetailPage</symbol>
+        <lines>all</lines>
+        <reason>Bull detail page with photo gallery - image optimization critical. LCP optimization target.</reason>
+      </artifact>
+      <artifact>
+        <path>app/compare/page.tsx</path>
+        <kind>page</kind>
+        <symbol>ComparePage</symbol>
+        <lines>all</lines>
+        <reason>Comparison page can be data-heavy with multiple bulls. May benefit from code splitting and loading optimization.</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/page.tsx</path>
+        <kind>page</kind>
+        <symbol>DashboardPage</symbol>
+        <lines>all</lines>
+        <reason>Ranch dashboard - may include charts and analytics. Candidate for code splitting if heavy components are used.</reason>
+      </artifact>
+      <artifact>
+        <path>package.json</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <lines>1-53</lines>
+        <reason>Dependency audit target. Need to identify large dependencies and remove unused packages. Current dependencies include BullMQ, Cloudinary, React Hook Form - all reasonable sizes.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>Bull model</symbol>
+        <lines>all</lines>
+        <reason>Database schema for query optimization. Need to verify indexes on frequently queried fields (breed, status, archived, createdAt).</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/bulls/public/route.ts</path>
+        <kind>api</kind>
+        <symbol>GET handler</symbol>
+        <lines>all</lines>
+        <reason>Public bulls API route - performance critical. Need to optimize query (select only needed fields), verify indexes, implement efficient pagination.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/cloudinary.ts</path>
+        <kind>utility</kind>
+        <symbol>cloudinary config</symbol>
+        <lines>all</lines>
+        <reason>Cloudinary configuration for image optimization. Verify automatic WebP conversion and quality settings.</reason>
+      </artifact>
+      <artifact>
+        <path>app/globals.css</path>
+        <kind>styles</kind>
+        <symbol>global styles</symbol>
+        <lines>all</lines>
+        <reason>Global CSS file - audit for unused styles and minimize CSS bundle size.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0" />
+        <package name="react" version="^18.3.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="cloudinary" version="^2.8.0" />
+        <package name="next-auth" version="^5.0.0-beta.30" />
+        <package name="bullmq" version="^5.63.0" />
+        <package name="react-hook-form" version="^7.66.0" />
+        <package name="@dnd-kit/core" version="^6.3.1" />
+        <package name="@dnd-kit/sortable" version="^10.0.0" />
+      </node>
+      <devDependencies>
+        <package name="typescript" version="^5" />
+        <package name="tailwindcss" version="^3.4.0" />
+        <package name="eslint" version="^8" />
+        <package name="prettier" version="^3.6.2" />
+      </devDependencies>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must use Next.js Image component for all images (automatic optimization)
+    - Must maintain Vercel Edge Network for CDN caching
+    - Must use Cloudinary for image delivery and optimization
+    - Must maintain PostgreSQL with proper indexing
+    - Code splitting must use dynamic imports for heavy components
+    - Must not break existing functionality while optimizing
+    - Performance targets are hard requirements: LCP &lt;2.5s, TTI &lt;5s, Lighthouse &gt;85
+    - Must test on throttled 4G connection (rural internet users)
+    - Loading states must not introduce layout shift (CLS)
+    - Font loading must not block LCP (use font-display: swap)
+    - API response times must remain &lt;500ms
+    - Bundle size target: &lt;200KB initial JS
+    - Must maintain accessibility while optimizing (no trade-offs)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Next.js Image Component</name>
+      <kind>React Component</kind>
+      <signature>Image src={string} alt={string} fill={boolean} sizes={string} loading="lazy" | "eager" priority={boolean}</signature>
+      <path>next/image</path>
+    </interface>
+    <interface>
+      <name>Cloudinary Image Transformation API</name>
+      <kind>URL-based API</kind>
+      <signature>https://res.cloudinary.com/{cloud_name}/image/upload/f_auto,q_auto/{public_id}</signature>
+      <path>lib/cloudinary.ts</path>
+    </interface>
+    <interface>
+      <name>Next.js Dynamic Import</name>
+      <kind>Function</kind>
+      <signature>dynamic(() => import('component'), { loading: () => JSX.Element, ssr: boolean })</signature>
+      <path>next/dynamic</path>
+    </interface>
+    <interface>
+      <name>Prisma Query Optimization</name>
+      <kind>ORM API</kind>
+      <signature>prisma.bull.findMany({ select: {...}, where: {...}, take: number, skip: number, orderBy: {...} })</signature>
+      <path>@prisma/client</path>
+    </interface>
+    <interface>
+      <name>Next.js ISR (Incremental Static Regeneration)</name>
+      <kind>Page Config</kind>
+      <signature>export const revalidate = 3600; // seconds</signature>
+      <path>app/bulls/[slug]/page.tsx</path>
+    </interface>
+    <interface>
+      <name>Next.js Script Component</name>
+      <kind>React Component</kind>
+      <signature>Script src={string} strategy="beforeInteractive" | "afterInteractive" | "lazyOnload"</signature>
+      <path>next/script</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Performance testing should use Chrome DevTools Lighthouse for automated audits (Performance, Accessibility, Best Practices, SEO scores). Manual testing with Chrome DevTools Network throttling (Slow 4G, Fast 3G) to simulate rural internet. Real device testing on mobile with 4G connection. Bundle analysis using webpack-bundle-analyzer to identify large dependencies. Database query performance testing using Prisma query logging. API response time testing with network tab and server logs. Visual regression testing to ensure loading states don't cause layout shift. Core Web Vitals monitoring: LCP, FID, CLS.
+    </standards>
+    <locations>
+      - No existing test files for performance
+      - Manual testing with Chrome DevTools
+      - Lighthouse CI can be added to deployment pipeline
+      - Performance budgets can be enforced in next.config.js
+    </locations>
+    <ideas>
+      <test ac="1,2,3,5">Run Lighthouse audit on all major pages (browse, bull detail, compare, dashboard) and verify scores meet targets (Performance &gt;85, LCP &lt;2.5s, TTI &lt;5s)</test>
+      <test ac="6">Verify all images use Next.js Image component with proper sizes prop and lazy loading. Check Cloudinary URLs include f_auto,q_auto for WebP conversion.</test>
+      <test ac="7">Run webpack-bundle-analyzer and verify initial JS bundle &lt;200KB. Check for large dependencies and ensure code splitting for heavy components.</test>
+      <test ac="8">Verify fonts use next/font with font-display: swap. Check font loading doesn't block LCP in Lighthouse.</test>
+      <test ac="9">Test API response times with network tab. Verify /api/bulls/public responds in &lt;500ms. Check database queries have proper indexes.</test>
+      <test ac="10">Verify loading skeletons exist on browse page, bull detail page, comparison page. Test that loading states don't cause layout shift (CLS score).</test>
+      <test ac="1,2,3">Manual test with Chrome DevTools throttling (Slow 4G). Verify page loads in &lt;3 seconds and interactive in &lt;5 seconds.</test>
+      <test ac="4">Test interactive elements (buttons, forms) respond within 100ms. Verify FID score in Lighthouse.</test>
+      <test ac="all">Create performance monitoring dashboard with before/after metrics. Document improvements in story completion notes.</test>
+    </ideas>
+  </tests>
+</story-context>

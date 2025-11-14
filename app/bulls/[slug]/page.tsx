@@ -108,9 +108,9 @@ export default async function BullDetailPage({ params }: PageProps) {
           
           <Link 
             href="/bulls"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+            className="inline-flex items-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 active:bg-blue-50 rounded-md min-h-[44px]"
           >
-            <ChevronLeftIcon className="h-4 w-4 mr-1" />
+            <ChevronLeftIcon className="h-5 w-5 mr-1" />
             Back to Browse
           </Link>
         </div>
@@ -121,7 +121,7 @@ export default async function BullDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Images */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-8">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden lg:sticky lg:top-8">
               {/* Hero Image */}
               <div className="relative h-96 bg-gray-200">
                 {bull.heroImage ? (
@@ -154,11 +154,15 @@ export default async function BullDetailPage({ params }: PageProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-start justify-between mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{bull.name}</h1>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{bull.name}</h1>
                 <div className="flex items-center gap-3">
-                  <FavoriteButton bullId={bull.id} initialIsFavorited={isFavorited} size="lg" />
-                  <ShareButton />
+                  <div className="min-w-[48px] min-h-[48px] flex items-center justify-center">
+                    <FavoriteButton bullId={bull.id} initialIsFavorited={isFavorited} size="lg" />
+                  </div>
+                  <div className="min-w-[48px] min-h-[48px] flex items-center justify-center">
+                    <ShareButton />
+                  </div>
                 </div>
               </div>
               
@@ -205,7 +209,7 @@ export default async function BullDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Expected Progeny Differences (EPDs)</h2>
                 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>

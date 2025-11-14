@@ -23,7 +23,7 @@ export default function ComparisonBar() {
               </h3>
               <button
                 onClick={clearComparison}
-                className="text-xs text-gray-500 hover:text-gray-700 underline"
+                className="text-xs text-gray-500 hover:text-gray-700 underline px-2 py-2 min-h-[44px]"
               >
                 Clear all
               </button>
@@ -41,14 +41,14 @@ export default function ComparisonBar() {
               <button
                 type="button"
                 disabled
-                className="w-full sm:w-auto px-6 py-3 bg-gray-300 text-white font-semibold rounded-lg shadow-md cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-3 bg-gray-300 text-white font-semibold rounded-lg shadow-md cursor-not-allowed min-h-[48px]"
               >
                 Select 2+ Bulls to Compare
               </button>
             ) : (
               <a
                 href="/compare"
-                className="inline-block w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-center no-underline"
+                className="inline-block w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-center no-underline min-h-[48px]"
               >
                 Compare {selectedBulls.length} Bulls
               </a>
