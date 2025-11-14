@@ -24,6 +24,22 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  /* Ensure minimum 16px font size on mobile */
+  font-size: 16px;
+}
+
+/* Hover states only on devices that support hover (AC7) */
+@media (hover: hover) and (pointer: fine) {
+  .hover\:shadow-xl:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+}
+
+/* Touch states for mobile (AC7) */
+@media (hover: none) and (pointer: coarse) {
+  .hover\:shadow-xl:active {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
 }
 
 @keyframes slide-up {

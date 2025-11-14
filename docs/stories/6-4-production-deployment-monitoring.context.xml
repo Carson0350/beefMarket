@@ -1,0 +1,270 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>4</storyId>
+    <title>Production Deployment &amp; Monitoring</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/6-4-production-deployment-monitoring.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the platform deployed to production with monitoring</iWant>
+    <soThat>I can track performance and quickly respond to issues</soThat>
+    <tasks>
+      - Task 1: Production Environment Setup (AC: #1, #2)
+      - Task 2: Database Migration and Setup (AC: #3, #12)
+      - Task 3: HTTPS and Security Configuration (AC: #4, #11)
+      - Task 4: Error Tracking Setup (AC: #5)
+      - Task 5: Uptime Monitoring Setup (AC: #6)
+      - Task 6: Analytics Setup (AC: #7)
+      - Task 7: Performance Monitoring Setup (AC: #8)
+      - Task 8: Email Service Production Configuration (AC: #9)
+      - Task 9: Image Delivery Verification (AC: #10)
+      - Task 10: API Rate Limiting and Security (AC: #11)
+      - Task 11: Production Deployment Checklist (AC: #1-12)
+      - Task 12: Post-Deployment Verification (AC: #1-12)
+      - Task 13: Production Documentation (AC: #1-12)
+      - Task 14: Performance and Security Audit (AC: #4, #8, #11)
+      - Task 15: Launch Preparation (AC: #1-12)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Platform is live at production URL with custom domain (if available)
+    2. All environment variables are configured correctly in production
+    3. Database migrations have run successfully in production
+    4. HTTPS is enforced on all pages
+    5. Error tracking is set up (Sentry or similar)
+    6. Uptime monitoring is configured with alerts
+    7. Analytics are tracking page views and user behavior
+    8. Performance monitoring is active (Core Web Vitals)
+    9. Email notifications work in production
+    10. Image delivery works via Cloudinary CDN
+    11. Security headers are configured (CSP, HSTS, X-Frame-Options)
+    12. Backup strategy is in place for database
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 6: Polish &amp; Production Readiness - Story 6.4</title>
+        <section>Story 6.4: Production Deployment &amp; Monitoring</section>
+        <snippet>Platform live at production URL, all environment variables configured, database migrations run successfully, HTTPS enforced, error tracking set up (Sentry or similar), uptime monitoring configured, analytics tracking, alerts for critical errors.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Reliability</title>
+        <section>NFR-11: Uptime</section>
+        <snippet>99.5% uptime target (3.6 hours downtime/month acceptable). Graceful degradation if services fail. Error boundaries prevent full app crashes. Ranch owners rely on platform for inquiries. Implementation: Vercel's infrastructure, error boundaries, retry logic.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Data Backup</title>
+        <section>NFR-12: Data Backup</section>
+        <snippet>Daily automated database backups, 30-day backup retention, point-in-time recovery capability, image storage redundancy (Cloudinary). Protect against data loss. Implementation: Vercel Postgres automated backups, Cloudinary redundancy.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Deployment Strategy - Vercel</title>
+        <section>AD-5: Deployment - Vercel</section>
+        <snippet>Deploy on Vercel with automated CI/CD. Main branch → Production, feature branches → Preview deployments. Database migrations run on deployment. Environment variables configured in Vercel dashboard. Vercel Postgres for production database. Serverless functions (API routes scale automatically).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture</title>
+        <section>System Architecture</section>
+        <snippet>Vercel Edge Network for CDN and load balancing. PostgreSQL (Vercel) for database. Cloudinary for images/CDN. Resend for email. HTTPS only (enforced by Vercel). Serverless Next.js API routes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/DEPLOYMENT.md</path>
+        <title>Deployment Documentation</title>
+        <section>Full Document</section>
+        <snippet>Existing deployment documentation with environment setup, database configuration, and deployment process.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>next.config.js</path>
+        <kind>config</kind>
+        <symbol>nextConfig</symbol>
+        <lines>1-18</lines>
+        <reason>Next.js configuration - needs security headers, Sentry configuration, and production optimizations.</reason>
+      </artifact>
+      <artifact>
+        <path>package.json</path>
+        <kind>config</kind>
+        <symbol>scripts</symbol>
+        <lines>1-53</lines>
+        <reason>Build and deployment scripts. Includes postbuild script for migrations. May need Sentry or analytics packages.</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>database schema</symbol>
+        <lines>all</lines>
+        <reason>Database schema for production migrations. Verify all models and indexes are production-ready.</reason>
+      </artifact>
+      <artifact>
+        <path>.env</path>
+        <kind>config</kind>
+        <symbol>environment variables</symbol>
+        <lines>all</lines>
+        <reason>Local environment variables template. Document all required production environment variables.</reason>
+      </artifact>
+      <artifact>
+        <path>middleware.ts</path>
+        <kind>middleware</kind>
+        <symbol>middleware</symbol>
+        <lines>all</lines>
+        <reason>Next.js middleware for authentication and routing. Verify works correctly in production.</reason>
+      </artifact>
+      <artifact>
+        <path>auth.config.ts</path>
+        <kind>config</kind>
+        <symbol>authConfig</symbol>
+        <lines>all</lines>
+        <reason>NextAuth.js configuration. Verify production URL and secrets are configured.</reason>
+      </artifact>
+      <artifact>
+        <path>auth.ts</path>
+        <kind>config</kind>
+        <symbol>auth handlers</symbol>
+        <lines>all</lines>
+        <reason>NextAuth.js setup. Verify session management works in production.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/cloudinary.ts</path>
+        <kind>utility</kind>
+        <symbol>cloudinary config</symbol>
+        <lines>all</lines>
+        <reason>Cloudinary configuration. Verify production credentials and CDN delivery.</reason>
+      </artifact>
+      <artifact>
+        <path>lib/db.ts</path>
+        <kind>utility</kind>
+        <symbol>Prisma client</symbol>
+        <lines>all</lines>
+        <reason>Prisma database client. Verify connection pooling and production configuration.</reason>
+      </artifact>
+      <artifact>
+        <path>app/api/*/route.ts</path>
+        <kind>api</kind>
+        <symbol>API routes</symbol>
+        <lines>all</lines>
+        <reason>All API routes need production testing, error handling, and rate limiting verification.</reason>
+      </artifact>
+      <artifact>
+        <path>DEPLOYMENT.md</path>
+        <kind>documentation</kind>
+        <symbol>deployment docs</symbol>
+        <lines>all</lines>
+        <reason>Existing deployment documentation. Update with monitoring, error tracking, and production checklist.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0" />
+        <package name="@prisma/client" version="^6.19.0" />
+        <package name="prisma" version="^6.19.0" />
+        <package name="next-auth" version="^5.0.0-beta.30" />
+        <package name="cloudinary" version="^2.8.0" />
+        <package name="resend" version="^6.4.2" />
+      </node>
+      <production-services>
+        <service name="Vercel" purpose="Hosting and deployment platform" />
+        <service name="Vercel Postgres" purpose="Production database" />
+        <service name="Cloudinary" purpose="Image storage and CDN" />
+        <service name="Resend" purpose="Transactional email service" />
+        <service name="Sentry" purpose="Error tracking (to be added)" />
+        <service name="UptimeRobot" purpose="Uptime monitoring (to be added)" />
+        <service name="Vercel Analytics" purpose="Performance and analytics (built-in)" />
+      </production-services>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must deploy to Vercel platform (architecture decision)
+    - Must use Vercel Postgres for production database
+    - Must use Cloudinary for image storage and delivery
+    - Must use Resend for email service
+    - HTTPS must be enforced on all pages
+    - Database migrations must run automatically on deployment
+    - Environment variables must be configured in Vercel dashboard (not in code)
+    - Must achieve 99.5% uptime target
+    - Must have daily automated database backups with 30-day retention
+    - Error tracking must capture both client and server errors
+    - Security headers must be configured (HSTS, CSP, X-Frame-Options, etc.)
+    - Performance monitoring must track Core Web Vitals
+    - Must maintain performance targets from Story 6.2 (LCP &lt;2.5s, TTI &lt;5s)
+    - Must maintain accessibility compliance from Story 6.3 (WCAG 2.1 AA)
+    - API rate limiting must be implemented to prevent abuse
+    - Production URL must be documented and communicated to stakeholders
+    - Incident response process must be documented
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Vercel Deployment API</name>
+      <kind>Platform API</kind>
+      <signature>Git push to main → Automatic deployment → Database migrations → Live production</signature>
+      <path>Vercel platform</path>
+    </interface>
+    <interface>
+      <name>Vercel Environment Variables</name>
+      <kind>Configuration</kind>
+      <signature>Vercel Dashboard → Settings → Environment Variables → Add/Edit variables</signature>
+      <path>Vercel dashboard</path>
+    </interface>
+    <interface>
+      <name>Sentry Error Tracking</name>
+      <kind>Monitoring Service</kind>
+      <signature>Sentry.captureException(error), Sentry.captureMessage(message)</signature>
+      <path>@sentry/nextjs</path>
+    </interface>
+    <interface>
+      <name>Next.js Security Headers</name>
+      <kind>Configuration</kind>
+      <signature>async headers() { return [{ source, headers: [{ key, value }] }] }</signature>
+      <path>next.config.js</path>
+    </interface>
+    <interface>
+      <name>Prisma Migrations</name>
+      <kind>Database CLI</kind>
+      <signature>prisma migrate deploy (runs in postbuild script)</signature>
+      <path>package.json scripts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Production deployment testing requires comprehensive manual verification across all features and services. (1) Pre-deployment: Run local build (npm run build), fix all errors/warnings, run Lighthouse audits, verify all environment variables are documented. (2) Deployment: Monitor Vercel deployment logs, verify migrations run successfully, check for deployment errors. (3) Post-deployment verification: Test all major user flows (registration, login, bull creation, inquiry submission, favorites), verify HTTPS enforcement, test image delivery via Cloudinary, verify email notifications send correctly, check error tracking captures errors (trigger test error), verify uptime monitoring is active, check analytics are tracking page views, verify performance meets targets (Core Web Vitals), test security headers with securityheaders.com. (4) Monitoring: Set up alerts for critical errors, monitor uptime for 24 hours, check performance metrics, verify backup strategy is active. Document all verification steps and results.
+    </standards>
+    <locations>
+      - No automated deployment tests
+      - Manual verification checklist required
+      - Vercel deployment logs for monitoring
+      - Sentry dashboard for error tracking
+      - UptimeRobot dashboard for uptime monitoring
+      - Vercel Analytics for performance monitoring
+    </locations>
+    <ideas>
+      <test ac="1">Production URL test: Visit production URL, verify site loads, verify custom domain works (if configured), verify HTTPS is enforced.</test>
+      <test ac="2">Environment variables test: Verify all required env vars are configured in Vercel dashboard. Test database connection, Cloudinary upload, email sending.</test>
+      <test ac="3">Database migration test: Check Vercel deployment logs for migration success. Verify schema matches expected structure. Test database queries work.</test>
+      <test ac="4">HTTPS test: Visit HTTP URL, verify redirect to HTTPS. Check for mixed content warnings. Verify SSL certificate is valid.</test>
+      <test ac="5">Error tracking test: Trigger test error in production. Verify error appears in Sentry dashboard. Check alert notifications work.</test>
+      <test ac="6">Uptime monitoring test: Verify UptimeRobot is checking production URL. Simulate downtime (if possible), verify alerts work.</test>
+      <test ac="7">Analytics test: Visit pages in production. Check analytics dashboard for page view tracking. Verify events are captured.</test>
+      <test ac="8">Performance monitoring test: Check Vercel Speed Insights for Core Web Vitals data. Verify LCP, FID, CLS meet targets.</test>
+      <test ac="9">Email test: Submit inquiry form, verify email sends. Test registration email verification. Check email deliverability.</test>
+      <test ac="10">Image delivery test: Upload image in production. Verify image loads via Cloudinary CDN. Check WebP conversion works.</test>
+      <test ac="11">Security headers test: Run securityheaders.com scan on production URL. Verify all headers are present (HSTS, CSP, X-Frame-Options, etc.).</test>
+      <test ac="12">Backup test: Verify Vercel Postgres automated backups are configured. Document backup retention policy. Test restore process (if possible).</test>
+      <test ac="all">Full user flow test: Complete registration → create ranch → add bull → browse bulls → compare bulls → submit inquiry → verify all features work end-to-end.</test>
+    </ideas>
+  </tests>
+</story-context>

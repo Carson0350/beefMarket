@@ -37,7 +37,6 @@ export default function BullCard({ bull, isFavorited = false }: BullCardProps) {
   const availability = getAvailabilityStatus(bull.availableStraws);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
     e.stopPropagation();
     if (e.target.checked) {
       addBull(bull.id);
@@ -70,15 +69,15 @@ export default function BullCard({ bull, isFavorited = false }: BullCardProps) {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col relative">
       {/* Comparison Checkbox */}
       <div className="absolute top-3 left-3 z-10" onClick={handleCheckboxClick}>
-        <label className="flex items-center cursor-pointer bg-white rounded-md px-2 py-1 shadow-md hover:bg-gray-50">
+        <label className="flex items-center cursor-pointer bg-white rounded-md px-3 py-2 shadow-md hover:bg-gray-50 active:bg-gray-100 min-h-[44px]">
           <input
             type="checkbox"
             checked={selected}
             disabled={checkboxDisabled}
             onChange={handleCheckboxChange}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <span className="ml-1.5 text-xs font-medium text-gray-700">Compare</span>
+          <span className="ml-2 text-sm font-medium text-gray-700">Compare</span>
         </label>
       </div>
 
@@ -107,7 +106,7 @@ export default function BullCard({ bull, isFavorited = false }: BullCardProps) {
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${availability.color}`}>
               {availability.text}
             </span>
-            <div className="bg-white rounded-full p-1.5 shadow-md" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-full p-2 shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               <FavoriteButton bullId={bull.id} initialIsFavorited={isFavorited} size="sm" />
             </div>
           </div>

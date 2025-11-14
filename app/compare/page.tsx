@@ -94,9 +94,9 @@ export default function ComparePage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Compare Bulls</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Compare Bulls</h1>
               <p className="mt-1 text-sm text-gray-600">
                 Comparing {bulls.length} {bulls.length === 1 ? 'bull' : 'bulls'} side-by-side
               </p>
@@ -105,14 +105,14 @@ export default function ComparePage() {
               {bulls.length < 3 && (
                 <Link
                   href="/bulls"
-                  className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[48px] flex items-center justify-center"
                 >
                   + Add Bull
                 </Link>
               )}
               <Link
                 href="/bulls"
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors min-h-[48px] flex items-center justify-center"
               >
                 Back to Browse
               </Link>
@@ -125,7 +125,7 @@ export default function ComparePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Bull Columns */}
         <div className={`grid gap-6 mb-8 ${
-          bulls.length === 2 ? 'md:grid-cols-2' : bulls.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-1'
+          bulls.length === 2 ? 'sm:grid-cols-2' : bulls.length === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-1'
         }`}>
           {bulls.map((bull) => (
             <BullComparisonColumn

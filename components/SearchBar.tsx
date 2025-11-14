@@ -50,15 +50,16 @@ export default function SearchBar() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-md border-gray-300 pl-10 pr-10 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          className="block w-full rounded-md border-gray-300 pl-10 pr-10 py-3 focus:border-blue-500 focus:ring-blue-500 text-base min-h-[48px]"
           placeholder="Search by bull name, registration, or ranch..."
         />
         {searchQuery && (
           <button
             onClick={clearSearch}
-            className="absolute inset-y-0 right-0 flex items-center pr-3"
+            className="absolute inset-y-0 right-0 flex items-center justify-center w-12 min-h-[44px] hover:bg-gray-50 active:bg-gray-100 rounded-r-md"
+            aria-label="Clear search"
           >
-            <XMarkIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" aria-hidden="true" />
+            <XMarkIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </button>
         )}
       </div>

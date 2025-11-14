@@ -1,0 +1,332 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.1</storyId>
+    <title>Responsive Design Refinement</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/6-1-responsive-design-refinement.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the platform to work seamlessly on all devices</iWant>
+    <soThat>I can access it from desktop, tablet, or mobile</soThat>
+    <tasks>
+      - Task 1: Audit and Fix Browse Page Responsiveness
+      - Task 2: Audit and Fix Bull Detail Page Responsiveness
+      - Task 3: Audit and Fix Comparison Page Responsiveness
+      - Task 4: Audit and Fix Ranch Dashboard Responsiveness
+      - Task 5: Audit and Fix Forms Responsiveness
+      - Task 6: Fix Navigation Responsiveness
+      - Task 7: Implement Touch Gesture Support
+      - Task 8: Fix Global Responsive Issues
+      - Task 9: Cross-Browser and Device Testing
+      - Task 10: Performance Testing on Mobile
+      - Task 11: Documentation and Testing Checklist
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Desktop layouts display multi-column grids (4 columns for bull cards, 3 columns for comparison)</criterion>
+    <criterion id="AC2">Tablet layouts display 2-column grids with touch-friendly buttons (minimum 44x44px)</criterion>
+    <criterion id="AC3">Mobile layouts display single-column with bottom sheets and thumb-friendly navigation</criterion>
+    <criterion id="AC4">Touch gestures work for image galleries (swipe, pinch-to-zoom)</criterion>
+    <criterion id="AC5">No horizontal scrolling on any mobile viewport (320px minimum width)</criterion>
+    <criterion id="AC6">All interactive elements meet touch target size requirements (44x44px minimum)</criterion>
+    <criterion id="AC7">Hover states work on desktop, touch states work on mobile</criterion>
+    <criterion id="AC8">Navigation adapts to mobile (hamburger menu or bottom nav)</criterion>
+    <criterion id="AC9">Forms are usable on mobile with appropriate input types and keyboard handling</criterion>
+    <criterion id="AC10">Images load responsively with appropriate sizes per viewport</criterion>
+    <criterion id="AC11">Tables (comparison, EPD data) are responsive (horizontal scroll or card layout on mobile)</criterion>
+    <criterion id="AC12">Tested on iOS Safari, Chrome Android, and desktop browsers (Chrome, Firefox, Safari)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR-10: Responsive Design</section>
+        <snippet>Platform works seamlessly across devices. Desktop-optimized, tablet and mobile functional. Visual card displays adapt to screen sizes. Photo galleries support touch gestures.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>NFR-10: Mobile Accessibility</section>
+        <snippet>Touch-friendly interface with minimum 44x44px touch targets. No hover-only interactions. Pinch-to-zoom enabled. Orientation support (portrait and landscape).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>AD-8: Styling Strategy - Tailwind CSS + shadcn/ui</section>
+        <snippet>Tailwind CSS responsive breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px). Mobile-first responsive design approach. shadcn/ui components are accessible and responsive by default.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Technical Architecture</title>
+        <section>Unique Challenges</section>
+        <snippet>Low Digital Literacy Users require extremely simple, forgiving UX. Rural Internet requires optimization for slower connections (4G, rural areas). Photo-Heavy Content must load quickly.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 6 - Story 6.1</section>
+        <snippet>All layouts must be responsive: Desktop (multi-column, hover states), Tablet (2-column, touch-friendly), Mobile (single-column, bottom sheets, thumb-friendly nav). Touch gestures required: swipe galleries, pinch-to-zoom. Test on iOS Safari, Chrome Android, desktop browsers.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullsPage</symbol>
+        <lines>all</lines>
+        <reason>Browse page with bull card grid - needs responsive column adjustments (4/3/2/1 columns)</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/[slug]/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullDetailPage</symbol>
+        <lines>all</lines>
+        <reason>Bull detail page with photo gallery and EPD tables - needs mobile responsiveness and touch gestures</reason>
+      </artifact>
+      <artifact>
+        <path>app/compare/page.tsx</path>
+        <kind>page</kind>
+        <symbol>ComparePage</symbol>
+        <lines>all</lines>
+        <reason>Comparison page with table - needs responsive stacking/scrolling for mobile</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/page.tsx</path>
+        <kind>page</kind>
+        <symbol>DashboardPage</symbol>
+        <lines>all</lines>
+        <reason>Ranch dashboard - needs responsive navigation and grid layouts</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/inquiries/page.tsx</path>
+        <kind>page</kind>
+        <symbol>InquiriesPage</symbol>
+        <lines>all</lines>
+        <reason>Inquiry dashboard - needs responsive card layout for mobile</reason>
+      </artifact>
+      <artifact>
+        <path>app/login/page.tsx</path>
+        <kind>page</kind>
+        <symbol>LoginPage</symbol>
+        <lines>all</lines>
+        <reason>Authentication form - needs mobile-friendly input types and spacing</reason>
+      </artifact>
+      <artifact>
+        <path>app/register/page.tsx</path>
+        <kind>page</kind>
+        <symbol>RegisterPage</symbol>
+        <lines>all</lines>
+        <reason>Registration form - needs mobile-friendly input types and spacing</reason>
+      </artifact>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>all</lines>
+        <reason>Bull card component used in grid - needs responsive sizing and touch-friendly buttons</reason>
+      </artifact>
+      <artifact>
+        <path>components/ComparisonBar.tsx</path>
+        <kind>component</kind>
+        <symbol>ComparisonBar</symbol>
+        <lines>all</lines>
+        <reason>Floating comparison bar - needs responsive positioning (bottom fixed on mobile)</reason>
+      </artifact>
+      <artifact>
+        <path>components/ComparisonTable.tsx</path>
+        <kind>component</kind>
+        <symbol>ComparisonTable</symbol>
+        <lines>all</lines>
+        <reason>Comparison table - needs responsive columns/stacking for mobile</reason>
+      </artifact>
+      <artifact>
+        <path>components/BullFilters.tsx</path>
+        <kind>component</kind>
+        <symbol>BullFilters</symbol>
+        <lines>all</lines>
+        <reason>Filter sidebar - needs to collapse to drawer on mobile</reason>
+      </artifact>
+      <artifact>
+        <path>components/SearchBar.tsx</path>
+        <kind>component</kind>
+        <symbol>SearchBar</symbol>
+        <lines>all</lines>
+        <reason>Search bar - needs full-width on mobile</reason>
+      </artifact>
+      <artifact>
+        <path>components/InquiryForm.tsx</path>
+        <kind>component</kind>
+        <symbol>InquiryForm</symbol>
+        <lines>all</lines>
+        <reason>Inquiry form - needs mobile-friendly inputs and touch-friendly buttons</reason>
+      </artifact>
+      <artifact>
+        <path>components/ImageUpload.tsx</path>
+        <kind>component</kind>
+        <symbol>ImageUpload</symbol>
+        <lines>all</lines>
+        <reason>Image upload component - needs mobile-friendly interface</reason>
+      </artifact>
+      <artifact>
+        <path>app/layout.tsx</path>
+        <kind>layout</kind>
+        <symbol>RootLayout</symbol>
+        <lines>all</lines>
+        <reason>Root layout with navigation - needs responsive mobile navigation (hamburger menu)</reason>
+      </artifact>
+      <artifact>
+        <path>app/globals.css</path>
+        <kind>styles</kind>
+        <symbol>global-styles</symbol>
+        <lines>all</lines>
+        <reason>Global styles - may need responsive utilities and viewport meta tag verification</reason>
+      </artifact>
+      <artifact>
+        <path>tailwind.config.ts</path>
+        <kind>config</kind>
+        <symbol>tailwind-config</symbol>
+        <lines>all</lines>
+        <reason>Tailwind configuration - defines responsive breakpoints (sm, md, lg, xl)</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0">Next.js framework with built-in Image component for responsive images</package>
+        <package name="react" version="^18.3.0">React for component-based UI</package>
+        <package name="tailwindcss" version="^3.4.0">Utility-first CSS framework with responsive utilities</package>
+        <package name="@heroicons/react" version="^2.2.0">Icon library for UI elements</package>
+      </node>
+      <potential>
+        <package name="react-swipeable">Touch gesture library for swipe gestures in galleries</package>
+        <package name="react-use-gesture">Alternative touch gesture library</package>
+        <package name="react-pinch-zoom-pan">Pinch-to-zoom functionality for images</package>
+      </potential>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Use Tailwind CSS responsive utilities consistently (sm:, md:, lg:, xl: prefixes)
+    - Next.js Image component required for all images with proper sizes prop
+    - Touch targets must be minimum 44x44px (48px recommended)
+    - No horizontal scrolling on mobile (320px minimum width)
+    - Mobile-first responsive design approach
+    - Test with real devices, not just browser emulation
+    - Optimize for slower connections (4G, rural areas)
+    - shadcn/ui components are accessible and responsive by default
+    - Hover states only on desktop: use @media (hover: hover)
+    - Touch states required for mobile (active states, ripple effects)
+    - Viewport meta tag must be: width=device-width, initial-scale=1
+    - Minimum body text size: 16px on mobile
+    - Form inputs: minimum 44px height, appropriate input types (email, tel, number, date)
+    - Tables: horizontal scroll with scroll indicator OR card layout on mobile
+    - Navigation: hamburger menu or bottom nav on mobile
+    - Photo galleries: swipe gestures + pinch-to-zoom required
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Next.js Image Component</name>
+      <kind>component</kind>
+      <signature>
+        &lt;Image 
+          src={string} 
+          alt={string} 
+          width={number} 
+          height={number} 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={boolean}
+        /&gt;
+      </signature>
+      <path>next/image</path>
+    </interface>
+    <interface>
+      <name>Tailwind Responsive Breakpoints</name>
+      <kind>css-utilities</kind>
+      <signature>
+        sm: 640px (mobile landscape)
+        md: 768px (tablet)
+        lg: 1024px (desktop)
+        xl: 1280px (large desktop)
+        Usage: className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      </signature>
+      <path>tailwind.config.ts</path>
+    </interface>
+    <interface>
+      <name>Touch Gesture Handler (to be implemented)</name>
+      <kind>library</kind>
+      <signature>
+        import { useSwipeable } from 'react-swipeable';
+        const handlers = useSwipeable({ onSwipedLeft, onSwipedRight });
+        &lt;div {...handlers}&gt;Swipeable content&lt;/div&gt;
+      </signature>
+      <path>react-swipeable (to be installed)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Manual testing required for responsive design. Use Chrome DevTools device emulation for initial testing, then verify on real devices (iOS Safari, Chrome Android). Test all breakpoints: 320px, 375px, 414px, 768px, 1024px, 1280px, 1920px. Verify no horizontal scroll, touch targets meet 44x44px minimum, touch gestures work, and forms are usable on mobile. Cross-browser testing on Chrome, Firefox, Safari (desktop and mobile).
+    </standards>
+    <locations>
+      - Manual testing checklist in story file
+      - Chrome DevTools device emulation
+      - Real device testing (iOS, Android)
+      - BrowserStack for cross-browser testing (optional)
+    </locations>
+    <ideas>
+      - AC1: Test browse page displays 4 columns on xl, 3 on lg, 2 on md, 1 on sm
+      - AC1: Test comparison page displays 3 columns on desktop, 2 on tablet, stacks on mobile
+      - AC2: Test all buttons are minimum 44x44px on tablet
+      - AC2: Test touch-friendly spacing on tablet layouts
+      - AC3: Test mobile navigation (hamburger menu or bottom nav)
+      - AC3: Test single-column layouts on mobile
+      - AC3: Test bottom sheets work on mobile
+      - AC4: Test swipe gestures in bull photo galleries
+      - AC4: Test pinch-to-zoom on bull photos
+      - AC5: Test no horizontal scroll at 320px width
+      - AC5: Test no horizontal scroll at 375px width
+      - AC5: Test no horizontal scroll at 414px width
+      - AC6: Test all buttons meet 44x44px minimum
+      - AC6: Test all links meet 44x44px minimum
+      - AC6: Test form inputs meet 44px height minimum
+      - AC7: Test hover states only appear on desktop (use @media hover: hover)
+      - AC7: Test touch states (active, pressed) work on mobile
+      - AC8: Test navigation collapses to hamburger on mobile
+      - AC8: Test mobile menu opens and closes correctly
+      - AC8: Test navigation is keyboard accessible
+      - AC9: Test inquiry form on mobile with appropriate input types
+      - AC9: Test bull creation form on mobile
+      - AC9: Test authentication forms on mobile
+      - AC9: Test numeric keyboard appears for number inputs
+      - AC9: Test email keyboard appears for email inputs
+      - AC10: Test images load with appropriate sizes per viewport
+      - AC10: Test Next.js Image component sizes prop is set correctly
+      - AC10: Test lazy loading works on mobile
+      - AC11: Test comparison table scrolls horizontally on mobile
+      - AC11: Test EPD tables are responsive
+      - AC11: Test scroll indicator appears for horizontal scroll
+      - AC12: Test on iOS Safari (iPhone 12, iPhone 14)
+      - AC12: Test on Chrome Android (Pixel, Samsung)
+      - AC12: Test on desktop Chrome (Windows, Mac)
+      - AC12: Test on desktop Firefox (Windows, Mac)
+      - AC12: Test on desktop Safari (Mac)
+      - AC12: Test in landscape and portrait orientations
+      - Edge case: Test very small screens (320px)
+      - Edge case: Test very large screens (1920px+)
+      - Edge case: Test with browser zoom at 200%
+      - Edge case: Test with touch and mouse simultaneously (hybrid devices)
+      - Edge case: Test with slow 3G connection (throttled)
+      - Edge case: Test form validation errors display correctly on mobile
+      - Edge case: Test long bull names don't break card layouts
+      - Edge case: Test many filters don't break mobile drawer
+    </ideas>
+  </tests>
+</story-context>

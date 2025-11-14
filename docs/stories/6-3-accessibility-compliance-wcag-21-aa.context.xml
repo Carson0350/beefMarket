@@ -1,0 +1,287 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>3</storyId>
+    <title>Accessibility Compliance (WCAG 2.1 AA)</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-14</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/6-3-accessibility-compliance-wcag-21-aa.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user with disabilities</asA>
+    <iWant>the platform to be accessible</iWant>
+    <soThat>I can use it with assistive technologies</soThat>
+    <tasks>
+      - Task 1: Run Accessibility Audit and Establish Baseline (AC: #8, #9)
+      - Task 2: Implement Keyboard Navigation (AC: #1, #4)
+      - Task 3: Add Skip Navigation Links (AC: #7)
+      - Task 4: Semantic HTML and ARIA Landmarks (AC: #2, #11)
+      - Task 5: Heading Hierarchy (AC: #10)
+      - Task 6: Form Accessibility (AC: #6, #12)
+      - Task 7: Image Accessibility (AC: #5)
+      - Task 8: Color Contrast (AC: #3)
+      - Task 9: ARIA Labels and Descriptions (AC: #2)
+      - Task 10: Interactive Component Accessibility (AC: #1, #2, #4)
+      - Task 11: Screen Reader Testing (AC: #2)
+      - Task 12: Focus Management (AC: #1, #4)
+      - Task 13: Dynamic Content and Loading States (AC: #2, #12)
+      - Task 14: Tables and Data Accessibility (AC: #2)
+      - Task 15: Final Accessibility Audit and Testing (AC: #1-12)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Keyboard navigation works for all interactive elements (no mouse required)
+    2. Screen reader compatible with proper ARIA labels and semantic HTML
+    3. Color contrast ratio meets 4.5:1 minimum for text
+    4. Focus indicators are clearly visible on all interactive elements
+    5. Alt text is provided for all images
+    6. Form labels are properly associated with inputs
+    7. Skip navigation links are present for keyboard users
+    8. Lighthouse Accessibility score is &gt;90
+    9. No accessibility errors in axe DevTools audit
+    10. Headings follow proper hierarchy (h1, h2, h3 in order)
+    11. ARIA landmarks are used appropriately (main, nav, aside, footer)
+    12. Error messages are announced to screen readers
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 6: Polish &amp; Production Readiness - Story 6.3</title>
+        <section>Story 6.3: Accessibility Compliance (WCAG 2.1 AA)</section>
+        <snippet>Keyboard navigation for all interactive elements, screen reader compatible (ARIA labels, semantic HTML), color contrast ratio 4.5:1 minimum, focus indicators clearly visible, alt text for all images, form labels properly associated, skip navigation links present, Lighthouse Accessibility score &gt;90.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Accessibility</title>
+        <section>NFR-9: WCAG 2.1 AA Compliance</section>
+        <snippet>Accessible to users with disabilities. Keyboard navigation for all interactive elements, screen reader compatible with ARIA labels, color contrast 4.5:1 minimum, focus indicators visible, alt text for images. Inclusive design for broader user base and legal compliance. Implementation: Semantic HTML, ARIA attributes, contrast checking tools.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Non-Functional Requirements - Mobile Accessibility</title>
+        <section>NFR-10: Mobile Accessibility</section>
+        <snippet>Touch-friendly interface. Touch targets minimum 44x44px, no hover-only interactions, pinch-to-zoom enabled. Ensures mobile users can interact effectively. Implementation: Tailwind touch-friendly utilities, test on real devices.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>User Experience Principles - Accessibility</title>
+        <section>Accessibility</section>
+        <snippet>WCAG 2.1 AA compliance target. Keyboard navigation for all interactive elements. Screen reader friendly labels and ARIA attributes. Sufficient color contrast (4.5:1 minimum). Focus indicators clearly visible.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Styling Strategy - shadcn/ui</title>
+        <section>AD-8: Styling Strategy</section>
+        <snippet>shadcn/ui components are accessible by default (Radix UI primitives). Radix UI provides keyboard navigation and ARIA attributes. Tailwind CSS for styling (can customize focus styles). Copy components into project for full control.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>components/BullCard.tsx</path>
+        <kind>component</kind>
+        <symbol>BullCard</symbol>
+        <lines>1-146</lines>
+        <reason>Core card component - needs alt text verification, keyboard accessibility for comparison checkbox, proper ARIA labels for favorite button.</reason>
+      </artifact>
+      <artifact>
+        <path>components/FavoriteButton.tsx</path>
+        <kind>component</kind>
+        <symbol>FavoriteButton</symbol>
+        <lines>all</lines>
+        <reason>Icon-only button - needs aria-label for screen readers. Critical accessibility component.</reason>
+      </artifact>
+      <artifact>
+        <path>components/ComparisonBar.tsx</path>
+        <kind>component</kind>
+        <symbol>ComparisonBar</symbol>
+        <lines>all</lines>
+        <reason>Fixed position bar with interactive elements - needs keyboard accessibility, focus management, ARIA labels.</reason>
+      </artifact>
+      <artifact>
+        <path>components/ComparisonTable.tsx</path>
+        <kind>component</kind>
+        <symbol>ComparisonTable</symbol>
+        <lines>all</lines>
+        <reason>Data table component - needs proper table markup (thead, tbody, th with scope), caption or aria-label.</reason>
+      </artifact>
+      <artifact>
+        <path>components/BullFilters.tsx</path>
+        <kind>component</kind>
+        <symbol>BullFilters</symbol>
+        <lines>all</lines>
+        <reason>Filter sidebar - needs keyboard navigation, proper form labels, ARIA attributes for expandable sections.</reason>
+      </artifact>
+      <artifact>
+        <path>components/SearchBar.tsx</path>
+        <kind>component</kind>
+        <symbol>SearchBar</symbol>
+        <lines>all</lines>
+        <reason>Search input - needs proper label, aria-describedby for help text, keyboard accessibility.</reason>
+      </artifact>
+      <artifact>
+        <path>components/InquiryForm.tsx</path>
+        <kind>component</kind>
+        <symbol>InquiryForm</symbol>
+        <lines>all</lines>
+        <reason>Contact form - needs proper labels, error message announcements (aria-invalid, aria-errormessage), keyboard navigation.</reason>
+      </artifact>
+      <artifact>
+        <path>components/Pagination.tsx</path>
+        <kind>component</kind>
+        <symbol>Pagination</symbol>
+        <lines>all</lines>
+        <reason>Pagination controls - needs keyboard navigation, ARIA labels for page numbers, current page indication.</reason>
+      </artifact>
+      <artifact>
+        <path>components/ImageUpload.tsx</path>
+        <kind>component</kind>
+        <symbol>ImageUpload</symbol>
+        <lines>all</lines>
+        <reason>File upload component - needs keyboard accessibility, proper labels, error announcements.</reason>
+      </artifact>
+      <artifact>
+        <path>components/NotificationList.tsx</path>
+        <kind>component</kind>
+        <symbol>NotificationList</symbol>
+        <lines>all</lines>
+        <reason>Notification list - needs aria-live region for new notifications, keyboard navigation for actions.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullsPage</symbol>
+        <lines>1-168</lines>
+        <reason>Main browse page - needs heading hierarchy, landmarks (main, nav, aside), skip navigation link.</reason>
+      </artifact>
+      <artifact>
+        <path>app/bulls/[slug]/page.tsx</path>
+        <kind>page</kind>
+        <symbol>BullDetailPage</symbol>
+        <lines>all</lines>
+        <reason>Bull detail page - needs alt text for gallery images, proper heading hierarchy, accessible contact form.</reason>
+      </artifact>
+      <artifact>
+        <path>app/compare/page.tsx</path>
+        <kind>page</kind>
+        <symbol>ComparePage</symbol>
+        <lines>all</lines>
+        <reason>Comparison page - needs accessible table markup, keyboard navigation, proper headings.</reason>
+      </artifact>
+      <artifact>
+        <path>app/dashboard/page.tsx</path>
+        <kind>page</kind>
+        <symbol>DashboardPage</symbol>
+        <lines>all</lines>
+        <reason>Dashboard page - needs keyboard navigation for all actions, proper headings, landmarks.</reason>
+      </artifact>
+      <artifact>
+        <path>app/login/page.tsx</path>
+        <kind>page</kind>
+        <symbol>LoginPage</symbol>
+        <lines>all</lines>
+        <reason>Login form - critical accessibility: proper labels, error announcements, keyboard navigation.</reason>
+      </artifact>
+      <artifact>
+        <path>app/signup/page.tsx</path>
+        <kind>page</kind>
+        <symbol>SignupPage</symbol>
+        <lines>all</lines>
+        <reason>Signup form - needs proper labels, password requirements announced, error messages accessible.</reason>
+      </artifact>
+      <artifact>
+        <path>app/globals.css</path>
+        <kind>styles</kind>
+        <symbol>global styles</symbol>
+        <lines>all</lines>
+        <reason>Global CSS - verify no outline: none without replacement, ensure focus styles are visible.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package name="next" version="^14.2.0" />
+        <package name="react" version="^18.3.0" />
+        <package name="react-hook-form" version="^7.66.0" />
+        <package name="@heroicons/react" version="^2.2.0" />
+      </node>
+      <note>shadcn/ui components (if used) are built on Radix UI primitives which are accessible by default</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must achieve WCAG 2.1 AA compliance
+    - Lighthouse Accessibility score must be &gt;90
+    - Zero critical or serious issues in axe DevTools audit
+    - All interactive elements must be keyboard accessible
+    - Color contrast must meet 4.5:1 minimum for normal text, 3:1 for large text
+    - Focus indicators must be visible (no outline: none without replacement)
+    - All images must have descriptive alt text (or empty alt for decorative)
+    - All forms must have proper labels and error announcements
+    - Must work with screen readers (NVDA, VoiceOver, JAWS)
+    - Must maintain performance optimizations from Story 6.2
+    - Touch targets must be 44x44px minimum (from Story 6.1)
+    - No hover-only interactions (must have keyboard/touch alternatives)
+    - Skip navigation links required for keyboard users
+    - Heading hierarchy must be logical (h1, h2, h3 in order)
+    - ARIA landmarks must be used appropriately
+    - Dynamic content must be announced to screen readers (aria-live)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ARIA Attributes</name>
+      <kind>HTML Attributes</kind>
+      <signature>aria-label, aria-labelledby, aria-describedby, aria-live, aria-invalid, aria-errormessage, aria-expanded, aria-selected, aria-modal, aria-busy, role</signature>
+      <path>HTML elements</path>
+    </interface>
+    <interface>
+      <name>Semantic HTML Elements</name>
+      <kind>HTML Elements</kind>
+      <signature>header, nav, main, aside, footer, article, section, h1-h6, button, label, table, thead, tbody, th, td</signature>
+      <path>HTML</path>
+    </interface>
+    <interface>
+      <name>Keyboard Event Handlers</name>
+      <kind>React Event Handlers</kind>
+      <signature>onKeyDown, onKeyUp, onKeyPress - handle Tab, Enter, Space, Escape, Arrow keys</signature>
+      <path>React components</path>
+    </interface>
+    <interface>
+      <name>Focus Management</name>
+      <kind>DOM API</kind>
+      <signature>element.focus(), document.activeElement, tabIndex</signature>
+      <path>Browser DOM API</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Accessibility testing should use multiple tools and methods: (1) Automated testing with Chrome DevTools Lighthouse (Accessibility score &gt;90 target), (2) Automated testing with axe DevTools browser extension (zero critical/serious issues), (3) Manual keyboard-only testing (no mouse) to verify all functionality is accessible via Tab, Shift+Tab, Enter, Space, Escape, Arrow keys, (4) Screen reader testing with NVDA (Windows) or VoiceOver (Mac) to verify all content is announced correctly, (5) Color contrast testing with WebAIM Contrast Checker or similar tools (4.5:1 minimum for normal text), (6) High contrast mode testing, (7) Focus indicator visibility testing. Test all major pages and user flows. Document issues and fixes in accessibility audit spreadsheet.
+    </standards>
+    <locations>
+      - No existing accessibility test files
+      - Manual testing with Chrome DevTools Lighthouse
+      - Manual testing with axe DevTools browser extension
+      - Manual keyboard-only testing
+      - Manual screen reader testing (NVDA, VoiceOver)
+      - Color contrast testing with online tools
+    </locations>
+    <ideas>
+      <test ac="1,4">Keyboard-only test: Navigate entire site using only keyboard (Tab, Shift+Tab, Enter, Space, Escape). Verify all interactive elements are reachable and operable. Verify focus indicators are visible.</test>
+      <test ac="2">Screen reader test: Use NVDA or VoiceOver to navigate all pages. Verify all content is announced, navigation is logical, forms are accessible, error messages are announced.</test>
+      <test ac="3">Color contrast test: Use WebAIM Contrast Checker on all text elements. Verify body text meets 4.5:1, large text meets 3:1, interactive elements have sufficient contrast.</test>
+      <test ac="5">Image alt text audit: Check all images have descriptive alt text. Verify decorative images have empty alt. Test with screen reader.</test>
+      <test ac="6,12">Form accessibility test: Verify all inputs have labels, error messages are announced (aria-invalid, aria-errormessage), validation works with keyboard and screen reader.</test>
+      <test ac="7">Skip navigation test: Tab to first element on page, verify skip link appears, press Enter, verify focus moves to main content.</test>
+      <test ac="8">Lighthouse audit: Run on all major pages (browse, bull detail, compare, dashboard, forms). Verify score &gt;90.</test>
+      <test ac="9">axe DevTools audit: Run on all major pages. Verify zero critical or serious issues. Fix moderate/minor issues if feasible.</test>
+      <test ac="10">Heading hierarchy test: Use browser extension or screen reader to check heading structure. Verify one h1 per page, logical order (h1 → h2 → h3).</test>
+      <test ac="11">Landmark test: Use screen reader landmark navigation. Verify main, nav, aside, footer landmarks are present and logical.</test>
+      <test ac="all">Create accessibility testing checklist for future development. Document all improvements and test results.</test>
+    </ideas>
+  </tests>
+</story-context>

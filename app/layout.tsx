@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'BeefStore - Premium Bull Semen Marketplace',
   description: 'Browse and purchase premium bull semen from top ranches',
+  viewport: 'width=device-width, initial-scale=1',
 }
 
 export default function RootLayout({

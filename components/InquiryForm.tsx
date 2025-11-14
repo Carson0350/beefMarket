@@ -124,7 +124,7 @@ export default function InquiryForm({
             {...register('breederName')}
             type="text"
             id="breederName"
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-h-[48px] ${
               errors.breederName ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="John Doe"
@@ -148,7 +148,7 @@ export default function InquiryForm({
             {...register('breederEmail')}
             type="email"
             id="breederEmail"
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-h-[48px] ${
               errors.breederEmail ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="john@example.com"
@@ -172,7 +172,7 @@ export default function InquiryForm({
             {...register('breederPhone')}
             type="tel"
             id="breederPhone"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-h-[48px]"
             placeholder="(555) 123-4567"
           />
         </div>
@@ -189,7 +189,7 @@ export default function InquiryForm({
             {...register('message')}
             id="message"
             rows={5}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base ${
               errors.message ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder={`I'm interested in ${bullName}`}
@@ -219,7 +219,7 @@ export default function InquiryForm({
         <button
           type="submit"
           disabled={!isValid || isSubmitting}
-          className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+          className={`w-full py-3 px-4 rounded-lg font-medium transition-colors min-h-[48px] ${
             !isValid || isSubmitting
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700'

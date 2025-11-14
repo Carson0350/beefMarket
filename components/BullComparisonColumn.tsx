@@ -26,7 +26,7 @@ export default function BullComparisonColumn({ bull, onRemove }: BullComparisonC
       <div className="relative">
         <button
           onClick={onRemove}
-          className="absolute top-3 right-3 z-10 bg-white rounded-full p-2 shadow-md hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="absolute top-3 right-3 z-10 bg-white rounded-full p-3 shadow-md hover:bg-red-50 hover:text-red-600 active:bg-red-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label={`Remove ${bull.name} from comparison`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

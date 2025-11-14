@@ -79,18 +79,18 @@ development_status:
   epic-4-retrospective: optional
   
   # Epic 5: Inquiry & Communication
-  epic-5: contexted
-  5-1-inquiry-contact-form: drafted
-  5-2-inquiry-email-notifications-to-ranch-owners: drafted
-  5-3-inquiry-dashboard-for-ranch-owners: drafted
-  5-4-inquiry-response-tracking: drafted
-  5-5-inquiry-analytics-for-ranch-owners: drafted
+  epic-5: done
+  5-1-inquiry-contact-form: done
+  5-2-inquiry-email-notifications-to-ranch-owners: done
+  5-3-inquiry-dashboard-for-ranch-owners: done
+  5-4-inquiry-response-tracking: done
+  5-5-inquiry-analytics-for-ranch-owners: done
   epic-5-retrospective: optional
   
   # Epic 6: Polish & Production Readiness
   epic-6: backlog
-  6-1-responsive-design-refinement: backlog
-  6-2-performance-optimization: backlog
-  6-3-accessibility-compliance-wcag-21-aa: backlog
-  6-4-production-deployment-monitoring: backlog
+  6-1-responsive-design-refinement: review
+  6-2-performance-optimization: deferred
+  6-3-accessibility-compliance-wcag-21-aa: ready-for-dev
+  6-4-production-deployment-monitoring: ready-for-dev
   epic-6-retrospective: optional

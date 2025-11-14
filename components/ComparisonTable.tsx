@@ -73,9 +73,10 @@ export default function ComparisonTable({ bulls }: ComparisonTableProps) {
     <div className="space-y-8">
       {/* EPD Comparison Table */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Genetic Data (EPDs)</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Genetic Data (EPDs)</h2>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 relative">
+          <div className="sm:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10"></div>
+          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden min-w-[600px]">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-200 p-3 text-left font-semibold text-gray-700">
@@ -129,9 +130,10 @@ export default function ComparisonTable({ bulls }: ComparisonTableProps) {
 
       {/* Pedigree Comparison */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Pedigree Information</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Pedigree Information</h2>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 relative">
+          <div className="sm:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10"></div>
+          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden min-w-[600px]">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-200 p-3 text-left font-semibold text-gray-700">
@@ -168,9 +170,10 @@ export default function ComparisonTable({ bulls }: ComparisonTableProps) {
 
       {/* Performance Data */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Data</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Performance Data</h2>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 relative">
+          <div className="sm:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10"></div>
+          <table className="w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden min-w-[600px]">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-200 p-3 text-left font-semibold text-gray-700">
